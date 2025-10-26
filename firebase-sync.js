@@ -109,14 +109,28 @@ function carregarDadosDoFirebase(dadosFirebase) {
         const dadosMes = dadosFirebase.meses[mesAtual];
         entradas = dadosMes.entradas || [];
         despesas = dadosMes.despesas || [];
+        
+        // Carregar gastos avulsos do mês
+        if (dadosMes.gastosAvulsos && Array.isArray(dadosMes.gastosAvulsos)) {
+            // Atualizar array global mantendo gastos de outros meses
+            gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
+            gastosAvulsos.push(...dadosMes.gastosAvulsos);
+        }
     } else {
         entradas = [];
         despesas = [];
+        // Remover gastos avulsos deste mês se não há dados
+        gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
     }
     
     // Salvar no localStorage com prefixo Firebase
     const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
-    localStorage.setItem(chaveMesFirebase, JSON.stringify({ entradas, despesas }));
+    const gastosAvulsosMes = gastosAvulsos.filter(g => g.mes === mesAtual);
+    localStorage.setItem(chaveMesFirebase, JSON.stringify({ 
+        entradas, 
+        despesas,
+        gastosAvulsos: gastosAvulsosMes
+    }));
     
     renderizarTudo();
     console.log('✅ Dados do Firebase carregados na interface');
@@ -140,8 +154,13 @@ function inicializarDadosVazios() {
     // Dados vazios
     entradas = [];
     despesas = [];
+    gastosAvulsos = [];
     const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
-    localStorage.setItem(chaveMesFirebase, JSON.stringify({ entradas, despesas }));
+    localStorage.setItem(chaveMesFirebase, JSON.stringify({ 
+        entradas, 
+        despesas,
+        gastosAvulsos: []
+    }));
     
     renderizarTudo();
 }
@@ -239,6 +258,15 @@ function iniciarListenersSincronizacao() {
             if (dadosLocaisStr !== dadosFirebaseStr) {
                 entradas = dadosMesFirebase.entradas || [];
                 despesas = dadosMesFirebase.despesas || [];
+                
+                // Atualizar gastos avulsos do mês
+                if (dadosMesFirebase.gastosAvulsos && Array.isArray(dadosMesFirebase.gastosAvulsos)) {
+                    gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
+                    gastosAvulsos.push(...dadosMesFirebase.gastosAvulsos);
+                } else {
+                    gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
+                }
+                
                 localStorage.setItem(chaveMesFirebase, dadosFirebaseStr);
                 renderizarTudo();
                 console.log('☁️ Dados compartilhados do mês atual atualizados');
@@ -247,8 +275,13 @@ function iniciarListenersSincronizacao() {
             // Se não há dados no Firebase para este mês, mostrar vazio
             entradas = [];
             despesas = [];
+            gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
             const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
-            localStorage.setItem(chaveMesFirebase, JSON.stringify({ entradas: [], despesas: [] }));
+            localStorage.setItem(chaveMesFirebase, JSON.stringify({ 
+                entradas: [], 
+                despesas: [],
+                gastosAvulsos: []
+            }));
             renderizarTudo();
         }
     });
@@ -298,6 +331,15 @@ function atualizarListenerMes(novoMes) {
             if (dadosLocaisStr !== dadosFirebaseStr) {
                 entradas = dadosMesFirebase.entradas || [];
                 despesas = dadosMesFirebase.despesas || [];
+                
+                // Atualizar gastos avulsos do novo mês
+                if (dadosMesFirebase.gastosAvulsos && Array.isArray(dadosMesFirebase.gastosAvulsos)) {
+                    gastosAvulsos = gastosAvulsos.filter(g => g.mes !== novoMes);
+                    gastosAvulsos.push(...dadosMesFirebase.gastosAvulsos);
+                } else {
+                    gastosAvulsos = gastosAvulsos.filter(g => g.mes !== novoMes);
+                }
+                
                 localStorage.setItem(chaveMesFirebase, dadosFirebaseStr);
                 renderizarTudo();
                 console.log(`☁️ Dados compartilhados de ${novoMes} atualizados`);
@@ -306,7 +348,12 @@ function atualizarListenerMes(novoMes) {
             // Se não há dados no Firebase para este mês, mostrar vazio
             entradas = [];
             despesas = [];
-            localStorage.setItem(chaveMesFirebase, JSON.stringify({ entradas: [], despesas: [] }));
+            gastosAvulsos = gastosAvulsos.filter(g => g.mes !== novoMes);
+            localStorage.setItem(chaveMesFirebase, JSON.stringify({ 
+                entradas: [], 
+                despesas: [],
+                gastosAvulsos: []
+            }));
             renderizarTudo();
         }
     });

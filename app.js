@@ -587,9 +587,14 @@ const getChaveMes = (mes) => {
 
 const salvarDados = () => {
     if (!mesAtual) return;
+    
+    // Filtrar gastos avulsos do mês atual
+    const gastosAvulsosMes = gastosAvulsos ? gastosAvulsos.filter(g => g.mes === mesAtual) : [];
+    
     const dados = {
         entradas: entradas,
-        despesas: despesas
+        despesas: despesas,
+        gastosAvulsos: gastosAvulsosMes
     };
     
     const chave = getChaveMes(mesAtual);
@@ -667,13 +672,19 @@ const carregarDados = (mes) => {
         const dados = JSON.parse(dadosSalvos);
         entradas = dados.entradas || [];
         despesas = dados.despesas || [];
+        
+        // Carregar gastos avulsos da mesma estrutura de dados
+        if (dados.gastosAvulsos && Array.isArray(dados.gastosAvulsos)) {
+            // Atualizar o array global mantendo gastos de outros meses
+            gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mes);
+            gastosAvulsos.push(...dados.gastosAvulsos);
+        }
     } else {
         entradas = [];
         despesas = [];
+        // Remover gastos avulsos deste mês se não há dados salvos
+        gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mes);
     }
-    
-    // Carregar gastos avulsos do mês
-    carregarGastosAvulsos(mes);
     
     // Poupança é GLOBAL, não precisa carregar por mês
     // (será carregada uma única vez no início)
@@ -2089,18 +2100,16 @@ window.excluirGastoAvulso = (index) => {
     mostrarToast('Gasto excluído!', 'success');
 };
 
-// Salvar gastos avulsos no localStorage
+// Salvar gastos avulsos (agora integrado com salvarDados)
 const salvarGastosAvulsos = () => {
-    if (!mesAtual) return;
-    const chave = `contas-gastos-avulsos-${mesAtual}`;
-    localStorage.setItem(chave, JSON.stringify(gastosAvulsos));
+    // Os gastos avulsos agora são salvos junto com entradas e despesas
+    salvarDados();
 };
 
-// Carregar gastos avulsos do localStorage
+// Carregar gastos avulsos (agora integrado com carregarDados)
 const carregarGastosAvulsos = (mes) => {
-    const chave = `contas-gastos-avulsos-${mes}`;
-    const dados = localStorage.getItem(chave);
-    gastosAvulsos = dados ? JSON.parse(dados) : [];
+    // Os gastos avulsos agora são carregados junto com entradas e despesas em carregarDados
+    // Esta função é mantida para compatibilidade, mas apenas renderiza
     renderizarGastosAvulsos();
 };
 
