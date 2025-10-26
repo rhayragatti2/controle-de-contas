@@ -1659,11 +1659,15 @@ window.processarGastoNatural = () => {
         formaPagamento = 'pix';
     } else if (texto.includes('dinheiro')) {
         formaPagamento = 'dinheiro';
+    } else if (texto.includes('vale refeição') || texto.includes('vale refeicao') || texto.includes('vr')) {
+        formaPagamento = 'vale-refeição';
+    } else if (texto.includes('vale alimentação') || texto.includes('vale alimentacao') || texto.includes('va')) {
+        formaPagamento = 'vale-alimentação';
     }
     
     // Extrair local/descrição (após "no" ou "na")
     let local = '';
-    const regexLocal = /n[oa]\s+(?:débito|crédito|pix|dinheiro)\s+n[oa]\s+(.+?)$/i;
+    const regexLocal = /n[oa]\s+(?:débito|crédito|pix|dinheiro|vale refeição|vale refeicao|vr|vale alimentação|vale alimentacao|va)\s+n[oa]\s+(.+?)$/i;
     const matchLocal = texto.match(regexLocal);
     
     if (matchLocal && matchLocal[1]) {
@@ -1685,7 +1689,7 @@ window.processarGastoNatural = () => {
     
     // Se não encontrou local, usar uma parte do texto
     if (!local) {
-        const palavrasLimpas = texto.replace(/gastei|comprei|reais?|débito|crédito|pix|dinheiro|n[oa]/gi, '').trim();
+        const palavrasLimpas = texto.replace(/gastei|comprei|paguei|reais?|débito|crédito|pix|dinheiro|vale refeição|vale refeicao|vr|vale alimentação|vale alimentacao|va|n[oa]/gi, '').trim();
         const primeiras = palavrasLimpas.split(/\s+/).slice(0, 3).join(' ');
         local = primeiras.charAt(0).toUpperCase() + primeiras.slice(1);
     }
@@ -1808,6 +1812,10 @@ const renderizarGastosAvulsos = () => {
             badgePagamento = '<span class="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded">📱 PIX</span>';
         } else if (gasto.formaPagamento === 'dinheiro') {
             badgePagamento = '<span class="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-1 rounded">💵 Dinheiro</span>';
+        } else if (gasto.formaPagamento === 'vale-refeição') {
+            badgePagamento = '<span class="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200 px-2 py-1 rounded">🍽️ Vale Refeição</span>';
+        } else if (gasto.formaPagamento === 'vale-alimentação') {
+            badgePagamento = '<span class="text-xs bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-200 px-2 py-1 rounded">🛒 Vale Alimentação</span>';
         }
         
         const tr = document.createElement('tr');
