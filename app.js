@@ -748,6 +748,10 @@ window.editarDespesa = (index) => {
     document.getElementById('despesa-vencimento').value = formatISODateToBR(despesa.vencimento);
     document.getElementById('despesa-previsto').value = despesa.previsto;
     document.getElementById('despesa-categoria').value = despesa.categoria;
+    document.getElementById('despesa-tags').value = despesa.tags ? despesa.tags.join(', ') : '';
+    document.getElementById('despesa-notas').value = despesa.notas || '';
+    document.getElementById('despesa-recorrente').checked = despesa.recorrente || false;
+    document.getElementById('despesa-debito-automatico').checked = despesa.debitoAutomatico || false;
     document.getElementById('despesa-id-edicao').value = index;
     document.getElementById('despesa-btn-texto').textContent = 'Atualizar Despesa';
 
@@ -798,8 +802,25 @@ const renderizarDespesas = () => {
                 </td>
             `;
         } else {
+            // Criar badges
+            let badges = '';
+            if (item.debitoAutomatico) {
+                badges += '<span class="badge-debito-automatico ml-2">🏦 Débito Automático</span>';
+            }
+            if (item.recorrente && !item.debitoAutomatico) {
+                badges += '<span class="badge-recorrente ml-2">🔄 Recorrente</span>';
+            }
+            if (item.parcelado) {
+                badges += '<span class="badge-parcelado ml-2">💳 Parcelado</span>';
+            }
+            
             tr.innerHTML = `
-                <td class="p-3">${item.descricao}</td>
+                <td class="p-3">
+                    <div class="flex items-center flex-wrap gap-1">
+                        <span>${item.descricao}</span>
+                        ${badges}
+                    </div>
+                </td>
                 <td class="p-3 text-gray-600 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
                     <span>${item.categoria || '---'}</span>
@@ -839,10 +860,16 @@ formDespesa.addEventListener('submit', (e) => {
     const categoria = document.getElementById('despesa-categoria').value;
     const tags = parseTags(document.getElementById('despesa-tags').value);
     const notas = document.getElementById('despesa-notas').value.trim();
-    const recorrente = document.getElementById('despesa-recorrente').checked;
+    let recorrente = document.getElementById('despesa-recorrente').checked;
+    const debitoAutomatico = document.getElementById('despesa-debito-automatico').checked;
     const parcelada = document.getElementById('despesa-parcelada').checked;
     const parcelas = parseInt(document.getElementById('despesa-parcelas').value) || 0;
     const idEdicao = document.getElementById('despesa-id-edicao').value;
+    
+    // Lógica do Débito Automático: deve ser sempre recorrente
+    if (debitoAutomatico) {
+        recorrente = true;
+    }
 
     if (!descricao || !vencimento || previsto <= 0) {
         mostrarToast('Preencha todos os campos corretamente!', 'error');
@@ -864,6 +891,14 @@ formDespesa.addEventListener('submit', (e) => {
         despesas[index].tags = tags;
         despesas[index].notas = notas;
         despesas[index].recorrente = recorrente;
+        despesas[index].debitoAutomatico = debitoAutomatico;
+        
+        // Lógica do Débito Automático: marca como pago automaticamente
+        if (debitoAutomatico) {
+            despesas[index].pago = previsto;
+            despesas[index].dataPagamento = vencimento;
+        }
+        
         // Não altera parcelamento em edição
         mostrarToast('Despesa atualizada!', 'success');
         document.getElementById('despesa-btn-texto').textContent = 'Adicionar Despesa (Planejamento)';
@@ -889,20 +924,31 @@ formDespesa.addEventListener('submit', (e) => {
             mostrarToast(`${parcelas} parcelas criadas com sucesso!`, 'success');
             carregarDados(mesAtual); // Recarrega para mostrar a primeira parcela
         } else {
-            // Despesa normal ou recorrente
-            despesas.push({
+            // Despesa normal, recorrente ou débito automático
+            const novaDespesa = {
                 descricao,
                 vencimento,
-                dataPagamento: '',
+                dataPagamento: debitoAutomatico ? vencimento : '',
                 previsto,
-                pago: 0,
+                pago: debitoAutomatico ? previsto : 0,
                 categoria,
                 tags,
                 notas,
                 recorrente,
-                parcelado: false
-            });
-            mostrarToast(recorrente ? 'Despesa recorrente adicionada! Use o botão roxo para copiar para o próximo mês.' : 'Despesa adicionada!', 'success');
+                parcelado: false,
+                debitoAutomatico
+            };
+            
+            despesas.push(novaDespesa);
+            
+            if (debitoAutomatico) {
+                mostrarToast('💳 Débito Automático adicionado! Já marcado como pago e recorrente.', 'success');
+            } else if (recorrente) {
+                mostrarToast('Despesa recorrente adicionada! Use o botão roxo para copiar para o próximo mês.', 'success');
+            } else {
+                mostrarToast('Despesa adicionada!', 'success');
+            }
+            
             salvarDados();
             renderizarDespesas();
         }

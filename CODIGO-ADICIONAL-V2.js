@@ -268,6 +268,7 @@ const filtrarDespesas = () => {
         else if (filtroDespesa.status === 'pendente') matchStatus = d.pago === 0;
         else if (filtroDespesa.status === 'recorrente') matchStatus = d.recorrente;
         else if (filtroDespesa.status === 'parcelado') matchStatus = d.parcelado;
+        else if (filtroDespesa.status === 'debito-automatico') matchStatus = d.debitoAutomatico;
         
         return matchBusca && matchCategoria && matchStatus;
     });
