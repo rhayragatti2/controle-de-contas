@@ -803,7 +803,9 @@ const renderizarEntradas = () => {
                 <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
                 <span>${item.categoria || '---'}</span>
             </td>
-            <td class="p-3 text-right text-green-600 font-semibold">${formatarMoeda(item.valor)}</td>
+            <td class="p-3 text-gray-500 dark:text-gray-400">${item.tags || '---'}</td>
+            <td class="p-3 text-gray-500 dark:text-gray-400">${item.observacoes || '---'}</td>
+            <td class="p-3 text-right text-green-600 dark:text-green-400 font-semibold">${formatarMoeda(item.valor)}</td>
             <td class="p-3 text-right">
                 <button onclick="editarEntrada(${index})" class="text-blue-500 hover:text-blue-700 font-semibold mr-2" title="Editar">
                     ✏️
@@ -941,7 +943,7 @@ const renderizarDespesas = () => {
             tr.classList.add('bg-yellow-50', 'shadow-inner');
             tr.innerHTML = `
                 <td class="p-3 font-semibold">${item.descricao}</td>
-                <td colspan="5" class="p-3">
+                <td colspan="7" class="p-3">
                     <div class="flex flex-col md:flex-row gap-2 items-center w-full">
                         <label class="font-medium text-sm text-gray-700 w-full md:w-auto flex-shrink-0">Pago em:</label>
                         <input type="text" id="input-pagamento-data" 
@@ -994,12 +996,14 @@ const renderizarDespesas = () => {
                     <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
                     <span>${item.categoria || '---'}</span>
                 </td>
+                <td class="p-3 text-gray-500 dark:text-gray-400">${item.tags || '---'}</td>
+                <td class="p-3 text-gray-500 dark:text-gray-400">${item.observacoes || '---'}</td>
                 <td class="p-3 font-medium ${pagoClasseDataValor}">${formatarData(item.vencimento)}</td>
                 <td class="p-3 ${estaPago ? 'text-gray-700 font-medium' : 'text-gray-400 italic'}">${formatarData(item.dataPagamento)}</td>
-                <td class="p-3 text-right text-red-500 ${pagoClasseDataValor}">
+                <td class="p-3 text-right text-red-500 dark:text-red-400 ${pagoClasseDataValor}">
                     ${formatarMoeda(item.previsto)}
                 </td>
-                <td class="p-3 text-right font-bold ${item.pago > 0 ? 'text-red-700' : 'text-gray-400'}">
+                <td class="p-3 text-right font-bold ${item.pago > 0 ? 'text-red-700 dark:text-red-500' : 'text-gray-400'}">
                     ${formatarMoeda(item.pago)}
                 </td>
                 <td class="p-3 text-right flex flex-col gap-1 items-end w-40">
@@ -2027,7 +2031,7 @@ const renderizarGastosAvulsos = () => {
     const gastosMes = gastosAvulsos.filter(g => g.mes === mesAtual);
     
     if (gastosMes.length === 0) {
-        tabela.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400 italic">Nenhum gasto avulso registrado neste mês</td></tr>';
+        tabela.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500 dark:text-gray-400 italic">Nenhum gasto avulso registrado neste mês</td></tr>';
         return;
     }
     
