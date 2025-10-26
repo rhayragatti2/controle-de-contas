@@ -1,0 +1,72 @@
+═══════════════════════════════════════════════════════════════
+  🚀 GUIA RÁPIDO DE DEPLOY - CONTROLE DE CONTAS
+═══════════════════════════════════════════════════════════════
+
+📌 MÉTODO MAIS FÁCIL: NETLIFY (5 MINUTOS)
+
+1. Acesse: https://www.netlify.com
+
+2. Clique em "Sign up" (criar conta)
+   → Use sua conta Google para facilitar
+
+3. Após logar, clique em "Add new site" → "Deploy manually"
+
+4. ARRASTE TODA A PASTA "Controle de Contas" para a área indicada
+   (ou selecione os 3 arquivos: index.html, styles.css, app.js)
+
+5. AGUARDE O UPLOAD (10-30 segundos)
+
+6. 🎉 PRONTO! Seu site está no ar!
+   URL será algo como: https://relaxed-cupcake-123456.netlify.app
+
+7. [OPCIONAL] Personalize o nome:
+   - Site settings → Change site name
+   - Escolha: meu-controle-financeiro
+   - Nova URL: https://meu-controle-financeiro.netlify.app
+
+═══════════════════════════════════════════════════════════════
+
+📌 ALTERNATIVA: VERCEL (TAMBÉM FÁCIL)
+
+1. Acesse: https://vercel.com
+2. Sign up com Google
+3. "Add New..." → "Project" → Upload dos arquivos
+4. Deploy!
+
+═══════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANTE:
+
+✅ TODOS os 3 arquivos devem estar na mesma pasta:
+   - index.html
+   - styles.css  
+   - app.js
+
+✅ NÃO precisa instalar nada
+✅ NÃO precisa pagar nada
+✅ NÃO precisa comprar domínio
+
+❌ NÃO use Google Drive (não funciona direito para sites)
+
+═══════════════════════════════════════════════════════════════
+
+💡 DICA: Salve a URL gerada nos seus favoritos!
+
+═══════════════════════════════════════════════════════════════
+
+🆘 PROBLEMAS?
+
+→ Se o site não carregar, verifique:
+  1. Todos os 3 arquivos foram enviados?
+  2. O arquivo index.html está na raiz?
+  3. Tente limpar o cache: Ctrl + Shift + Delete
+
+→ Se mesmo assim não funcionar:
+  1. Tente outro navegador
+  2. Espere 2-3 minutos (pode demorar para propagar)
+  3. Tente fazer o deploy novamente
+
+═══════════════════════════════════════════════════════════════
+
+Leia o arquivo README.md para instruções detalhadas!
+
