@@ -860,6 +860,17 @@ const renderizarDespesas = () => {
         }
         tabelaDespesas.appendChild(tr);
     });
+    
+    // Calcular e atualizar totais dos gastos fixos
+    const totalPrevisto = despesas.reduce((acc, item) => acc + item.previsto, 0);
+    const totalPago = despesas.reduce((acc, item) => acc + item.pago, 0);
+    
+    const totalPrevistoEl = document.getElementById('total-previsto-fixos');
+    const totalPagoEl = document.getElementById('total-pago-fixos');
+    
+    if (totalPrevistoEl) totalPrevistoEl.textContent = formatarMoeda(totalPrevisto);
+    if (totalPagoEl) totalPagoEl.textContent = formatarMoeda(totalPago);
+    
     atualizarResumo();
 };
 
@@ -1838,6 +1849,14 @@ const renderizarGastosAvulsos = () => {
         `;
         tabela.appendChild(tr);
     });
+    
+    // Calcular e atualizar total dos gastos avulsos
+    const totalAvulsos = gastosMes.reduce((acc, g) => acc + g.valor, 0);
+    const totalAvulsosEl = document.getElementById('total-gastos-avulsos');
+    
+    if (totalAvulsosEl) {
+        totalAvulsosEl.textContent = formatarMoeda(totalAvulsos);
+    }
 };
 
 // Excluir gasto avulso
