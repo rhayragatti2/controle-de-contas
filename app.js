@@ -262,25 +262,17 @@ const carregarDarkMode = () => {
 // ===== GERENCIAMENTO DE CATEGORIAS =====
 
 const salvarCategorias = () => {
-    // Determinar qual chave usar baseado no estado de login
-    const chave = (window.firebaseSync && window.firebaseSync.getCurrentUser()) 
-        ? 'contas-firebase-categorias' 
-        : CHAVE_CATEGORIAS;
-    
+    const chave = 'contas-firebase-categorias';
     localStorage.setItem(chave, JSON.stringify(categorias));
     
-    // Sincronizar com Firebase se estiver logado
-    if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
+    // Sincronizar com Firebase
+    if (window.firebaseSync && window.firebaseSync.isEnabled()) {
         window.firebaseSync.sincronizarCategoriasParaFirebase(categorias);
     }
 };
 
 const carregarCategorias = () => {
-    // Determinar qual chave usar baseado no estado de login
-    const chave = (window.firebaseSync && window.firebaseSync.getCurrentUser()) 
-        ? 'contas-firebase-categorias' 
-        : CHAVE_CATEGORIAS;
-    
+    const chave = 'contas-firebase-categorias';
     const salvas = localStorage.getItem(chave);
     let categoriasCarregadas = [];
 
@@ -530,12 +522,7 @@ window.excluirCategoria = (index) => {
 // ===== GERENCIAMENTO DE DADOS MENSAIS =====
 
 const getChaveMes = (mes) => {
-    // Se está logado, usar prefixo Firebase
-    if (window.firebaseSync && window.firebaseSync.getCurrentUser()) {
-        return `contas-firebase-${mes}`;
-    }
-    // Se não está logado, usar prefixo local normal
-    return `contas-${mes}`;
+    return `contas-firebase-${mes}`;
 };
 
 const salvarDados = () => {
@@ -548,8 +535,8 @@ const salvarDados = () => {
     const chave = getChaveMes(mesAtual);
     localStorage.setItem(chave, JSON.stringify(dados));
     
-    // Sincronizar com Firebase se estiver logado
-    if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
+    // Sincronizar com Firebase
+    if (window.firebaseSync && window.firebaseSync.isEnabled()) {
         window.firebaseSync.sincronizarMesParaFirebase(mesAtual, dados);
     }
 };
@@ -575,8 +562,8 @@ const carregarDados = (mes) => {
     renderizarTudo();
     verificarVencimentos();
     
-    // Atualizar listener do Firebase para o novo mês (se logado)
-    if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
+    // Atualizar listener do Firebase para o novo mês
+    if (window.firebaseSync && window.firebaseSync.isEnabled()) {
         window.firebaseSync.atualizarListenerMes(mes);
     }
 };
@@ -1514,34 +1501,7 @@ if (btnDarkMode) {
     btnDarkMode.addEventListener('click', toggleDarkMode);
 }
 
-// Listeners de autenticação Firebase
-const btnLogin = document.getElementById('btn-login');
-const btnLoginScreen = document.getElementById('btn-login-screen');
-const btnLogout = document.getElementById('btn-logout');
-
-if (btnLogin) {
-    btnLogin.addEventListener('click', () => {
-        if (window.firebaseSync) {
-            window.firebaseSync.loginComGoogle();
-        }
-    });
-}
-
-if (btnLoginScreen) {
-    btnLoginScreen.addEventListener('click', () => {
-        if (window.firebaseSync) {
-            window.firebaseSync.loginComGoogle();
-        }
-    });
-}
-
-if (btnLogout) {
-    btnLogout.addEventListener('click', () => {
-        if (window.firebaseSync) {
-            window.firebaseSync.logout();
-        }
-    });
-}
+// Nota: Autenticação agora é gerenciada pelo auth-simple.js
 
 // PWA Service Worker
 if ('serviceWorker' in navigator) {
