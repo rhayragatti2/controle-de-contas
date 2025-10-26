@@ -1073,6 +1073,8 @@ const renderizarGraficoMensal = (despesasDoMes) => {
         data: dataConfig,
         options: {
             responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
             plugins: {
                 legend: {
                     position: 'right',
@@ -1148,8 +1150,8 @@ const renderizarRelatorioUnico = (mesKey) => {
             
             <div class="text-center">
                 <h3 class="text-xl font-semibold mb-4 text-blue-600">Distribuição de Gastos</h3>
-                <div id="chart-container" class="w-full h-full p-4 bg-white rounded-lg shadow-md">
-                    <canvas id="grafico-despesas"></canvas>
+                <div id="chart-container" class="w-full p-4 bg-white rounded-lg shadow-md" style="max-width: 100%; overflow: hidden; box-sizing: border-box;">
+                    <canvas id="grafico-despesas" style="max-width: 100%; height: auto;"></canvas>
                 </div>
                 ${resumo.despesas.filter(d => d.pago > 0).length === 0 ? '<p class="mt-4 text-gray-500">Nenhuma despesa paga neste mês para gerar o gráfico.</p>' : ''}
             </div>
