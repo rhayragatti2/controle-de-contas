@@ -2,6 +2,15 @@
 // FIREBASE SYNC - Sistema de Sincronização
 // ============================================
 
+// ===== CONFIGURAÇÃO DE ACESSO =====
+// IMPORTANTE: Adicione aqui os emails das pessoas autorizadas a acessar o sistema
+const EMAILS_AUTORIZADOS = [
+    // Adicione seus emails aqui:
+    // 'rhayra@yahoo.com.br',
+    // 'rhayragdg@gmail.com',
+    // 'amarylima@hotmail.com'
+];
+
 // Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyAUE8OUVtat1eYnu7o_UK5sKDz06CntJmU",
@@ -34,6 +43,21 @@ try {
 // ===== AUTENTICAÇÃO =====
 
 /**
+ * Verifica se o email do usuário está autorizado
+ */
+function verificarAcessoAutorizado(email) {
+    if (EMAILS_AUTORIZADOS.length === 0) {
+        console.warn('⚠️ ATENÇÃO: Lista de emails autorizados está vazia! Configure EMAILS_AUTORIZADOS no firebase-sync.js');
+        return true; // Permite acesso se a lista estiver vazia (para primeira configuração)
+    }
+    
+    const emailLowerCase = email.toLowerCase();
+    return EMAILS_AUTORIZADOS.some(emailAutorizado => 
+        emailAutorizado.toLowerCase() === emailLowerCase
+    );
+}
+
+/**
  * Faz login com Google
  */
 async function loginComGoogle() {
@@ -45,13 +69,29 @@ async function loginComGoogle() {
     try {
         const provider = new firebase.auth.GoogleAuthProvider();
         const result = await auth.signInWithPopup(provider);
-        currentUser = result.user;
+        const user = result.user;
+        
+        // Verificar se o usuário está autorizado
+        if (!verificarAcessoAutorizado(user.email)) {
+            // Usuário não autorizado - fazer logout imediatamente
+            await auth.signOut();
+            mostrarToast('❌ Acesso negado! Você não tem permissão para acessar este sistema.', 'error');
+            mostrarTelaLogin();
+            return;
+        }
+        
+        currentUser = user;
         mostrarToast('✅ Login realizado com sucesso!', 'success');
+        ocultarTelaLogin();
         atualizarUIUsuario(currentUser);
         await sincronizarDadosInicial();
     } catch (error) {
         console.error('Erro no login:', error);
-        mostrarToast('❌ Erro ao fazer login: ' + error.message, 'error');
+        if (error.code === 'auth/popup-closed-by-user') {
+            mostrarToast('⚠️ Login cancelado', 'warning');
+        } else {
+            mostrarToast('❌ Erro ao fazer login: ' + error.message, 'error');
+        }
     }
 }
 
@@ -65,14 +105,50 @@ async function logout() {
         await auth.signOut();
         currentUser = null;
         
-        // Restaurar dados locais
-        restaurarDadosLocais();
+        // Limpar dados da interface
+        entradas = [];
+        despesas = [];
+        categorias = [];
+        if (typeof renderizarTudo === 'function') {
+            renderizarTudo();
+        }
         
         atualizarUIUsuario(null);
-        mostrarToast('✅ Logout realizado! Voltou para dados locais.', 'success');
+        mostrarTelaLogin();
+        mostrarToast('✅ Logout realizado com sucesso!', 'success');
     } catch (error) {
         console.error('Erro no logout:', error);
         mostrarToast('❌ Erro ao fazer logout', 'error');
+    }
+}
+
+/**
+ * Mostra a tela de login e oculta o app
+ */
+function mostrarTelaLogin() {
+    const loginScreen = document.getElementById('login-screen');
+    const mainApp = document.getElementById('main-app');
+    
+    if (loginScreen) {
+        loginScreen.classList.remove('hidden');
+    }
+    if (mainApp) {
+        mainApp.style.display = 'none';
+    }
+}
+
+/**
+ * Oculta a tela de login e mostra o app
+ */
+function ocultarTelaLogin() {
+    const loginScreen = document.getElementById('login-screen');
+    const mainApp = document.getElementById('main-app');
+    
+    if (loginScreen) {
+        loginScreen.classList.add('hidden');
+    }
+    if (mainApp) {
+        mainApp.style.display = 'block';
     }
 }
 
@@ -81,15 +157,27 @@ async function logout() {
  */
 if (isFirebaseEnabled) {
     auth.onAuthStateChanged((user) => {
-        currentUser = user;
-        atualizarUIUsuario(user);
-        
         if (user) {
+            // Verificar se o usuário está autorizado
+            if (!verificarAcessoAutorizado(user.email)) {
+                console.warn('Tentativa de acesso não autorizado:', user.email);
+                auth.signOut();
+                mostrarTelaLogin();
+                mostrarToast('❌ Acesso negado! Email não autorizado.', 'error');
+                return;
+            }
+            
+            currentUser = user;
             console.log('Usuário autenticado:', user.email);
+            ocultarTelaLogin();
+            atualizarUIUsuario(user);
             sincronizarDadosInicial();
             iniciarListenersSincronizacao();
         } else {
             console.log('Usuário não autenticado');
+            currentUser = null;
+            mostrarTelaLogin();
+            atualizarUIUsuario(null);
             pararListenersSincronizacao();
         }
     });
@@ -160,7 +248,11 @@ async function sincronizarDadosInicial() {
         }
     } catch (error) {
         console.error('Erro na sincronização inicial:', error);
+        console.error('Stack trace:', error.stack);
         mostrarToast('⚠️ Erro ao sincronizar: ' + error.message, 'warning');
+        
+        // Se houver erro, inicializar dados vazios para não travar
+        inicializarDadosVazios();
     }
 }
 

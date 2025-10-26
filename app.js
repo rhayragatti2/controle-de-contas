@@ -1516,10 +1516,19 @@ if (btnDarkMode) {
 
 // Listeners de autenticação Firebase
 const btnLogin = document.getElementById('btn-login');
+const btnLoginScreen = document.getElementById('btn-login-screen');
 const btnLogout = document.getElementById('btn-logout');
 
 if (btnLogin) {
     btnLogin.addEventListener('click', () => {
+        if (window.firebaseSync) {
+            window.firebaseSync.loginComGoogle();
+        }
+    });
+}
+
+if (btnLoginScreen) {
+    btnLoginScreen.addEventListener('click', () => {
         if (window.firebaseSync) {
             window.firebaseSync.loginComGoogle();
         }
