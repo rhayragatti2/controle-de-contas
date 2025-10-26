@@ -1,5 +1,5 @@
 // Service Worker para PWA - Controle de Contas
-const CACHE_NAME = 'controle-contas-v1';
+const CACHE_NAME = 'controle-contas-v4';
 const urlsToCache = [
   './',
   './index.html',
