@@ -6,6 +6,7 @@
 const firebaseConfig = {
     apiKey: "AIzaSyAUE8OUVtat1eYnu7o_UK5sKDz06CntJmU",
     authDomain: "controle-financeiro-2f875.firebaseapp.com",
+    databaseURL: "https://controle-financeiro-2f875-default-rtdb.firebaseio.com",
     projectId: "controle-financeiro-2f875",
     storageBucket: "controle-financeiro-2f875.firebasestorage.app",
     messagingSenderId: "700647503137",
