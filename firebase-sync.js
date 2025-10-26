@@ -64,8 +64,12 @@ async function logout() {
     try {
         await auth.signOut();
         currentUser = null;
+        
+        // Restaurar dados locais
+        restaurarDadosLocais();
+        
         atualizarUIUsuario(null);
-        mostrarToast('✅ Logout realizado com sucesso!', 'success');
+        mostrarToast('✅ Logout realizado! Voltou para dados locais.', 'success');
     } catch (error) {
         console.error('Erro no logout:', error);
         mostrarToast('❌ Erro ao fazer logout', 'error');
@@ -121,6 +125,13 @@ function atualizarUIUsuario(user) {
 // ===== SINCRONIZAÇÃO DE DADOS =====
 
 let listenersAtivos = {};
+let dadosLocaisBackup = null; // Backup dos dados locais quando logado
+
+// Constantes para prefixos de armazenamento
+const PREFIX_LOCAL = 'contas-local-';
+const PREFIX_FIREBASE = 'contas-firebase-';
+const CHAVE_CATEGORIAS_LOCAL = 'contas-categorias';
+const CHAVE_CATEGORIAS_FIREBASE = 'contas-firebase-categorias';
 
 /**
  * Sincronização inicial quando o usuário faz login
@@ -129,20 +140,23 @@ async function sincronizarDadosInicial() {
     if (!currentUser || !isFirebaseEnabled) return;
 
     try {
-        mostrarToast('🔄 Sincronizando dados compartilhados...', 'info');
+        mostrarToast('🔄 Carregando dados compartilhados...', 'info');
         
-        // Buscar dados compartilhados do Firebase
+        // 1. SALVAR DADOS LOCAIS EM BACKUP
+        salvarDadosLocaisEmBackup();
+        
+        // 2. BUSCAR DADOS DO FIREBASE
         const snapshot = await database.ref('dados-compartilhados').once('value');
         const dadosFirebase = snapshot.val();
 
         if (dadosFirebase) {
-            // Se há dados no Firebase, mesclar com dados locais
-            mesclarDados(dadosFirebase);
-            mostrarToast('✅ Dados compartilhados sincronizados!', 'success');
+            // 3. CARREGAR DADOS DO FIREBASE
+            carregarDadosDoFirebase(dadosFirebase);
+            mostrarToast('✅ Dados compartilhados carregados!', 'success');
         } else {
-            // Se não há dados no Firebase, enviar dados locais
-            await enviarTodosDadosParaFirebase();
-            mostrarToast('✅ Dados enviados para área compartilhada!', 'success');
+            // Se não há dados no Firebase, inicializar vazio
+            inicializarDadosVazios();
+            mostrarToast('✅ Pronto! Adicione dados compartilhados.', 'success');
         }
     } catch (error) {
         console.error('Erro na sincronização inicial:', error);
@@ -151,134 +165,150 @@ async function sincronizarDadosInicial() {
 }
 
 /**
- * Mescla dados do Firebase com dados locais
+ * Salva dados locais em backup antes de carregar dados do Firebase
  */
-function mesclarDados(dadosFirebase) {
-    // Mesclar categorias
-    if (dadosFirebase.categorias) {
-        const categoriasLocal = carregarCategorias();
-        const categoriasFirebase = dadosFirebase.categorias;
-        
-        // Combinar categorias únicas
-        const categoriasSet = new Set([...categoriasLocal, ...categoriasFirebase]);
-        categorias = Array.from(categoriasSet);
-        salvarCategorias();
-        renderizarCategorias();
+function salvarDadosLocaisEmBackup() {
+    console.log('💾 Salvando dados locais em backup...');
+    
+    // Não fazer nada se já existe backup (já está logado)
+    if (localStorage.getItem('contas-backup-ativo')) {
+        return;
     }
-
-    // Mesclar dados mensais
-    if (dadosFirebase.meses) {
-        Object.keys(dadosFirebase.meses).forEach(mes => {
-            const dadosMesFirebase = dadosFirebase.meses[mes];
-            const dadosMesLocal = carregarMes(mes);
-
-            if (dadosMesLocal) {
-                // Mesclar entradas e despesas por ID
-                const entradas = mesclarArraysPorId(dadosMesLocal.entradas || [], dadosMesFirebase.entradas || []);
-                const despesas = mesclarArraysPorId(dadosMesLocal.despesas || [], dadosMesFirebase.despesas || []);
-                
-                salvarMes(mes, { entradas, despesas });
-            } else {
-                // Se não existe localmente, salvar direto
-                salvarMes(mes, dadosMesFirebase);
-            }
-        });
-        
-        // Recarregar o mês atual
-        carregarMes(mesAtual);
-        renderizarTudo();
-    }
-}
-
-/**
- * Mescla arrays por ID, mantendo a versão mais recente
- */
-function mesclarArraysPorId(arrayLocal, arrayFirebase) {
-    const mapa = new Map();
     
-    // Adicionar itens locais
-    arrayLocal.forEach(item => {
-        if (item.id) {
-            mapa.set(item.id, item);
-        }
-    });
-    
-    // Sobrescrever/adicionar itens do Firebase
-    arrayFirebase.forEach(item => {
-        if (item.id) {
-            const itemLocal = mapa.get(item.id);
-            // Usar o timestamp mais recente se ambos existirem
-            if (!itemLocal || (item.timestamp && item.timestamp > (itemLocal.timestamp || 0))) {
-                mapa.set(item.id, item);
-            }
-        }
-    });
-    
-    return Array.from(mapa.values());
-}
-
-/**
- * Envia todos os dados locais para o Firebase (área compartilhada)
- */
-async function enviarTodosDadosParaFirebase() {
-    if (!currentUser || !isFirebaseEnabled) return;
-
-    // Buscar dados atuais para mesclar
-    const snapshot = await database.ref('dados-compartilhados').once('value');
-    const dadosAtuais = snapshot.val() || { categorias: [], meses: {} };
-
-    const dadosLocais = {
-        categorias: carregarCategorias(),
+    dadosLocaisBackup = {
+        categorias: localStorage.getItem(CHAVE_CATEGORIAS_LOCAL),
         meses: {}
     };
-
-    // Coletar dados de todos os meses do localStorage
+    
+    // Salvar todos os meses locais
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('contas-')) {
-            const mes = key.replace('contas-', '');
-            if (mes !== 'categorias' && mes !== 'dark-mode') {
-                const dadosMes = localStorage.getItem(key);
-                if (dadosMes) {
-                    dadosLocais.meses[mes] = JSON.parse(dadosMes);
-                }
+        if (key && key.startsWith('contas-') && !key.includes('firebase') && !key.includes('backup') && key !== 'contas-categorias' && key !== 'contas-dark-mode') {
+            dadosLocaisBackup.meses[key] = localStorage.getItem(key);
+        }
+    }
+    
+    // Marcar que há backup ativo
+    localStorage.setItem('contas-backup-ativo', 'true');
+    console.log('✅ Backup dos dados locais criado');
+}
+
+/**
+ * Carrega dados do Firebase na interface
+ */
+function carregarDadosDoFirebase(dadosFirebase) {
+    console.log('☁️ Carregando dados do Firebase...');
+    
+    // Carregar categorias
+    if (dadosFirebase.categorias && Array.isArray(dadosFirebase.categorias)) {
+        categorias = dadosFirebase.categorias;
+        localStorage.setItem(CHAVE_CATEGORIAS_FIREBASE, JSON.stringify(categorias));
+    } else {
+        // Categorias padrão se não houver
+        categorias = [
+            { nome: 'Salário', cor: PALETA_CORES[0] },
+            { nome: 'Moradia', cor: PALETA_CORES[1] },
+            { nome: 'Alimentação', cor: PALETA_CORES[2] },
+            { nome: 'Transporte', cor: PALETA_CORES[3] },
+            { nome: 'Lazer', cor: PALETA_CORES[4] }
+        ];
+        localStorage.setItem(CHAVE_CATEGORIAS_FIREBASE, JSON.stringify(categorias));
+    }
+    
+    renderizarCategorias();
+    
+    // Carregar dados do mês atual
+    if (dadosFirebase.meses && dadosFirebase.meses[mesAtual]) {
+        const dadosMes = dadosFirebase.meses[mesAtual];
+        entradas = dadosMes.entradas || [];
+        despesas = dadosMes.despesas || [];
+    } else {
+        entradas = [];
+        despesas = [];
+    }
+    
+    // Salvar no localStorage com prefixo Firebase
+    const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
+    localStorage.setItem(chaveMesFirebase, JSON.stringify({ entradas, despesas }));
+    
+    renderizarTudo();
+    console.log('✅ Dados do Firebase carregados na interface');
+}
+
+/**
+ * Inicializa dados vazios quando não há dados no Firebase
+ */
+function inicializarDadosVazios() {
+    // Categorias padrão
+    categorias = [
+        { nome: 'Salário', cor: PALETA_CORES[0] },
+        { nome: 'Moradia', cor: PALETA_CORES[1] },
+        { nome: 'Alimentação', cor: PALETA_CORES[2] },
+        { nome: 'Transporte', cor: PALETA_CORES[3] },
+        { nome: 'Lazer', cor: PALETA_CORES[4] }
+    ];
+    localStorage.setItem(CHAVE_CATEGORIAS_FIREBASE, JSON.stringify(categorias));
+    renderizarCategorias();
+    
+    // Dados vazios
+    entradas = [];
+    despesas = [];
+    const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
+    localStorage.setItem(chaveMesFirebase, JSON.stringify({ entradas, despesas }));
+    
+    renderizarTudo();
+}
+
+/**
+ * Restaura dados locais quando faz logout
+ */
+function restaurarDadosLocais() {
+    console.log('🔄 Restaurando dados locais...');
+    
+    // Limpar dados do Firebase do localStorage
+    const keysParaRemover = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith(PREFIX_FIREBASE) || key === CHAVE_CATEGORIAS_FIREBASE)) {
+            keysParaRemover.push(key);
+        }
+    }
+    keysParaRemover.forEach(key => localStorage.removeItem(key));
+    
+    // Remover marcador de backup
+    localStorage.removeItem('contas-backup-ativo');
+    
+    // Recarregar categorias locais
+    const categoriasLocais = localStorage.getItem(CHAVE_CATEGORIAS_LOCAL);
+    if (categoriasLocais) {
+        try {
+            const cats = JSON.parse(categoriasLocais);
+            if (Array.isArray(cats)) {
+                categorias = cats;
+            } else {
+                categorias = [];
             }
+        } catch (e) {
+            categorias = [];
         }
+    } else {
+        // Categorias padrão
+        categorias = [
+            { nome: 'Salário', cor: PALETA_CORES[0] },
+            { nome: 'Moradia', cor: PALETA_CORES[1] },
+            { nome: 'Alimentação', cor: PALETA_CORES[2] },
+            { nome: 'Transporte', cor: PALETA_CORES[3] },
+            { nome: 'Lazer', cor: PALETA_CORES[4] }
+        ];
+        localStorage.setItem(CHAVE_CATEGORIAS_LOCAL, JSON.stringify(categorias));
     }
-
-    // Mesclar categorias
-    const categoriasSet = new Set([...dadosAtuais.categorias, ...dadosLocais.categorias]);
-    const categoriasMescladas = Array.from(categoriasSet);
-
-    // Mesclar meses
-    const mesesMesclados = { ...dadosAtuais.meses };
-    Object.keys(dadosLocais.meses).forEach(mes => {
-        if (mesesMesclados[mes]) {
-            // Mesclar entradas e despesas
-            const entradas = mesclarArraysPorId(
-                mesesMesclados[mes].entradas || [],
-                dadosLocais.meses[mes].entradas || []
-            );
-            const despesas = mesclarArraysPorId(
-                mesesMesclados[mes].despesas || [],
-                dadosLocais.meses[mes].despesas || []
-            );
-            mesesMesclados[mes] = { entradas, despesas };
-        } else {
-            mesesMesclados[mes] = dadosLocais.meses[mes];
-        }
-    });
-
-    try {
-        await database.ref('dados-compartilhados').set({
-            categorias: categoriasMescladas,
-            meses: mesesMesclados
-        });
-        console.log('Dados enviados para área compartilhada do Firebase');
-    } catch (error) {
-        console.error('Erro ao enviar dados:', error);
-        throw error;
-    }
+    
+    renderizarCategorias();
+    
+    // Recarregar dados do mês atual
+    carregarDados(mesAtual);
+    
+    console.log('✅ Dados locais restaurados');
 }
 
 /**
@@ -321,11 +351,13 @@ function iniciarListenersSincronizacao() {
     const refCategorias = database.ref('dados-compartilhados/categorias');
     listenersAtivos.categorias = refCategorias.on('value', (snapshot) => {
         const categoriasFirebase = snapshot.val();
-        if (categoriasFirebase && JSON.stringify(categoriasFirebase) !== JSON.stringify(categorias)) {
-            categorias = categoriasFirebase;
-            salvarCategorias();
-            renderizarCategorias();
-            console.log('Categorias compartilhadas atualizadas');
+        if (categoriasFirebase && Array.isArray(categoriasFirebase)) {
+            if (JSON.stringify(categoriasFirebase) !== JSON.stringify(categorias)) {
+                categorias = categoriasFirebase;
+                localStorage.setItem(CHAVE_CATEGORIAS_FIREBASE, JSON.stringify(categorias));
+                renderizarCategorias();
+                console.log('☁️ Categorias compartilhadas atualizadas');
+            }
         }
     });
 
@@ -334,16 +366,24 @@ function iniciarListenersSincronizacao() {
     listenersAtivos.mesAtual = refMesAtual.on('value', (snapshot) => {
         const dadosMesFirebase = snapshot.val();
         if (dadosMesFirebase) {
-            const dadosLocaisStr = localStorage.getItem(getChaveMes(mesAtual));
+            const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
+            const dadosLocaisStr = localStorage.getItem(chaveMesFirebase);
             const dadosFirebaseStr = JSON.stringify(dadosMesFirebase);
             
             if (dadosLocaisStr !== dadosFirebaseStr) {
                 entradas = dadosMesFirebase.entradas || [];
                 despesas = dadosMesFirebase.despesas || [];
-                salvarMes(mesAtual, { entradas, despesas });
+                localStorage.setItem(chaveMesFirebase, dadosFirebaseStr);
                 renderizarTudo();
-                console.log('Dados compartilhados do mês atual atualizados');
+                console.log('☁️ Dados compartilhados do mês atual atualizados');
             }
+        } else {
+            // Se não há dados no Firebase para este mês, mostrar vazio
+            entradas = [];
+            despesas = [];
+            const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
+            localStorage.setItem(chaveMesFirebase, JSON.stringify({ entradas: [], despesas: [] }));
+            renderizarTudo();
         }
     });
 }
@@ -380,16 +420,25 @@ function atualizarListenerMes(novoMes) {
     const refNovoMes = database.ref(`dados-compartilhados/meses/${novoMes}`);
     listenersAtivos.mesAtual = refNovoMes.on('value', (snapshot) => {
         const dadosMesFirebase = snapshot.val();
+        const chaveMesFirebase = `${PREFIX_FIREBASE}${novoMes}`;
+        
         if (dadosMesFirebase) {
-            const dadosLocaisStr = localStorage.getItem(getChaveMes(novoMes));
+            const dadosLocaisStr = localStorage.getItem(chaveMesFirebase);
             const dadosFirebaseStr = JSON.stringify(dadosMesFirebase);
             
             if (dadosLocaisStr !== dadosFirebaseStr) {
                 entradas = dadosMesFirebase.entradas || [];
                 despesas = dadosMesFirebase.despesas || [];
+                localStorage.setItem(chaveMesFirebase, dadosFirebaseStr);
                 renderizarTudo();
-                console.log(`Dados compartilhados de ${novoMes} atualizados`);
+                console.log(`☁️ Dados compartilhados de ${novoMes} atualizados`);
             }
+        } else {
+            // Se não há dados no Firebase para este mês, mostrar vazio
+            entradas = [];
+            despesas = [];
+            localStorage.setItem(chaveMesFirebase, JSON.stringify({ entradas: [], despesas: [] }));
+            renderizarTudo();
         }
     });
 }
