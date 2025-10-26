@@ -162,6 +162,20 @@
                 
                 <!-- Lado Direito: Botões de Ação -->
                 <div class="flex gap-2 items-center">
+                    <!-- Botão Relatório Mensal (Apenas Ícone) -->
+                    <button id="btn-relatorio" class="bg-indigo-600 text-white p-2.5 rounded-lg hover:bg-indigo-700 transition-colors shadow-md" title="Relatório Mensal">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Botão Exportar Dados (Apenas Ícone) -->
+                    <button id="btn-exportar" class="bg-green-600 text-white p-2.5 rounded-lg hover:bg-green-700 transition-colors shadow-md" title="Exportar Dados">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </button>
+                    
                     <!-- Botão Sair (Apenas Ícone) -->
                     <button id="btn-logout" class="bg-red-600 text-white p-2.5 rounded-lg hover:bg-red-700 transition-colors shadow-md" title="Sair">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -186,23 +200,10 @@
             </div>
         </div>
 
-        <!-- Seletor de Mês e Botões de Ação -->
-        <div class="flex flex-col items-stretch gap-4 mb-8">
-            <!-- Seletor de Mês -->
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-center gap-4 justify-center">
-                <label for="seletor-mes" class="font-semibold text-lg text-gray-700 dark:text-gray-300">Mês/Ano:</label>
-                <input type="month" id="seletor-mes" class="p-2 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:border-gray-600 w-full sm:w-auto">
-            </div>
-            
-            <!-- Botões de Ação - Lado a Lado -->
-            <div class="grid grid-cols-2 gap-4">
-                <button id="btn-relatorio" class="bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg">
-                    📊 Relatório Mensal
-                </button>
-                <button id="btn-exportar" class="bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-lg">
-                    📥 Exportar Dados
-                </button>
-            </div>
+        <!-- Seletor de Mês -->
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-center gap-4 justify-center mb-8">
+            <label for="seletor-mes" class="font-semibold text-lg text-gray-700 dark:text-gray-300">Mês/Ano:</label>
+            <input type="month" id="seletor-mes" class="p-2 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:border-gray-600 w-full sm:w-auto">
         </div>
 
         <!-- Alertas de Vencimento -->

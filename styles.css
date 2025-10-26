@@ -595,11 +595,18 @@ body.dark #login-screen input::placeholder {
 
 /* ===== MELHORIAS DE RESPONSIVIDADE MOBILE ===== */
 
-/* ===== BOTÕES RELATÓRIO E EXPORTAR - SEMPRE LADO A LADO ===== */
-/* Grid de 2 colunas sempre */
-.grid.grid-cols-2.gap-4 {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
+/* ===== BOTÕES DO HEADER ===== */
+/* Botões de ação no header com tamanho consistente */
+#btn-relatorio,
+#btn-exportar,
+#btn-logout,
+#btn-dark-mode,
+#btn-backup {
+    min-width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 640px) {
@@ -663,6 +670,8 @@ body.dark #login-screen input::placeholder {
     }
 
     /* Botões do header compactos */
+    #btn-relatorio,
+    #btn-exportar,
     #btn-logout,
     #btn-dark-mode,
     #btn-backup {
@@ -671,6 +680,8 @@ body.dark #login-screen input::placeholder {
         height: 36px !important;
     }
 
+    #btn-relatorio svg,
+    #btn-exportar svg,
     #btn-logout svg,
     #btn-dark-mode svg,
     #btn-backup svg {
@@ -681,13 +692,6 @@ body.dark #login-screen input::placeholder {
     /* Lado direito - botões mais próximos */
     .header-container .flex.gap-2.items-center {
         gap: 0.375rem !important;
-    }
-
-    /* Botões Relatório e Exportar compactos */
-    #btn-relatorio,
-    #btn-exportar {
-        font-size: 0.875rem !important;
-        padding: 0.875rem 0.5rem !important;
     }
     
     /* Header responsivo */
