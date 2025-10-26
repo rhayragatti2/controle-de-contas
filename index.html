@@ -23,6 +23,11 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
     <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,10 +41,33 @@
     <div class="max-w-7xl mx-auto">
         <!-- Cabeçalho -->
         <div class="flex justify-between items-center mb-4">
-            <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400">
-                Controle de Contas Mensais
-            </h1>
-            <div class="flex gap-2">
+            <div>
+                <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400">
+                    Controle de Contas Mensais
+                </h1>
+                <div id="status-sync" class="text-sm mt-1 text-gray-600 dark:text-gray-400">
+                    <span id="sync-indicator">💾 Modo Local</span>
+                </div>
+            </div>
+            <div class="flex gap-2 items-center">
+                <!-- Área de Login/Logout -->
+                <div id="auth-container" class="flex items-center gap-2">
+                    <!-- Quando não logado -->
+                    <button id="btn-login" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        Login
+                    </button>
+                    <!-- Quando logado (inicialmente oculto) -->
+                    <div id="user-info" class="hidden items-center gap-2 bg-white dark:bg-gray-800 px-3 py-2 rounded-lg shadow-md">
+                        <img id="user-avatar" src="" alt="Avatar" class="w-8 h-8 rounded-full">
+                        <span id="user-name" class="text-sm font-medium dark:text-white"></span>
+                        <button id="btn-logout" class="ml-2 text-red-600 hover:text-red-700 text-sm font-semibold">
+                            Sair
+                        </button>
+                    </div>
+                </div>
                 <button id="btn-dark-mode" class="bg-gray-600 text-white p-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors shadow-md" title="Alternar Modo Escuro">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -364,6 +392,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="firebase-sync.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

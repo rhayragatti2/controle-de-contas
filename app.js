@@ -263,6 +263,11 @@ const carregarDarkMode = () => {
 
 const salvarCategorias = () => {
     localStorage.setItem(CHAVE_CATEGORIAS, JSON.stringify(categorias));
+    
+    // Sincronizar com Firebase se estiver habilitado
+    if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
+        window.firebaseSync.sincronizarCategoriasParaFirebase(categorias);
+    }
 };
 
 const carregarCategorias = () => {
@@ -523,6 +528,11 @@ const salvarDados = () => {
         despesas: despesas
     };
     localStorage.setItem(getChaveMes(mesAtual), JSON.stringify(dados));
+    
+    // Sincronizar com Firebase se estiver habilitado
+    if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
+        window.firebaseSync.sincronizarMesParaFirebase(mesAtual, dados);
+    }
 };
 
 const carregarDados = (mes) => {
@@ -544,6 +554,11 @@ const carregarDados = (mes) => {
 
     renderizarTudo();
     verificarVencimentos();
+    
+    // Atualizar listener do Firebase para o novo mês
+    if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
+        window.firebaseSync.atualizarListenerMes(mes);
+    }
 };
 
 const renderizarTudo = () => {
@@ -1477,6 +1492,26 @@ btnExportar.addEventListener('click', abrirModalExportar);
 const btnDarkMode = document.getElementById('btn-dark-mode');
 if (btnDarkMode) {
     btnDarkMode.addEventListener('click', toggleDarkMode);
+}
+
+// Listeners de autenticação Firebase
+const btnLogin = document.getElementById('btn-login');
+const btnLogout = document.getElementById('btn-logout');
+
+if (btnLogin) {
+    btnLogin.addEventListener('click', () => {
+        if (window.firebaseSync) {
+            window.firebaseSync.loginComGoogle();
+        }
+    });
+}
+
+if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+        if (window.firebaseSync) {
+            window.firebaseSync.logout();
+        }
+    });
 }
 
 // PWA Service Worker
