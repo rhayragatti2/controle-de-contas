@@ -199,49 +199,52 @@
             <!-- Alertas serão inseridos aqui via JS -->
         </div>
 
-        <!-- Seção de Resumo -->
-        <div class="bg-white dark:bg-gray-800 text-gray-800 dark:text-white p-6 rounded-lg shadow-xl mb-8">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">Resumo Mensal</h2>
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-                <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <p class="text-sm font-light opacity-80">Total Entradas</p>
-                    <p id="total-entradas" class="text-xl font-bold text-green-600 dark:text-green-400">R$ 0,00</p>
-                </div>
-                <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <p class="text-sm font-light opacity-80">Previsto Despesas</p>
-                    <p id="total-previsto" class="text-xl font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</p>
-                </div>
-                <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <p class="text-sm font-light opacity-80">Total Pago</p>
-                    <p id="total-pago" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</p>
-                </div>
-                <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <p class="text-sm font-light opacity-80">Saldo Atual</p>
-                    <p id="saldo" class="text-xl font-bold text-gray-800 dark:text-gray-100">R$ 0,00</p>
-                </div>
-                <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <p class="text-sm font-light opacity-80">🔮 Previsão Final</p>
-                    <p id="previsao-saldo" class="text-xl font-bold text-cyan-600 dark:text-cyan-300">R$ 0,00</p>
+        <!-- Layout com Duas Colunas: Resumo Mensal e Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Coluna Esquerda: Resumo Mensal -->
+            <div class="bg-white dark:bg-gray-800 text-gray-800 dark:text-white p-6 rounded-lg shadow-xl">
+                <h2 class="text-2xl font-semibold mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">Resumo Mensal</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-light opacity-80">Total Entradas</p>
+                        <p id="total-entradas" class="text-xl font-bold text-green-600 dark:text-green-400">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-light opacity-80">Previsto Despesas</p>
+                        <p id="total-previsto" class="text-xl font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-light opacity-80">Total Pago</p>
+                        <p id="total-pago" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-light opacity-80">Saldo Atual</p>
+                        <p id="saldo" class="text-xl font-bold text-gray-800 dark:text-gray-100">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg sm:col-span-2">
+                        <p class="text-sm font-light opacity-80">🔮 Previsão Final</p>
+                        <p id="previsao-saldo" class="text-xl font-bold text-cyan-600 dark:text-cyan-300">R$ 0,00</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Dashboard Expandido -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💰 Maior Despesa</h3>
-                <p id="maior-despesa" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
-                <p id="maior-despesa-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">📊 Categoria Top</h3>
-                <p id="categoria-top" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
-                <p id="categoria-top-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💵 Média Diária</h3>
-                <p id="media-diaria" class="text-lg font-bold text-gray-800 dark:text-white">R$ 0,00</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Gastos por dia</p>
+            <!-- Coluna Direita: Dashboard Expandido -->
+            <div class="flex flex-col gap-4">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💰 Maior Despesa</h3>
+                    <p id="maior-despesa" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
+                    <p id="maior-despesa-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">📊 Categoria Top</h3>
+                    <p id="categoria-top" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
+                    <p id="categoria-top-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💵 Média Diária</h3>
+                    <p id="media-diaria" class="text-lg font-bold text-gray-800 dark:text-white">R$ 0,00</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Gastos por dia</p>
+                </div>
             </div>
         </div>
 

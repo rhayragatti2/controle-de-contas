@@ -854,6 +854,62 @@ body.dark #modal-relatorio #chart-container {
     }
 }
 
+/* ===== LAYOUT DUAS COLUNAS - RESUMO E DASHBOARD ===== */
+
+/* Container das duas colunas */
+.grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 {
+    align-items: start;
+}
+
+/* Coluna direita com cards do dashboard */
+.grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 > div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+}
+
+/* Cards do dashboard com altura flexível */
+.grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 > div:last-child > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100px;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect nos cards do dashboard */
+.grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 > div:last-child > div:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark mode hover effect */
+body.dark .grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 > div:last-child > div:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Resumo Mensal - altura total */
+.grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 > div:first-child {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Grid interno do Resumo Mensal */
+.grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 > div:first-child > div.grid {
+    flex: 1;
+    align-content: start;
+}
+
+/* Responsividade mobile - empilhar verticalmente */
+@media (max-width: 1023px) {
+    .grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ===== MELHORIAS GERAIS DE UX ===== */
 
 /* Transições suaves */
