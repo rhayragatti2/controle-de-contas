@@ -1657,6 +1657,14 @@ window.processarGastoNatural = () => {
     // Regex para extrair informações
     // Padrão: "{gastei|comprei} {valor} {reais} no {débito|crédito} no {local}"
     
+    // Extrair pessoa (Mary ou Rhayra)
+    let pessoa = 'Mary'; // Padrão
+    if (texto.includes('rhayra')) {
+        pessoa = 'Rhayra';
+    } else if (texto.includes('mary')) {
+        pessoa = 'Mary';
+    }
+    
     // Extrair valor (números inteiros ou decimais)
     const regexValor = /(\d+(?:[.,]\d{1,2})?)\s*(?:reais?)?/i;
     const matchValor = texto.match(regexValor);
@@ -1773,6 +1781,7 @@ window.processarGastoNatural = () => {
     const dataFormatada = `${dia}/${mes}/${ano}`;
     
     // Preencher preview
+    document.getElementById('preview-pessoa').value = pessoa;
     document.getElementById('preview-valor').value = valor.toFixed(2);
     document.getElementById('preview-pagamento').value = formaPagamento;
     document.getElementById('preview-local').value = local;
@@ -1789,6 +1798,7 @@ window.processarGastoNatural = () => {
 
 // Confirmar e adicionar gasto avulso
 window.confirmarGastoAvulso = () => {
+    const pessoa = document.getElementById('preview-pessoa').value;
     const valor = parseFloat(document.getElementById('preview-valor').value);
     const formaPagamento = document.getElementById('preview-pagamento').value;
     const local = document.getElementById('preview-local').value.trim();
@@ -1812,6 +1822,7 @@ window.confirmarGastoAvulso = () => {
     
     // Criar gasto avulso
     const gastoAvulso = {
+        pessoa,
         descricao: local,
         formaPagamento,
         data: parseBRDateToISO(data),
@@ -1880,9 +1891,18 @@ const renderizarGastosAvulsos = () => {
             badgePagamento = '<span class="text-xs bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-200 px-2 py-1 rounded">🛒 Vale Alimentação</span>';
         }
         
+        // Badge de pessoa com cores diferentes
+        let badgePessoa = '';
+        if (gasto.pessoa === 'Mary') {
+            badgePessoa = '<span class="text-xs bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-200 px-2 py-1 rounded font-semibold">👩 Mary</span>';
+        } else if (gasto.pessoa === 'Rhayra') {
+            badgePessoa = '<span class="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded font-semibold">👩 Rhayra</span>';
+        }
+        
         const tr = document.createElement('tr');
         tr.className = 'border-b border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors';
         tr.innerHTML = `
+            <td class="p-3">${badgePessoa}</td>
             <td class="p-3 font-medium dark:text-gray-300">${gasto.descricao}</td>
             <td class="p-3 text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full ${corCategoria}"></span>

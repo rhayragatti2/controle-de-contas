@@ -601,10 +601,10 @@
                                 <h3 class="text-lg font-bold text-purple-700 dark:text-purple-300 mb-3">💬 Adicione gastos falando naturalmente!</h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
                                     Exemplos:
-                                    <span class="block mt-2 italic">"gastei 50 reais <strong>hoje</strong> no débito no Mercado"</span>
-                                    <span class="block italic">"comprei 100 <strong>ontem</strong> no crédito na Farmácia"</span>
-                                    <span class="block italic">"paguei 35 <strong>dia 25</strong> no vale refeição no Restaurante"</span>
-                                    <span class="block italic">"gastei 80 <strong>25/10</strong> no vale alimentação no Supermercado"</span>
+                                    <span class="block mt-2 italic">"<strong>Mary</strong> gastei 50 reais hoje no débito no Mercado"</span>
+                                    <span class="block italic">"<strong>Rhayra</strong> comprei 100 ontem no crédito na Farmácia"</span>
+                                    <span class="block italic">"<strong>Mary</strong> paguei 35 dia 25 no vale refeição no Restaurante"</span>
+                                    <span class="block italic">"<strong>Rhayra</strong> gastei 80 25/10 no vale alimentação no Supermercado"</span>
                                 </p>
                                 
                                 <!-- Campo de Linguagem Natural -->
@@ -612,7 +612,7 @@
                                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">✍️ Digite seu gasto:</label>
                                     <textarea 
                                         id="input-gasto-natural" 
-                                        placeholder="Ex: gastei 30 reais hoje no débito no Mercado" 
+                                        placeholder="Ex: Mary gastei 30 reais hoje no débito no Mercado" 
                                         class="w-full p-4 border-2 border-purple-300 dark:border-purple-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white text-lg"
                                         rows="3"
                                     ></textarea>
@@ -630,6 +630,17 @@
                             <!-- Preview dos Campos Detectados -->
                             <div id="preview-gasto-avulso" class="hidden bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md mb-6 border-2 border-green-300 dark:border-green-600">
                                 <h4 class="text-lg font-bold text-green-700 dark:text-green-300 mb-4">✅ Informações Detectadas:</h4>
+                                
+                                <div class="mb-4">
+                                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">👤 Pessoa:</label>
+                                    <select 
+                                        id="preview-pessoa" 
+                                        class="w-full p-3 border rounded-lg dark:bg-gray-600 dark:text-white dark:border-gray-500"
+                                    >
+                                        <option value="Mary">Mary</option>
+                                        <option value="Rhayra">Rhayra</option>
+                                    </select>
+                                </div>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
@@ -707,9 +718,10 @@
                             <!-- Tabela de Gastos Avulsos -->
                             <div class="overflow-x-auto">
                                 <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">📊 Gastos Avulsos do Mês</h4>
-                                <table class="w-full min-w-[750px]">
+                                <table class="w-full min-w-[850px]">
                                     <thead>
                                         <tr class="border-b dark:border-gray-700">
+                                            <th class="text-left p-3 dark:text-gray-300">Pessoa</th>
                                             <th class="text-left p-3 dark:text-gray-300">Descrição</th>
                                             <th class="text-left p-3 dark:text-gray-300">Categoria</th>
                                             <th class="text-left p-3 dark:text-gray-300">Pagamento</th>
@@ -723,7 +735,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr class="border-t-2 border-gray-400 dark:border-gray-500 bg-purple-100 dark:bg-gray-700 font-bold">
-                                            <td colspan="4" class="p-3 text-right dark:text-gray-200">TOTAL GASTOS AVULSOS:</td>
+                                            <td colspan="5" class="p-3 text-right dark:text-gray-200">TOTAL GASTOS AVULSOS:</td>
                                             <td class="p-3 text-right text-purple-700 dark:text-purple-300" id="total-gastos-avulsos">R$ 0,00</td>
                                             <td></td>
                                         </tr>
