@@ -328,6 +328,7 @@ const carregarCategorias = () => {
     salvarCategorias();
     renderizarCategorias();
     popularDropdownsCategorias();
+    popularFiltrosCategorias();
 };
 
 const atualizarCategoriaGlobalmente = (antigoNome, novoNome) => {
@@ -417,6 +418,7 @@ window.salvarEdicaoCategoria = (index, antigoNome) => {
 
     carregarDados(mesAtual);
     popularDropdownsCategorias();
+    popularFiltrosCategorias();
     renderizarCategorias();
 
     mostrarToast(`Categoria '${antigoNome}' atualizada para '${novoNome}'`, 'success');
@@ -464,6 +466,42 @@ const popularDropdownsCategorias = () => {
     });
 };
 
+// Popular filtros de categoria
+const popularFiltrosCategorias = () => {
+    const filtroEntrada = document.getElementById('filtro-entrada-categoria');
+    const filtroDespesa = document.getElementById('filtro-despesa-categoria');
+    
+    if (filtroEntrada) {
+        const valorAtualEntrada = filtroEntrada.value;
+        filtroEntrada.innerHTML = '<option value="">Todas categorias</option>';
+        
+        categorias.forEach(item => {
+            const option = new Option(item.nome, item.nome);
+            filtroEntrada.appendChild(option);
+        });
+        
+        // Restaura valor selecionado se ainda existir
+        if (valorAtualEntrada && categorias.some(c => c.nome === valorAtualEntrada)) {
+            filtroEntrada.value = valorAtualEntrada;
+        }
+    }
+    
+    if (filtroDespesa) {
+        const valorAtualDespesa = filtroDespesa.value;
+        filtroDespesa.innerHTML = '<option value="">Todas categorias</option>';
+        
+        categorias.forEach(item => {
+            const option = new Option(item.nome, item.nome);
+            filtroDespesa.appendChild(option);
+        });
+        
+        // Restaura valor selecionado se ainda existir
+        if (valorAtualDespesa && categorias.some(c => c.nome === valorAtualDespesa)) {
+            filtroDespesa.value = valorAtualDespesa;
+        }
+    }
+};
+
 formCategoria.addEventListener('submit', (e) => {
     e.preventDefault();
     const input = document.getElementById('categoria-nome');
@@ -478,6 +516,7 @@ formCategoria.addEventListener('submit', (e) => {
         salvarCategorias();
         renderizarCategorias();
         popularDropdownsCategorias();
+        popularFiltrosCategorias();
         input.value = '';
         mostrarToast(`Categoria '${nome}' adicionada!`, 'success');
     } else if (nomeExiste) {
@@ -534,6 +573,7 @@ window.excluirCategoria = (index) => {
     }
 
     popularDropdownsCategorias();
+    popularFiltrosCategorias();
     renderizarCategorias();
     renderizarTudo();
     mostrarToast(`Categoria '${nomeExcluido}' excluída!`, 'success');
