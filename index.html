@@ -133,12 +133,16 @@
 
     <div class="max-w-7xl mx-auto" id="main-app" style="display: none;">
         <!-- Cabeçalho -->
-        <div class="flex justify-between items-center mb-4">
-            <div>
-                <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400">
-                    Controle de Contas Mensais
-                </h1>
-                <div class="flex items-center gap-3 mt-2">
+        <div class="header-container mb-4">
+            <!-- Título - Largura Total -->
+            <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400 text-center mb-4">
+                Controle de Contas Mensais
+            </h1>
+            
+            <!-- Container de Informações e Botões -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <!-- Lado Esquerdo: Usuário e Status -->
+                <div class="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
                     <div id="user-indicator" class="flex items-center gap-2 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-lg shadow-sm">
                         <div class="user-avatar w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm">
                             <span id="user-initial">A</span>
@@ -155,43 +159,50 @@
                         </span>
                     </div>
                 </div>
-            </div>
-            <div class="flex gap-2 items-center flex-wrap">
-                <!-- Área de Logout -->
-                <div id="auth-container" class="flex items-center gap-2">
-                    <button id="btn-logout" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-md flex items-center gap-2">
+                
+                <!-- Lado Direito: Botões de Ação -->
+                <div class="flex gap-2 items-center">
+                    <!-- Botão Sair (Apenas Ícone) -->
+                    <button id="btn-logout" class="bg-red-600 text-white p-2.5 rounded-lg hover:bg-red-700 transition-colors shadow-md" title="Sair">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
-                        Sair
+                    </button>
+                    
+                    <!-- Botão Dark Mode -->
+                    <button id="btn-dark-mode" class="bg-gray-600 text-white p-2.5 rounded-lg hover:bg-gray-700 transition-colors shadow-md" title="Alternar Modo Escuro">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Botão Backup (Apenas Ícone) -->
+                    <button id="btn-backup" class="bg-gray-600 text-white p-2.5 rounded-lg hover:bg-gray-700 transition-colors shadow-md" title="Backup e Restauração">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
+                        </svg>
                     </button>
                 </div>
-                <button id="btn-dark-mode" class="bg-gray-600 text-white p-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors shadow-md" title="Alternar Modo Escuro">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                </button>
-                <button id="btn-backup" class="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors shadow-md" title="Backup e Restauração">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
-                    </svg>
-                    Backup
-                </button>
             </div>
         </div>
 
         <!-- Seletor de Mês e Botões de Ação -->
-        <div class="flex justify-center flex-col sm:flex-row items-center gap-4 mb-8">
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center gap-4">
+        <div class="flex flex-col items-stretch gap-4 mb-8">
+            <!-- Seletor de Mês -->
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-center gap-4 justify-center">
                 <label for="seletor-mes" class="font-semibold text-lg text-gray-700 dark:text-gray-300">Mês/Ano:</label>
-                <input type="month" id="seletor-mes" class="p-2 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:border-gray-600">
+                <input type="month" id="seletor-mes" class="p-2 border rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:border-gray-600 w-full sm:w-auto">
             </div>
-            <button id="btn-relatorio" class="bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg">
-                📊 Relatório Mensal
-            </button>
-            <button id="btn-exportar" class="bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-lg">
-                📥 Exportar Dados
-            </button>
+            
+            <!-- Botões de Ação - Lado a Lado -->
+            <div class="grid grid-cols-2 gap-4">
+                <button id="btn-relatorio" class="bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors shadow-lg">
+                    📊 Relatório Mensal
+                </button>
+                <button id="btn-exportar" class="bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-lg">
+                    📥 Exportar Dados
+                </button>
+            </div>
         </div>
 
         <!-- Alertas de Vencimento -->
