@@ -580,6 +580,9 @@ const carregarDados = (mes) => {
         entradas = [];
         despesas = [];
     }
+    
+    // Carregar gastos avulsos do mês
+    carregarGastosAvulsos(mes);
 
     renderizarTudo();
     verificarVencimentos();
@@ -600,7 +603,15 @@ const renderizarTudo = () => {
 const atualizarResumo = () => {
     const totalEntradas = entradas.reduce((acc, item) => acc + item.valor, 0);
     const totalPrevisto = despesas.reduce((acc, item) => acc + item.previsto, 0);
-    const totalPago = despesas.reduce((acc, item) => acc + item.pago, 0);
+    let totalPago = despesas.reduce((acc, item) => acc + item.pago, 0);
+    
+    // Adicionar gastos avulsos ao total pago
+    if (gastosAvulsos && gastosAvulsos.length > 0) {
+        const gastosMes = gastosAvulsos.filter(g => g.mes === mesAtual);
+        const totalGastosAvulsos = gastosMes.reduce((acc, g) => acc + g.valor, 0);
+        totalPago += totalGastosAvulsos;
+    }
+    
     const saldo = totalEntradas - totalPago;
 
     totalEntradasEl.textContent = formatarMoeda(totalEntradas);
@@ -1570,6 +1581,282 @@ const btnDarkMode = document.getElementById('btn-dark-mode');
 if (btnDarkMode) {
     btnDarkMode.addEventListener('click', toggleDarkMode);
 }
+
+// ===== GASTOS AVULSOS COM LINGUAGEM NATURAL =====
+
+let gastosAvulsos = [];
+
+// Trocar entre tabs
+window.trocarTabDespesa = (tab) => {
+    const tabFixos = document.getElementById('tab-gastos-fixos');
+    const tabAvulsos = document.getElementById('tab-gastos-avulsos');
+    const contentFixos = document.getElementById('tab-content-fixos');
+    const contentAvulsos = document.getElementById('tab-content-avulsos');
+    
+    if (tab === 'fixos') {
+        // Ativa tab fixos
+        tabFixos.classList.add('border-red-600', 'text-red-600', 'dark:text-red-400');
+        tabFixos.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        
+        tabAvulsos.classList.remove('border-red-600', 'text-red-600', 'dark:text-red-400');
+        tabAvulsos.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        
+        contentFixos.classList.remove('hidden');
+        contentAvulsos.classList.add('hidden');
+    } else {
+        // Ativa tab avulsos
+        tabAvulsos.classList.add('border-red-600', 'text-red-600', 'dark:text-red-400');
+        tabAvulsos.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        
+        tabFixos.classList.remove('border-red-600', 'text-red-600', 'dark:text-red-400');
+        tabFixos.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        
+        contentAvulsos.classList.remove('hidden');
+        contentFixos.classList.add('hidden');
+        
+        // Popula categorias no preview
+        popularCategoriasPreview();
+    }
+};
+
+// Popular categorias no preview
+const popularCategoriasPreview = () => {
+    const select = document.getElementById('preview-categoria');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Selecione uma categoria...</option>';
+    categorias.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.nome;
+        option.textContent = cat.nome;
+        select.appendChild(option);
+    });
+};
+
+// Processar linguagem natural
+window.processarGastoNatural = () => {
+    const input = document.getElementById('input-gasto-natural');
+    const texto = input.value.trim().toLowerCase();
+    
+    if (!texto) {
+        mostrarToast('Digite uma descrição do gasto!', 'error');
+        return;
+    }
+    
+    // Regex para extrair informações
+    // Padrão: "{gastei|comprei} {valor} {reais} no {débito|crédito} no {local}"
+    
+    // Extrair valor (números inteiros ou decimais)
+    const regexValor = /(\d+(?:[.,]\d{1,2})?)\s*(?:reais?)?/i;
+    const matchValor = texto.match(regexValor);
+    const valor = matchValor ? parseFloat(matchValor[1].replace(',', '.')) : 0;
+    
+    // Extrair forma de pagamento
+    let formaPagamento = 'débito';
+    if (texto.includes('crédito') || texto.includes('credito')) {
+        formaPagamento = 'crédito';
+    } else if (texto.includes('pix')) {
+        formaPagamento = 'pix';
+    } else if (texto.includes('dinheiro')) {
+        formaPagamento = 'dinheiro';
+    }
+    
+    // Extrair local/descrição (após "no" ou "na")
+    let local = '';
+    const regexLocal = /n[oa]\s+(?:débito|crédito|pix|dinheiro)\s+n[oa]\s+(.+?)$/i;
+    const matchLocal = texto.match(regexLocal);
+    
+    if (matchLocal && matchLocal[1]) {
+        local = matchLocal[1].trim();
+        // Capitalizar primeira letra
+        local = local.charAt(0).toUpperCase() + local.slice(1);
+    } else {
+        // Tentar extrair após última ocorrência de "no" ou "na"
+        const palavras = texto.split(/\s+/);
+        const indexUltimoNo = Math.max(
+            texto.lastIndexOf(' no '),
+            texto.lastIndexOf(' na ')
+        );
+        if (indexUltimoNo > 0) {
+            local = texto.slice(indexUltimoNo + 4).trim();
+            local = local.charAt(0).toUpperCase() + local.slice(1);
+        }
+    }
+    
+    // Se não encontrou local, usar uma parte do texto
+    if (!local) {
+        const palavrasLimpas = texto.replace(/gastei|comprei|reais?|débito|crédito|pix|dinheiro|n[oa]/gi, '').trim();
+        const primeiras = palavrasLimpas.split(/\s+/).slice(0, 3).join(' ');
+        local = primeiras.charAt(0).toUpperCase() + primeiras.slice(1);
+    }
+    
+    // Validação
+    if (valor <= 0) {
+        mostrarToast('Não consegui identificar o valor! Verifique o texto.', 'error');
+        return;
+    }
+    
+    if (!local) {
+        local = 'Gasto não especificado';
+    }
+    
+    // Preencher preview
+    document.getElementById('preview-valor').value = valor.toFixed(2);
+    document.getElementById('preview-pagamento').value = formaPagamento;
+    document.getElementById('preview-local').value = local;
+    
+    // Data de hoje
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    document.getElementById('preview-data').value = `${dia}/${mes}/${ano}`;
+    
+    // Mostrar preview
+    document.getElementById('preview-gasto-avulso').classList.remove('hidden');
+    
+    // Scroll suave
+    document.getElementById('preview-gasto-avulso').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    mostrarToast('✅ Texto processado! Revise e confirme.', 'success');
+};
+
+// Confirmar e adicionar gasto avulso
+window.confirmarGastoAvulso = () => {
+    const valor = parseFloat(document.getElementById('preview-valor').value);
+    const formaPagamento = document.getElementById('preview-pagamento').value;
+    const local = document.getElementById('preview-local').value.trim();
+    const data = document.getElementById('preview-data').value;
+    const categoria = document.getElementById('preview-categoria').value;
+    
+    if (!valor || valor <= 0) {
+        mostrarToast('Valor inválido!', 'error');
+        return;
+    }
+    
+    if (!local) {
+        mostrarToast('Descrição/Local inválido!', 'error');
+        return;
+    }
+    
+    if (!data || !data.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        mostrarToast('Data inválida! Use DD/MM/AAAA', 'error');
+        return;
+    }
+    
+    // Criar gasto avulso
+    const gastoAvulso = {
+        descricao: local,
+        formaPagamento,
+        data: parseBRDateToISO(data),
+        valor,
+        categoria: categoria || 'Sem categoria',
+        mes: mesAtual
+    };
+    
+    // Adicionar ao array
+    if (!gastosAvulsos) gastosAvulsos = [];
+    gastosAvulsos.push(gastoAvulso);
+    
+    // Salvar no localStorage
+    salvarGastosAvulsos();
+    
+    // Renderizar tabela
+    renderizarGastosAvulsos();
+    
+    // Limpar campos
+    document.getElementById('input-gasto-natural').value = '';
+    document.getElementById('preview-gasto-avulso').classList.add('hidden');
+    
+    mostrarToast('💰 Gasto avulso adicionado!', 'success');
+    
+    // Atualizar resumo (somar gastos avulsos ao total pago)
+    atualizarResumo();
+};
+
+// Cancelar preview
+window.cancelarGastoAvulso = () => {
+    document.getElementById('preview-gasto-avulso').classList.add('hidden');
+    document.getElementById('input-gasto-natural').value = '';
+};
+
+// Renderizar tabela de gastos avulsos
+const renderizarGastosAvulsos = () => {
+    const tabela = document.getElementById('tabela-gastos-avulsos');
+    if (!tabela) return;
+    
+    tabela.innerHTML = '';
+    
+    // Filtrar gastos do mês atual
+    const gastosMes = gastosAvulsos.filter(g => g.mes === mesAtual);
+    
+    if (gastosMes.length === 0) {
+        tabela.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400 italic">Nenhum gasto avulso registrado neste mês</td></tr>';
+        return;
+    }
+    
+    gastosMes.forEach((gasto, index) => {
+        const corCategoria = getCorCategoria(gasto.categoria);
+        
+        // Badge de forma de pagamento
+        let badgePagamento = '';
+        if (gasto.formaPagamento === 'débito') {
+            badgePagamento = '<span class="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 px-2 py-1 rounded">💳 Débito</span>';
+        } else if (gasto.formaPagamento === 'crédito') {
+            badgePagamento = '<span class="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200 px-2 py-1 rounded">💳 Crédito</span>';
+        } else if (gasto.formaPagamento === 'pix') {
+            badgePagamento = '<span class="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded">📱 PIX</span>';
+        } else if (gasto.formaPagamento === 'dinheiro') {
+            badgePagamento = '<span class="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-1 rounded">💵 Dinheiro</span>';
+        }
+        
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors';
+        tr.innerHTML = `
+            <td class="p-3 font-medium dark:text-gray-300">${gasto.descricao}</td>
+            <td class="p-3 text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
+                <span>${gasto.categoria}</span>
+            </td>
+            <td class="p-3">${badgePagamento}</td>
+            <td class="p-3 text-gray-600 dark:text-gray-400">${formatarData(gasto.data)}</td>
+            <td class="p-3 text-right text-red-600 dark:text-red-400 font-bold">${formatarMoeda(gasto.valor)}</td>
+            <td class="p-3 text-right">
+                <button onclick="excluirGastoAvulso(${gastosAvulsos.indexOf(gasto)})" 
+                        class="text-red-500 hover:text-red-700 font-semibold text-sm">
+                    🗑️ Excluir
+                </button>
+            </td>
+        `;
+        tabela.appendChild(tr);
+    });
+};
+
+// Excluir gasto avulso
+window.excluirGastoAvulso = (index) => {
+    if (!confirm('Tem certeza que deseja excluir este gasto?')) return;
+    
+    gastosAvulsos.splice(index, 1);
+    salvarGastosAvulsos();
+    renderizarGastosAvulsos();
+    atualizarResumo();
+    mostrarToast('Gasto excluído!', 'success');
+};
+
+// Salvar gastos avulsos no localStorage
+const salvarGastosAvulsos = () => {
+    if (!mesAtual) return;
+    const chave = `contas-gastos-avulsos-${mesAtual}`;
+    localStorage.setItem(chave, JSON.stringify(gastosAvulsos));
+};
+
+// Carregar gastos avulsos do localStorage
+const carregarGastosAvulsos = (mes) => {
+    const chave = `contas-gastos-avulsos-${mes}`;
+    const dados = localStorage.getItem(chave);
+    gastosAvulsos = dados ? JSON.parse(dados) : [];
+    renderizarGastosAvulsos();
+};
 
 // Nota: Autenticação agora é gerenciada pelo auth-simple.js
 

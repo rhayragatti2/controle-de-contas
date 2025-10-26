@@ -465,6 +465,29 @@
                 <!-- Conteúdo do Accordion -->
                 <div id="despesas-content" class="accordion-content">
                     <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                        
+                        <!-- Tabs de Despesas -->
+                        <div class="mb-6">
+                            <div class="flex border-b border-gray-200 dark:border-gray-600">
+                                <button 
+                                    id="tab-gastos-fixos"
+                                    onclick="trocarTabDespesa('fixos')"
+                                    class="tab-despesa-btn px-6 py-3 font-semibold transition-colors border-b-2 border-red-600 text-red-600 dark:text-red-400"
+                                >
+                                    📌 Gastos Fixos
+                                </button>
+                                <button 
+                                    id="tab-gastos-avulsos"
+                                    onclick="trocarTabDespesa('avulsos')"
+                                    class="tab-despesa-btn px-6 py-3 font-semibold transition-colors border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                                >
+                                    ⚡ Gastos Avulsos
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab Content: Gastos Fixos -->
+                        <div id="tab-content-fixos" class="tab-despesa-content">
                         <!-- Busca e Filtros -->
                 <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div class="flex flex-col md:flex-row gap-3">
@@ -561,6 +584,136 @@
                         </tbody>
                     </table>
                         </div>
+                        </div>
+                        <!-- Fim Tab Content: Gastos Fixos -->
+                        
+                        <!-- Tab Content: Gastos Avulsos -->
+                        <div id="tab-content-avulsos" class="tab-despesa-content hidden">
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-700 dark:to-gray-600 p-6 rounded-lg mb-6">
+                                <h3 class="text-lg font-bold text-purple-700 dark:text-purple-300 mb-3">💬 Adicione gastos falando naturalmente!</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                    Exemplos:
+                                    <span class="block mt-2 italic">"gastei 50 reais no débito no Mercado"</span>
+                                    <span class="block italic">"comprei 100 no crédito na Farmácia"</span>
+                                </p>
+                                
+                                <!-- Campo de Linguagem Natural -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">✍️ Digite seu gasto:</label>
+                                    <textarea 
+                                        id="input-gasto-natural" 
+                                        placeholder="Ex: gastei 50 reais no débito no Mercado" 
+                                        class="w-full p-4 border-2 border-purple-300 dark:border-purple-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white text-lg"
+                                        rows="3"
+                                    ></textarea>
+                                </div>
+                                
+                                <button 
+                                    id="btn-processar-gasto" 
+                                    onclick="processarGastoNatural()"
+                                    class="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors shadow-md flex items-center justify-center gap-2"
+                                >
+                                    <span>🤖 Processar Texto</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Preview dos Campos Detectados -->
+                            <div id="preview-gasto-avulso" class="hidden bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md mb-6 border-2 border-green-300 dark:border-green-600">
+                                <h4 class="text-lg font-bold text-green-700 dark:text-green-300 mb-4">✅ Informações Detectadas:</h4>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">💰 Valor:</label>
+                                        <input 
+                                            type="number" 
+                                            id="preview-valor" 
+                                            class="w-full p-3 border rounded-lg dark:bg-gray-600 dark:text-white dark:border-gray-500"
+                                            step="0.01"
+                                            min="0.01"
+                                        >
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">💳 Forma de Pagamento:</label>
+                                        <select 
+                                            id="preview-pagamento" 
+                                            class="w-full p-3 border rounded-lg dark:bg-gray-600 dark:text-white dark:border-gray-500"
+                                        >
+                                            <option value="débito">Débito</option>
+                                            <option value="crédito">Crédito</option>
+                                            <option value="pix">PIX</option>
+                                            <option value="dinheiro">Dinheiro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">📝 Local/Descrição:</label>
+                                    <input 
+                                        type="text" 
+                                        id="preview-local" 
+                                        class="w-full p-3 border rounded-lg dark:bg-gray-600 dark:text-white dark:border-gray-500"
+                                    >
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">📅 Data:</label>
+                                    <input 
+                                        type="text" 
+                                        id="preview-data" 
+                                        placeholder="DD/MM/AAAA"
+                                        class="w-full p-3 border rounded-lg dark:bg-gray-600 dark:text-white dark:border-gray-500"
+                                    >
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="block text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">🏷️ Categoria:</label>
+                                    <select 
+                                        id="preview-categoria" 
+                                        class="w-full p-3 border rounded-lg dark:bg-gray-600 dark:text-white dark:border-gray-500"
+                                    >
+                                        <option value="">Selecione uma categoria...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="flex gap-3">
+                                    <button 
+                                        onclick="confirmarGastoAvulso()"
+                                        class="flex-1 bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                                    >
+                                        ✅ Confirmar e Adicionar
+                                    </button>
+                                    <button 
+                                        onclick="cancelarGastoAvulso()"
+                                        class="flex-1 bg-gray-400 text-white p-3 rounded-lg font-semibold hover:bg-gray-500 transition-colors"
+                                    >
+                                        ❌ Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Tabela de Gastos Avulsos -->
+                            <div class="overflow-x-auto">
+                                <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">📊 Gastos Avulsos do Mês</h4>
+                                <table class="w-full min-w-[750px]">
+                                    <thead>
+                                        <tr class="border-b dark:border-gray-700">
+                                            <th class="text-left p-3 dark:text-gray-300">Descrição</th>
+                                            <th class="text-left p-3 dark:text-gray-300">Categoria</th>
+                                            <th class="text-left p-3 dark:text-gray-300">Pagamento</th>
+                                            <th class="text-left p-3 dark:text-gray-300">Data</th>
+                                            <th class="text-right p-3 dark:text-gray-300">Valor</th>
+                                            <th class="text-right p-3 w-32 dark:text-gray-300">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabela-gastos-avulsos">
+                                        <!-- Linhas de gastos avulsos serão adicionadas aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Fim Tab Content: Gastos Avulsos -->
+                        
                     </div>
                 </div>
             </div>

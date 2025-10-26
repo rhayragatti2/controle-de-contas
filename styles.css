@@ -887,6 +887,31 @@ body.dark #modal-relatorio #chart-container {
     opacity: 1 !important;
 }
 
+/* ===== TABS DE DESPESAS ===== */
+
+.tab-despesa-btn {
+    transition: all 0.3s ease;
+}
+
+.tab-despesa-btn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.tab-despesa-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ===== HEADER CONTAINER ===== */
 
 /* Header com layout limpo */
