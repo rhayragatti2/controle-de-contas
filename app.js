@@ -44,6 +44,7 @@ const despesaCategoria = document.getElementById('despesa-categoria');
 const btnRelatorio = document.getElementById('btn-relatorio');
 const btnBackup = document.getElementById('btn-backup');
 const btnExportar = document.getElementById('btn-exportar');
+const btnSyncGastos = document.getElementById('btn-sync-gastos');
 const alertasVencimento = document.getElementById('alertas-vencimento');
 
 // Elementos de resumo
@@ -1750,6 +1751,17 @@ btnRelatorio.addEventListener('click', abrirRelatorio);
 btnBackup.addEventListener('click', abrirModalBackup);
 btnExportar.addEventListener('click', abrirModalExportar);
 
+// Listener do botão de sincronização de Gastos Avulsos
+if (btnSyncGastos) {
+    btnSyncGastos.addEventListener('click', () => {
+        if (confirm('Deseja forçar a sincronização de todos os Gastos Avulsos com o Firebase?\n\nIsso enviará todos os gastos locais para a nuvem.')) {
+            // Remover flag de migração para forçar nova execução
+            localStorage.removeItem('contas-migracao-gastos-avulsos-v2');
+            migrarESincronizarGastosAvulsos();
+        }
+    });
+}
+
 // Listener do botão de modo escuro
 const btnDarkMode = document.getElementById('btn-dark-mode');
 if (btnDarkMode) {
@@ -2117,6 +2129,112 @@ const carregarGastosAvulsos = (mes) => {
     renderizarGastosAvulsos();
 };
 
+// ===== MIGRAÇÃO E SINCRONIZAÇÃO DE GASTOS AVULSOS =====
+
+/**
+ * Migra e sincroniza TODOS os gastos avulsos existentes no localStorage para o Firebase
+ * Esta função consolida gastos de todas as chaves antigas e força upload para o Firebase
+ */
+const migrarESincronizarGastosAvulsos = async () => {
+    console.log('🔄 Iniciando migração e sincronização de Gastos Avulsos...');
+    
+    // Buscar todas as chaves antigas de gastos avulsos
+    const chavesAntigas = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('contas-gastos-avulsos-')) {
+            chavesAntigas.push(key);
+        }
+    }
+    
+    if (chavesAntigas.length === 0) {
+        console.log('✅ Nenhum gasto avulso antigo encontrado para migrar');
+        return;
+    }
+    
+    console.log(`📦 Encontradas ${chavesAntigas.length} chaves antigas de gastos avulsos`);
+    
+    // Consolidar todos os gastos avulsos antigos
+    const todosGastosAntigos = [];
+    chavesAntigas.forEach(chave => {
+        try {
+            const dados = localStorage.getItem(chave);
+            if (dados) {
+                const gastos = JSON.parse(dados);
+                if (Array.isArray(gastos) && gastos.length > 0) {
+                    const mes = chave.replace('contas-gastos-avulsos-', '');
+                    console.log(`  ↳ ${mes}: ${gastos.length} gastos`);
+                    todosGastosAntigos.push(...gastos);
+                }
+            }
+        } catch (error) {
+            console.error(`Erro ao processar ${chave}:`, error);
+        }
+    });
+    
+    if (todosGastosAntigos.length === 0) {
+        console.log('✅ Nenhum gasto para migrar');
+        return;
+    }
+    
+    console.log(`💾 Total de gastos a migrar: ${todosGastosAntigos.length}`);
+    
+    // Atualizar array global
+    gastosAvulsos = todosGastosAntigos;
+    
+    // Agrupar gastos por mês
+    const gastosPorMes = {};
+    todosGastosAntigos.forEach(gasto => {
+        if (!gastosPorMes[gasto.mes]) {
+            gastosPorMes[gasto.mes] = [];
+        }
+        gastosPorMes[gasto.mes].push(gasto);
+    });
+    
+    // Sincronizar cada mês com o Firebase
+    const mesesParaSincronizar = Object.keys(gastosPorMes);
+    console.log(`☁️ Sincronizando ${mesesParaSincronizar.length} meses com o Firebase...`);
+    
+    for (const mes of mesesParaSincronizar) {
+        try {
+            // Carregar dados existentes do mês
+            const chave = getChaveMes(mes);
+            const dadosExistentes = localStorage.getItem(chave);
+            let dados = dadosExistentes ? JSON.parse(dadosExistentes) : { entradas: [], despesas: [] };
+            
+            // Adicionar gastos avulsos
+            dados.gastosAvulsos = gastosPorMes[mes];
+            
+            // Salvar localmente
+            localStorage.setItem(chave, JSON.stringify(dados));
+            
+            // Sincronizar com Firebase
+            if (window.firebaseSync && window.firebaseSync.isEnabled()) {
+                await window.firebaseSync.sincronizarMesParaFirebase(mes, dados);
+                console.log(`  ✅ ${mes}: ${gastosPorMes[mes].length} gastos sincronizados`);
+            }
+        } catch (error) {
+            console.error(`Erro ao sincronizar mês ${mes}:`, error);
+        }
+    }
+    
+    // Remover chaves antigas após migração bem-sucedida
+    chavesAntigas.forEach(chave => {
+        localStorage.removeItem(chave);
+        console.log(`  🗑️ Removida chave antiga: ${chave}`);
+    });
+    
+    // Marcar migração como concluída
+    localStorage.setItem('contas-migracao-gastos-avulsos-v2', 'concluida');
+    
+    console.log('✅ Migração e sincronização concluída com sucesso!');
+    mostrarToast('✅ Gastos Avulsos sincronizados com o Firebase!', 'success');
+    
+    // Recarregar dados do mês atual
+    renderizarGastosAvulsos();
+    atualizarResumo();
+};
+
 // ===== POUPANÇA =====
 
 let poupanca = [];
@@ -2271,6 +2389,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     seletorMes.value = mesFormatado;
     carregarDados(mesFormatado);
+    
+    // Executar migração de Gastos Avulsos (apenas uma vez)
+    setTimeout(() => {
+        const migracaoConcluida = localStorage.getItem('contas-migracao-gastos-avulsos-v2');
+        if (!migracaoConcluida && window.firebaseSync && window.firebaseSync.isEnabled()) {
+            console.log('🔄 Detectada necessidade de migração de Gastos Avulsos...');
+            migrarESincronizarGastosAvulsos();
+        }
+    }, 2000); // Aguarda 2s para garantir que Firebase está pronto
     
     // Controla o campo de parcelas baseado no toggle
     const toggleParcelado = document.getElementById('despesa-parcelada');
