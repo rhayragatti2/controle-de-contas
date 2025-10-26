@@ -747,47 +747,84 @@
                 <!-- Conteúdo do Accordion -->
                 <div id="resumo-mensal-content" class="accordion-content">
                     <div class="p-6 border-t border-gray-200 dark:border-gray-700">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm font-light opacity-80">Total Entradas</p>
-                        <p id="total-entradas" class="text-xl font-bold text-green-600 dark:text-green-400">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm font-light opacity-80">Previsto Despesas</p>
-                        <p id="total-previsto" class="text-xl font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm font-light opacity-80">Total Pago</p>
-                        <p id="total-pago" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm font-light opacity-80">Saldo Atual</p>
-                        <p id="saldo" class="text-xl font-bold text-gray-800 dark:text-gray-100">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                        <p class="text-sm font-light opacity-80">💎 Poupança</p>
-                        <p id="total-poupanca-resumo" class="text-xl font-bold text-blue-600 dark:text-blue-300">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <!-- Previsão Final com Tooltip Explicativo -->
-                        <p class="text-sm font-light opacity-80 flex items-center justify-center gap-1">
-                            🔮 Previsão Final
-                            <span class="group relative inline-flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 dark:text-blue-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span class="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-3 px-4 text-left shadow-xl z-50">
-                                    <strong class="text-sm">Saldo previsto no fim do mês:</strong><br>
-                                    Total Entradas - Total Pago - Despesas Pendentes<br><br>
-                                    <span style="color: #6ee7b7;">🟢 Verde:</span> Sobra dinheiro<br>
-                                    <span style="color: #fca5a5;">🔴 Vermelho:</span> Vai faltar<br>
-                                    <span style="color: #67e8f9;">🔵 Ciano:</span> Zero a zero
-                                    <span class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></span>
-                                </span>
-                            </span>
-                        </p>
-                        <p id="previsao-saldo" class="text-xl font-bold text-cyan-600 dark:text-cyan-300">R$ 0,00</p>
-                    </div>
+                        
+                        <!-- Fluxo de Caixa Único -->
+                        <div class="space-y-4">
+                            
+                            <!-- 1. ENTRADAS -->
+                            <div class="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 rounded-lg border-2 border-green-200 dark:border-green-700">
+                                <p class="text-sm font-semibold text-green-700 dark:text-green-300 mb-1">📥 ENTRADAS (Receitas)</p>
+                                <p id="total-entradas" class="text-2xl font-bold text-green-600 dark:text-green-400">R$ 0,00</p>
+                            </div>
+                            
+                            <!-- 2. DESPESAS -->
+                            <div class="p-4 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900 dark:to-rose-900 rounded-lg border-2 border-red-200 dark:border-red-700">
+                                <p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-2">💳 DESPESAS</p>
+                                <div class="grid grid-cols-2 gap-3 text-center">
+                                    <div>
+                                        <p class="text-xs opacity-80 dark:text-red-200">Previsto</p>
+                                        <p id="total-previsto" class="text-lg font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs opacity-80 dark:text-red-200">Pago</p>
+                                        <p id="total-pago" class="text-lg font-bold text-red-600 dark:text-red-400">R$ 0,00</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 3. SALDO DISPONÍVEL -->
+                            <div class="p-4 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900 dark:to-violet-900 rounded-lg border-2 border-purple-200 dark:border-purple-700">
+                                <p class="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-1">💰 SALDO DISPONÍVEL</p>
+                                <p class="text-xs opacity-80 dark:text-purple-200 mb-2">(Entradas - Despesas Pagas)</p>
+                                <p id="saldo-disponivel" class="text-2xl font-bold text-purple-600 dark:text-purple-400">R$ 0,00</p>
+                            </div>
+                            
+                            <!-- 4. POUPANÇA (Movimentação) -->
+                            <div class="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-lg border-2 border-blue-200 dark:border-blue-700">
+                                <p class="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-2">🏦 MOVIMENTAÇÃO POUPANÇA</p>
+                                <div class="grid grid-cols-2 gap-3 text-center mb-3">
+                                    <div>
+                                        <p class="text-xs opacity-80 dark:text-blue-200">Depósitos (-)</p>
+                                        <p id="total-depositos-poupanca-resumo" class="text-md font-bold text-blue-600 dark:text-blue-400">R$ 0,00</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs opacity-80 dark:text-blue-200">Retiradas (+)</p>
+                                        <p id="total-retiradas-poupanca-resumo" class="text-md font-bold text-cyan-600 dark:text-cyan-400">R$ 0,00</p>
+                                    </div>
+                                </div>
+                                <div class="pt-3 border-t border-blue-300 dark:border-blue-600">
+                                    <p class="text-xs opacity-80 dark:text-blue-200 mb-1">💎 Total Guardado</p>
+                                    <p id="saldo-poupanca-resumo" class="text-xl font-bold text-blue-600 dark:text-blue-300">R$ 0,00</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 5. SALDO FINAL EM MÃOS -->
+                            <div class="p-4 bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-700 dark:to-slate-700 rounded-lg border-2 border-gray-300 dark:border-gray-600">
+                                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">💵 SALDO EM MÃOS</p>
+                                <p class="text-xs opacity-80 dark:text-gray-300 mb-2">(Disponível - Depósitos + Retiradas)</p>
+                                <p id="saldo-final-maos" class="text-2xl font-bold text-gray-800 dark:text-gray-100">R$ 0,00</p>
+                            </div>
+                            
+                            <!-- 6. PREVISÃO FINAL -->
+                            <div class="p-4 bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 rounded-lg border-2 border-cyan-200 dark:border-cyan-700">
+                                <p class="text-sm font-semibold text-cyan-700 dark:text-cyan-300 mb-1 flex items-center gap-2">
+                                    🔮 PREVISÃO FINAL DO MÊS
+                                    <span class="group relative inline-flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-cyan-600 dark:text-cyan-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-3 px-4 text-left shadow-xl z-50">
+                                            <strong class="text-sm">Se todas despesas forem pagas:</strong><br>
+                                            Entradas - Total Previsto<br><br>
+                                            Mostra quanto sobrará ou faltará no fim do mês.
+                                            <span class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></span>
+                                        </span>
+                                    </span>
+                                </p>
+                                <p class="text-xs opacity-80 dark:text-cyan-200 mb-2">(Se todas despesas forem pagas)</p>
+                                <p id="previsao-saldo" class="text-2xl font-bold text-cyan-600 dark:text-cyan-300">R$ 0,00</p>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>

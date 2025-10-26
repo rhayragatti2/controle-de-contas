@@ -605,7 +605,10 @@ const renderizarTudo = () => {
 // ===== RESUMO MENSAL =====
 
 const atualizarResumo = () => {
+    // 1. ENTRADAS (Receitas)
     const totalEntradas = entradas.reduce((acc, item) => acc + item.valor, 0);
+    
+    // 2. DESPESAS
     const totalPrevisto = despesas.reduce((acc, item) => acc + item.previsto, 0);
     let totalPago = despesas.reduce((acc, item) => acc + item.pago, 0);
     
@@ -616,20 +619,69 @@ const atualizarResumo = () => {
         totalPago += totalGastosAvulsos;
     }
     
-    const saldo = totalEntradas - totalPago;
-
-    totalEntradasEl.textContent = formatarMoeda(totalEntradas);
-    totalPrevistoEl.textContent = formatarMoeda(totalPrevisto);
-    totalPagoEl.textContent = formatarMoeda(totalPago);
-    saldoEl.textContent = formatarMoeda(saldo);
-
-    saldoEl.classList.remove('text-green-400', 'text-red-400', 'text-gray-100');
-    if (saldo > 0) {
-        saldoEl.classList.add('text-green-400');
-    } else if (saldo < 0) {
-        saldoEl.classList.add('text-red-400');
-    } else {
-        saldoEl.classList.add('text-gray-100');
+    // 3. SALDO DISPONÍVEL (Entradas - Despesas Pagas)
+    const saldoDisponivel = totalEntradas - totalPago;
+    
+    // 4. POUPANÇA (Movimentação)
+    const totalDepositos = poupanca.filter(p => p.tipo === 'deposito').reduce((acc, p) => acc + p.valor, 0);
+    const totalRetiradas = poupanca.filter(p => p.tipo === 'retirada').reduce((acc, p) => acc + p.valor, 0);
+    const saldoPoupanca = totalDepositos - totalRetiradas;
+    
+    // 5. SALDO FINAL EM MÃOS (Disponível - Depósitos + Retiradas)
+    const saldoFinalMaos = saldoDisponivel - totalDepositos + totalRetiradas;
+    
+    // 6. PREVISÃO FINAL (Se todas despesas forem pagas)
+    const previsaoFinal = totalEntradas - totalPrevisto;
+    
+    // Atualizar elementos no DOM
+    const totalEntradasEl = document.getElementById('total-entradas');
+    const totalPrevistoEl = document.getElementById('total-previsto');
+    const totalPagoEl = document.getElementById('total-pago');
+    const saldoDisponivelEl = document.getElementById('saldo-disponivel');
+    const totalDepositosResumoEl = document.getElementById('total-depositos-poupanca-resumo');
+    const totalRetiradasResumoEl = document.getElementById('total-retiradas-poupanca-resumo');
+    const saldoPoupancaResumoEl = document.getElementById('saldo-poupanca-resumo');
+    const saldoFinalMaosEl = document.getElementById('saldo-final-maos');
+    const previsaoSaldoEl = document.getElementById('previsao-saldo');
+    
+    if (totalEntradasEl) totalEntradasEl.textContent = formatarMoeda(totalEntradas);
+    if (totalPrevistoEl) totalPrevistoEl.textContent = formatarMoeda(totalPrevisto);
+    if (totalPagoEl) totalPagoEl.textContent = formatarMoeda(totalPago);
+    if (saldoDisponivelEl) {
+        saldoDisponivelEl.textContent = formatarMoeda(saldoDisponivel);
+        saldoDisponivelEl.classList.remove('text-purple-600', 'text-red-600', 'text-green-600');
+        if (saldoDisponivel > 0) {
+            saldoDisponivelEl.classList.add('text-purple-600');
+        } else if (saldoDisponivel < 0) {
+            saldoDisponivelEl.classList.add('text-red-600');
+        } else {
+            saldoDisponivelEl.classList.add('text-purple-600');
+        }
+    }
+    if (totalDepositosResumoEl) totalDepositosResumoEl.textContent = formatarMoeda(totalDepositos);
+    if (totalRetiradasResumoEl) totalRetiradasResumoEl.textContent = formatarMoeda(totalRetiradas);
+    if (saldoPoupancaResumoEl) saldoPoupancaResumoEl.textContent = formatarMoeda(saldoPoupanca);
+    if (saldoFinalMaosEl) {
+        saldoFinalMaosEl.textContent = formatarMoeda(saldoFinalMaos);
+        saldoFinalMaosEl.classList.remove('text-green-600', 'text-red-600', 'text-gray-800');
+        if (saldoFinalMaos > 0) {
+            saldoFinalMaosEl.classList.add('text-green-600');
+        } else if (saldoFinalMaos < 0) {
+            saldoFinalMaosEl.classList.add('text-red-600');
+        } else {
+            saldoFinalMaosEl.classList.add('text-gray-800');
+        }
+    }
+    if (previsaoSaldoEl) {
+        previsaoSaldoEl.textContent = formatarMoeda(previsaoFinal);
+        previsaoSaldoEl.classList.remove('text-green-600', 'text-red-600', 'text-cyan-600');
+        if (previsaoFinal > 0) {
+            previsaoSaldoEl.classList.add('text-green-600');
+        } else if (previsaoFinal < 0) {
+            previsaoSaldoEl.classList.add('text-red-600');
+        } else {
+            previsaoSaldoEl.classList.add('text-cyan-600');
+        }
     }
 };
 
@@ -2006,16 +2058,17 @@ const renderizarPoupanca = () => {
     const totalRetiradas = poupanca.filter(p => p.tipo === 'retirada').reduce((acc, p) => acc + p.valor, 0);
     const saldoPoupanca = totalDepositos - totalRetiradas;
     
-    // Atualizar elementos
+    // Atualizar elementos na seção de poupança
     const totalDepositosEl = document.getElementById('total-depositos-poupanca');
     const totalRetiradasEl = document.getElementById('total-retiradas-poupanca');
     const saldoPoupancaEl = document.getElementById('saldo-poupanca');
-    const totalPoupancaResumoEl = document.getElementById('total-poupanca-resumo');
     
     if (totalDepositosEl) totalDepositosEl.textContent = formatarMoeda(totalDepositos);
     if (totalRetiradasEl) totalRetiradasEl.textContent = formatarMoeda(totalRetiradas);
     if (saldoPoupancaEl) saldoPoupancaEl.textContent = formatarMoeda(saldoPoupanca);
-    if (totalPoupancaResumoEl) totalPoupancaResumoEl.textContent = formatarMoeda(saldoPoupanca);
+    
+    // Atualizar resumo mensal (fluxo de caixa completo)
+    atualizarResumo();
 };
 
 if (formPoupanca) {
