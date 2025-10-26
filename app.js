@@ -1715,17 +1715,68 @@ window.processarGastoNatural = () => {
         local = 'Gasto não especificado';
     }
     
+    // Extrair e processar data
+    let dataProcessada = new Date();
+    
+    if (texto.includes('hoje')) {
+        // Data de hoje
+        dataProcessada = new Date();
+    } else if (texto.includes('ontem')) {
+        // Data de ontem
+        dataProcessada = new Date();
+        dataProcessada.setDate(dataProcessada.getDate() - 1);
+    } else if (texto.includes('anteontem')) {
+        // Data de anteontem
+        dataProcessada = new Date();
+        dataProcessada.setDate(dataProcessada.getDate() - 2);
+    } else {
+        // Tentar extrair data no formato DD/MM ou DD/MM/AAAA
+        const regexData = /\b(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?\b/;
+        const matchData = texto.match(regexData);
+        
+        if (matchData) {
+            const dia = parseInt(matchData[1]);
+            const mes = parseInt(matchData[2]) - 1; // Mês começa em 0
+            const ano = matchData[3] ? parseInt(matchData[3]) : new Date().getFullYear();
+            
+            dataProcessada = new Date(ano, mes, dia);
+            
+            // Validar se a data é válida
+            if (isNaN(dataProcessada.getTime()) || 
+                dataProcessada.getDate() !== dia || 
+                dataProcessada.getMonth() !== mes) {
+                // Data inválida, usar hoje
+                dataProcessada = new Date();
+            }
+        } else {
+            // Tentar extrair "dia DD"
+            const regexDia = /\bdia\s+(\d{1,2})\b/i;
+            const matchDia = texto.match(regexDia);
+            
+            if (matchDia) {
+                const dia = parseInt(matchDia[1]);
+                const hoje = new Date();
+                dataProcessada = new Date(hoje.getFullYear(), hoje.getMonth(), dia);
+                
+                // Validar se a data é válida
+                if (isNaN(dataProcessada.getTime()) || dataProcessada.getDate() !== dia) {
+                    dataProcessada = new Date();
+                }
+            }
+        }
+    }
+    
+    // Formatar data para o campo
+    const dia = String(dataProcessada.getDate()).padStart(2, '0');
+    const mes = String(dataProcessada.getMonth() + 1).padStart(2, '0');
+    const ano = dataProcessada.getFullYear();
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+    
     // Preencher preview
     document.getElementById('preview-valor').value = valor.toFixed(2);
     document.getElementById('preview-pagamento').value = formaPagamento;
     document.getElementById('preview-local').value = local;
-    
-    // Data de hoje
-    const hoje = new Date();
-    const dia = String(hoje.getDate()).padStart(2, '0');
-    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-    const ano = hoje.getFullYear();
-    document.getElementById('preview-data').value = `${dia}/${mes}/${ano}`;
+    document.getElementById('preview-data').value = dataFormatada;
     
     // Mostrar preview
     document.getElementById('preview-gasto-avulso').classList.remove('hidden');
