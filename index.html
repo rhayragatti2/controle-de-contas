@@ -233,7 +233,23 @@
                         <p id="saldo" class="text-xl font-bold text-gray-800 dark:text-gray-100">R$ 0,00</p>
                     </div>
                     <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg sm:col-span-2">
-                        <p class="text-sm font-light opacity-80">🔮 Previsão Final</p>
+                        <!-- Previsão Final com Tooltip Explicativo -->
+                        <p class="text-sm font-light opacity-80 flex items-center justify-center gap-1">
+                            🔮 Previsão Final
+                            <span class="group relative inline-flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 dark:text-blue-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span class="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-3 px-4 text-left shadow-xl z-50">
+                                    <strong class="text-sm">Saldo previsto no fim do mês:</strong><br>
+                                    Total Entradas - Total Pago - Despesas Pendentes<br><br>
+                                    <span style="color: #6ee7b7;">🟢 Verde:</span> Sobra dinheiro<br>
+                                    <span style="color: #fca5a5;">🔴 Vermelho:</span> Vai faltar<br>
+                                    <span style="color: #67e8f9;">🔵 Ciano:</span> Zero a zero
+                                    <span class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></span>
+                                </span>
+                            </span>
+                        </p>
                         <p id="previsao-saldo" class="text-xl font-bold text-cyan-600 dark:text-cyan-300">R$ 0,00</p>
                     </div>
                 </div>
@@ -503,6 +519,8 @@
         </div>
     </div>
 
+    <!-- BUILD: 2025-10-26-12:10 - TOOLTIP ADDED -->
+    
     <!-- Scripts -->
     <script>
         // Toggle mostrar/ocultar senha

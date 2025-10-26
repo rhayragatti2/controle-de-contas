@@ -305,30 +305,66 @@ body.dark .tag {
 /* Tooltip para notas */
 .tooltip {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
 }
 
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 200px;
+    min-width: 200px;
+    max-width: 280px;
     background-color: #1f2937;
     color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 8px;
+    text-align: left;
+    border-radius: 8px;
+    padding: 12px;
     position: absolute;
-    z-index: 1;
+    z-index: 1000;
     bottom: 125%;
     left: 50%;
-    margin-left: -100px;
+    transform: translateX(-50%);
     opacity: 0;
-    transition: opacity 0.3s;
-    font-size: 0.875rem;
+    transition: opacity 0.3s, visibility 0.3s;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    white-space: normal;
+}
+
+/* Seta do tooltip */
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1f2937 transparent transparent transparent;
 }
 
 .tooltip:hover .tooltiptext {
     visibility: visible;
     opacity: 1;
+}
+
+/* Tooltip responsivo mobile */
+@media (max-width: 640px) {
+    .tooltip .tooltiptext {
+        min-width: 220px;
+        max-width: 90vw;
+        left: auto;
+        right: -10px;
+        transform: translateX(0);
+        font-size: 0.75rem;
+        padding: 10px;
+    }
+    
+    .tooltip .tooltiptext::after {
+        left: auto;
+        right: 15px;
+        margin-left: 0;
+    }
 }
 
 /* Animação fadeIn */
@@ -559,26 +595,11 @@ body.dark #login-screen input::placeholder {
 
 /* ===== MELHORIAS DE RESPONSIVIDADE MOBILE ===== */
 
-/* ===== BOTÕES RELATÓRIO E EXPORTAR - SEMPRE LADO A LADO NO MOBILE ===== */
-@media (max-width: 500px) {
-    /* Botões de Relatório e Exportar lado a lado */
-    #btn-relatorio,
-    #btn-exportar {
-        font-size: 0.875rem !important;
-        padding: 0.875rem 0.5rem !important;
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.25rem;
-    }
-    
-    /* Grid de 2 colunas forçado */
-    .grid.grid-cols-2.gap-4 {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 0.75rem !important;
-    }
+/* ===== BOTÕES RELATÓRIO E EXPORTAR - SEMPRE LADO A LADO ===== */
+/* Grid de 2 colunas sempre */
+.grid.grid-cols-2.gap-4 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
 }
 
 @media (max-width: 640px) {
@@ -606,19 +627,18 @@ body.dark #login-screen input::placeholder {
         line-height: 1.3 !important;
     }
 
-    /* Container de informações e botões - mesma linha */
-    .header-container > div.flex {
+    /* Container principal - forçar linha única */
+    .header-container > .flex.flex-col.sm\:flex-row {
         flex-direction: row !important;
         justify-content: space-between !important;
         align-items: center !important;
-        flex-wrap: nowrap !important;
+        gap: 0.5rem !important;
     }
 
-    /* Lado esquerdo - usuário e status - compacto */
-    .header-container > div.flex > div:first-child {
-        flex-wrap: nowrap !important;
-        justify-content: flex-start !important;
+    /* Lado esquerdo - compacto */
+    .header-container .flex.items-center.gap-3 {
         gap: 0.5rem !important;
+        flex-wrap: nowrap !important;
     }
 
     /* Avatar do usuário mais compacto */
@@ -637,12 +657,12 @@ body.dark #login-screen input::placeholder {
         font-size: 0.875rem !important;
     }
 
-    /* Ocultar status de sincronização em mobile para economizar espaço */
+    /* Ocultar status de sincronização em mobile */
     #status-sync {
         display: none !important;
     }
 
-    /* Botões do header com tamanho uniforme e mais compactos */
+    /* Botões do header compactos */
     #btn-logout,
     #btn-dark-mode,
     #btn-backup {
@@ -659,15 +679,15 @@ body.dark #login-screen input::placeholder {
     }
 
     /* Lado direito - botões mais próximos */
-    .header-container > div.flex > div:last-child {
+    .header-container .flex.gap-2.items-center {
         gap: 0.375rem !important;
     }
 
-    /* Botões Relatório e Exportar - responsivos */
+    /* Botões Relatório e Exportar compactos */
     #btn-relatorio,
     #btn-exportar {
-        padding: 0.75rem !important;
-        font-size: 0.9rem !important;
+        font-size: 0.875rem !important;
+        padding: 0.875rem 0.5rem !important;
     }
     
     /* Header responsivo */

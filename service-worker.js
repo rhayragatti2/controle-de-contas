@@ -1,54 +1,41 @@
 // Service Worker para PWA - Controle de Contas
-const CACHE_NAME = 'controle-contas-v4';
-const urlsToCache = [
-  './',
-  './index.html',
-  './app.js',
-  './styles.css',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
-];
+// TEMPORARIAMENTE DESABILITADO PARA EVITAR CACHE DURANTE DESENVOLVIMENTO
 
-// Install event - cache dos arquivos
+const CACHE_NAME = 'controle-contas-v10-no-cache';
+
+// Install event - pula o cache
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Cache aberto');
-        return cache.addAll(urlsToCache);
+  console.log('Service Worker instalado - SEM CACHE');
+  self.skipWaiting(); // Ativa imediatamente
+});
+
+// Fetch event - SEMPRE busca da rede (sem cache)
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        return response;
+      })
+      .catch(error => {
+        console.log('Erro ao buscar:', error);
+        throw error;
       })
   );
 });
 
-// Fetch event - serve do cache quando offline
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - retorna a resposta
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
-  );
-});
-
-// Activate event - limpa caches antigos
+// Activate event - limpa TODOS os caches
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  console.log('Service Worker ativado - Limpando caches');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
+          console.log('Deletando cache:', cacheName);
+          return caches.delete(cacheName);
         })
       );
+    }).then(() => {
+      return self.clients.claim(); // Assume controle imediatamente
     })
   );
 });
