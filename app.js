@@ -549,8 +549,7 @@ const salvarDados = () => {
     if (!mesAtual) return;
     const dados = {
         entradas: entradas,
-        despesas: despesas,
-        poupanca: poupanca
+        despesas: despesas
     };
     
     const chave = getChaveMes(mesAtual);
@@ -562,6 +561,57 @@ const salvarDados = () => {
         window.firebaseSync.sincronizarMesParaFirebase(mesAtual, dados);
         setTimeout(() => mostrarIndicadorSincronizacao(false), 800);
     }
+};
+
+// Salvar Poupança GLOBAL (acumulativa entre todos os meses)
+const salvarPoupanca = () => {
+    const chave = 'contas-firebase-poupanca';
+    localStorage.setItem(chave, JSON.stringify(poupanca));
+    
+    // Sincronizar com Firebase
+    if (window.firebaseSync && window.firebaseSync.isEnabled()) {
+        mostrarIndicadorSincronizacao(true);
+        window.firebaseSync.sincronizarPoupancaParaFirebase(poupanca);
+        setTimeout(() => mostrarIndicadorSincronizacao(false), 800);
+    }
+};
+
+// Carregar Poupança GLOBAL
+const carregarPoupanca = () => {
+    const chave = 'contas-firebase-poupanca';
+    const dadosSalvos = localStorage.getItem(chave);
+    
+    if (dadosSalvos) {
+        poupanca = JSON.parse(dadosSalvos);
+    } else {
+        // Migração: buscar poupança antiga de todos os meses
+        poupanca = [];
+        const todasChaves = Object.keys(localStorage);
+        const chavesMeses = todasChaves.filter(k => k.startsWith('contas-firebase-') && k.match(/\d{4}-\d{2}$/));
+        
+        chavesMeses.forEach(chaveMes => {
+            try {
+                const dadosMes = JSON.parse(localStorage.getItem(chaveMes));
+                if (dadosMes.poupanca && Array.isArray(dadosMes.poupanca) && dadosMes.poupanca.length > 0) {
+                    poupanca = poupanca.concat(dadosMes.poupanca);
+                    
+                    // Remove poupança do mês antigo
+                    delete dadosMes.poupanca;
+                    localStorage.setItem(chaveMes, JSON.stringify(dadosMes));
+                }
+            } catch (e) {
+                console.error(`Erro ao migrar poupança de ${chaveMes}:`, e);
+            }
+        });
+        
+        // Salva poupança consolidada no formato global
+        if (poupanca.length > 0) {
+            salvarPoupanca();
+            console.log(`✅ Migração concluída: ${poupanca.length} movimentações de poupança consolidadas`);
+        }
+    }
+    
+    renderizarPoupanca();
 };
 
 const carregarDados = (mes) => {
@@ -577,15 +627,16 @@ const carregarDados = (mes) => {
         const dados = JSON.parse(dadosSalvos);
         entradas = dados.entradas || [];
         despesas = dados.despesas || [];
-        poupanca = dados.poupanca || [];
     } else {
         entradas = [];
         despesas = [];
-        poupanca = [];
     }
     
     // Carregar gastos avulsos do mês
     carregarGastosAvulsos(mes);
+    
+    // Poupança é GLOBAL, não precisa carregar por mês
+    // (será carregada uma única vez no início)
 
     renderizarTudo();
     verificarVencimentos();
@@ -1610,6 +1661,7 @@ window.importarBackup = () => {
             }
 
             carregarCategorias();
+            carregarPoupanca();
             carregarDados(mesAtual);
             mostrarToast('Backup restaurado com sucesso!', 'success');
             fecharModalBackup();
@@ -2067,7 +2119,7 @@ const renderizarPoupanca = () => {
     if (totalRetiradasEl) totalRetiradasEl.textContent = formatarMoeda(totalRetiradas);
     if (saldoPoupancaEl) saldoPoupancaEl.textContent = formatarMoeda(saldoPoupanca);
     
-    // Atualizar resumo mensal (fluxo de caixa completo)
+    // Atualizar resumo mensal (a poupança é global e afeta o resumo)
     atualizarResumo();
 };
 
@@ -2110,7 +2162,7 @@ if (formPoupanca) {
             mostrarToast(`${tipoTexto} adicionado à poupança!`, 'success');
         }
         
-        salvarDados();
+        salvarPoupanca();
         renderizarPoupanca();
         formPoupanca.reset();
     });
@@ -2133,7 +2185,7 @@ window.excluirPoupanca = (index) => {
     if (!confirm('Tem certeza que deseja excluir esta movimentação?')) return;
     
     poupanca.splice(index, 1);
-    salvarDados();
+    salvarPoupanca();
     renderizarPoupanca();
     mostrarToast('Movimentação excluída!', 'success');
 };
@@ -2153,8 +2205,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Carrega dark mode
     carregarDarkMode();
     
-    // Carrega categorias
+    // Carrega categorias (GLOBAL)
     carregarCategorias();
+    
+    // Carrega poupança (GLOBAL - acumulativa entre meses)
+    carregarPoupanca();
 
     const hoje = new Date();
     const ano = hoje.getFullYear();
