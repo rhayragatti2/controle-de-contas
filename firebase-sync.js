@@ -5,10 +5,10 @@
 // ===== CONFIGURAÇÃO DE ACESSO =====
 // IMPORTANTE: Adicione aqui os emails das pessoas autorizadas a acessar o sistema
 const EMAILS_AUTORIZADOS = [
-    // Adicione seus emails aqui:
-    // 'rhayra@yahoo.com.br',
-    // 'rhayragdg@gmail.com',
-    // 'amarylima@hotmail.com'
+    // Emails autorizados a acessar o sistema:
+    'rhayra@yahoo.com.br',
+    'rhayragdg@gmail.com',
+    'amarylima@hotmail.com'
 ];
 
 // Configuração do Firebase
@@ -181,6 +181,10 @@ if (isFirebaseEnabled) {
             pararListenersSincronizacao();
         }
     });
+} else {
+    // Se Firebase não está habilitado, garantir que mostra tela de login
+    console.log('Firebase não habilitado - mantendo tela de login');
+    mostrarTelaLogin();
 }
 
 /**
