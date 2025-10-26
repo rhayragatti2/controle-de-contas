@@ -326,90 +326,6 @@
                 </div>
             </div>
 
-            <!-- Seção de Poupança com Accordion -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                <!-- Cabeçalho do Accordion -->
-                <button 
-                    onclick="toggleAccordion('poupanca')" 
-                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                    <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
-                        🏦 Poupança
-                    </h2>
-                    <svg 
-                        id="poupanca-icon" 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        class="h-6 w-6 text-gray-600 dark:text-gray-400 transform transition-transform duration-300" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                
-                <!-- Conteúdo do Accordion -->
-                <div id="poupanca-content" class="accordion-content">
-                    <div class="p-6 border-t border-gray-200 dark:border-gray-700">
-                        
-                        <!-- Saldo da Poupança -->
-                        <div class="mb-6 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-lg text-center">
-                            <p class="text-sm font-light opacity-80 dark:text-white">💎 Saldo Total da Poupança</p>
-                            <p id="saldo-poupanca" class="text-3xl font-bold text-blue-600 dark:text-blue-300">R$ 0,00</p>
-                        </div>
-                        
-                        <form id="form-poupanca" class="flex flex-col gap-4 mb-4">
-                            <input type="text" id="poupanca-descricao" placeholder="Descrição (ex: Depósito mensal, Retirada emergência)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <input type="text" id="poupanca-data" placeholder="Data (DD/MM/AAAA)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
-                                <input type="number" id="poupanca-valor" placeholder="Valor (R$)" min="0.01" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
-                                <select id="poupanca-tipo" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
-                                    <option value="">Tipo...</option>
-                                    <option value="deposito">💰 Depósito</option>
-                                    <option value="retirada">💸 Retirada</option>
-                                </select>
-                            </div>
-                            
-                            <textarea id="poupanca-notas" placeholder="Observações/Notas (opcional)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" rows="2"></textarea>
-                            
-                            <input type="hidden" id="poupanca-id-edicao">
-                            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                                <span id="poupanca-btn-texto">Adicionar Movimentação</span>
-                            </button>
-                        </form>
-                        
-                        <div class="overflow-x-auto">
-                            <table class="w-full min-w-[700px]">
-                                <thead>
-                                    <tr class="border-b dark:border-gray-700">
-                                        <th class="text-left p-3 dark:text-gray-300">Data</th>
-                                        <th class="text-left p-3 dark:text-gray-300">Descrição</th>
-                                        <th class="text-left p-3 dark:text-gray-300">Tipo</th>
-                                        <th class="text-left p-3 dark:text-gray-300">Observações</th>
-                                        <th class="text-right p-3 dark:text-gray-300">Valor</th>
-                                        <th class="text-right p-3 w-32 dark:text-gray-300">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabela-poupanca">
-                                    <!-- Linhas de poupança serão adicionadas aqui -->
-                                </tbody>
-                                <tfoot>
-                                    <tr class="border-t-2 border-gray-400 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 font-bold">
-                                        <td colspan="4" class="p-3 text-right dark:text-gray-200">TOTAIS:</td>
-                                        <td class="p-3 text-right">
-                                            <div class="text-green-600 dark:text-green-400">+<span id="total-depositos-poupanca">R$ 0,00</span></div>
-                                            <div class="text-red-600 dark:text-red-400">-<span id="total-retiradas-poupanca">R$ 0,00</span></div>
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Seção de Despesas com Accordion -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                 <!-- Cabeçalho do Accordion -->
@@ -715,6 +631,90 @@
                         </div>
                         <!-- Fim Tab Content: Gastos Avulsos -->
                         
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Poupança com Accordion -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                <!-- Cabeçalho do Accordion -->
+                <button 
+                    onclick="toggleAccordion('poupanca')" 
+                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                    <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                        🏦 Poupança
+                    </h2>
+                    <svg 
+                        id="poupanca-icon" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        class="h-6 w-6 text-gray-600 dark:text-gray-400 transform transition-transform duration-300" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                
+                <!-- Conteúdo do Accordion -->
+                <div id="poupanca-content" class="accordion-content">
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                        
+                        <!-- Saldo da Poupança -->
+                        <div class="mb-6 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-lg text-center">
+                            <p class="text-sm font-light opacity-80 dark:text-white">💎 Saldo Total da Poupança</p>
+                            <p id="saldo-poupanca" class="text-3xl font-bold text-blue-600 dark:text-blue-300">R$ 0,00</p>
+                        </div>
+                        
+                        <form id="form-poupanca" class="flex flex-col gap-4 mb-4">
+                            <input type="text" id="poupanca-descricao" placeholder="Descrição (ex: Depósito mensal, Retirada emergência)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <input type="text" id="poupanca-data" placeholder="Data (DD/MM/AAAA)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                                <input type="number" id="poupanca-valor" placeholder="Valor (R$)" min="0.01" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                                <select id="poupanca-tipo" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                                    <option value="">Tipo...</option>
+                                    <option value="deposito">💰 Depósito</option>
+                                    <option value="retirada">💸 Retirada</option>
+                                </select>
+                            </div>
+                            
+                            <textarea id="poupanca-notas" placeholder="Observações/Notas (opcional)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" rows="2"></textarea>
+                            
+                            <input type="hidden" id="poupanca-id-edicao">
+                            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                                <span id="poupanca-btn-texto">Adicionar Movimentação</span>
+                            </button>
+                        </form>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[700px]">
+                                <thead>
+                                    <tr class="border-b dark:border-gray-700">
+                                        <th class="text-left p-3 dark:text-gray-300">Data</th>
+                                        <th class="text-left p-3 dark:text-gray-300">Descrição</th>
+                                        <th class="text-left p-3 dark:text-gray-300">Tipo</th>
+                                        <th class="text-left p-3 dark:text-gray-300">Observações</th>
+                                        <th class="text-right p-3 dark:text-gray-300">Valor</th>
+                                        <th class="text-right p-3 w-32 dark:text-gray-300">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-poupanca">
+                                    <!-- Linhas de poupança serão adicionadas aqui -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="border-t-2 border-gray-400 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 font-bold">
+                                        <td colspan="4" class="p-3 text-right dark:text-gray-200">TOTAIS:</td>
+                                        <td class="p-3 text-right">
+                                            <div class="text-green-600 dark:text-green-400">+<span id="total-depositos-poupanca">R$ 0,00</span></div>
+                                            <div class="text-red-600 dark:text-red-400">-<span id="total-retiradas-poupanca">R$ 0,00</span></div>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
