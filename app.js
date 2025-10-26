@@ -262,16 +262,26 @@ const carregarDarkMode = () => {
 // ===== GERENCIAMENTO DE CATEGORIAS =====
 
 const salvarCategorias = () => {
-    localStorage.setItem(CHAVE_CATEGORIAS, JSON.stringify(categorias));
+    // Determinar qual chave usar baseado no estado de login
+    const chave = (window.firebaseSync && window.firebaseSync.getCurrentUser()) 
+        ? 'contas-firebase-categorias' 
+        : CHAVE_CATEGORIAS;
     
-    // Sincronizar com Firebase se estiver habilitado
+    localStorage.setItem(chave, JSON.stringify(categorias));
+    
+    // Sincronizar com Firebase se estiver logado
     if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
         window.firebaseSync.sincronizarCategoriasParaFirebase(categorias);
     }
 };
 
 const carregarCategorias = () => {
-    const salvas = localStorage.getItem(CHAVE_CATEGORIAS);
+    // Determinar qual chave usar baseado no estado de login
+    const chave = (window.firebaseSync && window.firebaseSync.getCurrentUser()) 
+        ? 'contas-firebase-categorias' 
+        : CHAVE_CATEGORIAS;
+    
+    const salvas = localStorage.getItem(chave);
     let categoriasCarregadas = [];
 
     if (salvas) {
@@ -519,7 +529,14 @@ window.excluirCategoria = (index) => {
 
 // ===== GERENCIAMENTO DE DADOS MENSAIS =====
 
-const getChaveMes = (mes) => `contas-${mes}`;
+const getChaveMes = (mes) => {
+    // Se está logado, usar prefixo Firebase
+    if (window.firebaseSync && window.firebaseSync.getCurrentUser()) {
+        return `contas-firebase-${mes}`;
+    }
+    // Se não está logado, usar prefixo local normal
+    return `contas-${mes}`;
+};
 
 const salvarDados = () => {
     if (!mesAtual) return;
@@ -527,9 +544,11 @@ const salvarDados = () => {
         entradas: entradas,
         despesas: despesas
     };
-    localStorage.setItem(getChaveMes(mesAtual), JSON.stringify(dados));
     
-    // Sincronizar com Firebase se estiver habilitado
+    const chave = getChaveMes(mesAtual);
+    localStorage.setItem(chave, JSON.stringify(dados));
+    
+    // Sincronizar com Firebase se estiver logado
     if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
         window.firebaseSync.sincronizarMesParaFirebase(mesAtual, dados);
     }
@@ -540,6 +559,7 @@ const carregarDados = (mes) => {
     mesAtual = mes;
     estadoEdicaoDespesa = -1;
     estadoEdicaoEntrada = -1;
+    
     const chave = getChaveMes(mes);
     const dadosSalvos = localStorage.getItem(chave);
 
@@ -555,7 +575,7 @@ const carregarDados = (mes) => {
     renderizarTudo();
     verificarVencimentos();
     
-    // Atualizar listener do Firebase para o novo mês
+    // Atualizar listener do Firebase para o novo mês (se logado)
     if (window.firebaseSync && window.firebaseSync.isEnabled() && window.firebaseSync.getCurrentUser()) {
         window.firebaseSync.atualizarListenerMes(mes);
     }
