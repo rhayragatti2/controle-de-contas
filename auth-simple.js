@@ -9,7 +9,7 @@ const CREDENCIAIS = {
     senha: 'caminhoneir@s'  // ✅ SENHA ALTERADA!
 };
 
-// Chave para armazenar sessão
+// Chave para armazenar sessão (mudado para localStorage para persistir)
 const CHAVE_SESSAO = 'contas-sessao-ativa';
 
 // ===== VERIFICAÇÃO DE SESSÃO =====
@@ -18,26 +18,26 @@ const CHAVE_SESSAO = 'contas-sessao-ativa';
  * Verifica se existe uma sessão ativa
  */
 function verificarSessao() {
-    const sessaoAtiva = sessionStorage.getItem(CHAVE_SESSAO);
+    const sessaoAtiva = localStorage.getItem(CHAVE_SESSAO);
     return sessaoAtiva === 'true';
 }
 
 /**
- * Cria uma sessão ativa
+ * Cria uma sessão ativa (persistente)
  */
 function criarSessao() {
-    sessionStorage.setItem(CHAVE_SESSAO, 'true');
+    localStorage.setItem(CHAVE_SESSAO, 'true');
     // Salvar timestamp da sessão
-    sessionStorage.setItem('contas-sessao-timestamp', Date.now().toString());
+    localStorage.setItem('contas-sessao-timestamp', Date.now().toString());
 }
 
 /**
  * Encerra a sessão
  */
 function encerrarSessao() {
-    sessionStorage.removeItem(CHAVE_SESSAO);
-    sessionStorage.removeItem('contas-sessao-timestamp');
-    sessionStorage.removeItem('contas-usuario');
+    localStorage.removeItem(CHAVE_SESSAO);
+    localStorage.removeItem('contas-sessao-timestamp');
+    localStorage.removeItem('contas-usuario');
 }
 
 // ===== CONTROLE DE TELA =====
@@ -201,8 +201,8 @@ function atualizarIndicadorUsuario(usuario) {
 function inicializarAuth() {
     // Verificar se já tem sessão ativa
     if (verificarSessao()) {
-        // Recuperar usuário do sessionStorage se disponível
-        const usuarioSalvo = sessionStorage.getItem('contas-usuario');
+        // Recuperar usuário do localStorage se disponível
+        const usuarioSalvo = localStorage.getItem('contas-usuario');
         if (usuarioSalvo) {
             atualizarIndicadorUsuario(usuarioSalvo);
         }
@@ -233,8 +233,8 @@ function inicializarAuth() {
             const usuario = document.getElementById('login-usuario').value.trim();
             const senha = document.getElementById('login-senha').value;
             
-            // Salvar usuário para recuperar depois
-            sessionStorage.setItem('contas-usuario', usuario);
+            // Salvar usuário para recuperar depois (persistente)
+            localStorage.setItem('contas-usuario', usuario);
             
             realizarLogin(usuario, senha);
             

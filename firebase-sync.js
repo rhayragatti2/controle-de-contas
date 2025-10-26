@@ -95,6 +95,15 @@ function carregarDadosDoFirebase(dadosFirebase) {
     
     renderizarCategorias();
     
+    // Carregar poupança (GLOBAL - acumulativa)
+    if (dadosFirebase.poupanca && Array.isArray(dadosFirebase.poupanca)) {
+        poupanca = dadosFirebase.poupanca;
+        localStorage.setItem('contas-firebase-poupanca', JSON.stringify(poupanca));
+        if (typeof renderizarPoupanca === 'function') {
+            renderizarPoupanca();
+        }
+    }
+    
     // Carregar dados do mês atual
     if (dadosFirebase.meses && dadosFirebase.meses[mesAtual]) {
         const dadosMes = dadosFirebase.meses[mesAtual];
@@ -166,6 +175,20 @@ async function sincronizarCategoriasParaFirebase(cats) {
     }
 }
 
+/**
+ * Sincroniza poupança para o Firebase (área compartilhada - GLOBAL)
+ */
+async function sincronizarPoupancaParaFirebase(poupancaData) {
+    if (!isFirebaseEnabled) return;
+
+    try {
+        await database.ref('dados-compartilhados/poupanca').set(poupancaData);
+        console.log('Poupança sincronizada');
+    } catch (error) {
+        console.error('Erro ao sincronizar poupança:', error);
+    }
+}
+
 // ===== LISTENERS EM TEMPO REAL =====
 
 /**
@@ -184,6 +207,22 @@ function iniciarListenersSincronizacao() {
                 localStorage.setItem(CHAVE_CATEGORIAS_FIREBASE, JSON.stringify(categorias));
                 renderizarCategorias();
                 console.log('☁️ Categorias compartilhadas atualizadas');
+            }
+        }
+    });
+    
+    // Listener para poupança compartilhada (GLOBAL - acumulativa)
+    const refPoupanca = database.ref('dados-compartilhados/poupanca');
+    listenersAtivos.poupanca = refPoupanca.on('value', (snapshot) => {
+        const poupancaFirebase = snapshot.val();
+        if (poupancaFirebase && Array.isArray(poupancaFirebase)) {
+            if (JSON.stringify(poupancaFirebase) !== JSON.stringify(poupanca)) {
+                poupanca = poupancaFirebase;
+                localStorage.setItem('contas-firebase-poupanca', JSON.stringify(poupanca));
+                if (typeof renderizarPoupanca === 'function') {
+                    renderizarPoupanca();
+                }
+                console.log('☁️ Poupança compartilhada atualizada');
             }
         }
     });
@@ -223,6 +262,9 @@ function pararListenersSincronizacao() {
 
     if (listenersAtivos.categorias) {
         database.ref('dados-compartilhados/categorias').off('value', listenersAtivos.categorias);
+    }
+    if (listenersAtivos.poupanca) {
+        database.ref('dados-compartilhados/poupanca').off('value', listenersAtivos.poupanca);
     }
     if (listenersAtivos.mesAtual) {
         database.ref(`dados-compartilhados/meses/${mesAtual}`).off('value', listenersAtivos.mesAtual);
@@ -286,6 +328,7 @@ if (isFirebaseEnabled) {
 window.firebaseSync = {
     sincronizarMesParaFirebase,
     sincronizarCategoriasParaFirebase,
+    sincronizarPoupancaParaFirebase,
     atualizarListenerMes,
     isEnabled: () => isFirebaseEnabled,
     iniciarSincronizacao: () => {
