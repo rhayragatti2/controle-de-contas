@@ -964,20 +964,22 @@ body.dark #modal-relatorio #chart-container {
 
 /* Força conteúdo do accordion do Dashboard no topo */
 #dashboard-stats-content {
-    align-items: flex-start !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
     justify-content: flex-start !important;
 }
 
 #dashboard-stats-content > div {
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    padding-top: 1rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
 }
 
 /* Força cards internos do Dashboard no topo */
 #dashboard-stats-content .bg-gray-50 {
-    align-self: flex-start !important;
-    margin-top: 0 !important;
+    margin-bottom: 0 !important;
 }
 
 /* Hover effect nos cards do dashboard */
