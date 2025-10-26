@@ -851,6 +851,27 @@ body.dark #modal-relatorio #chart-container {
     }
 }
 
+/* ===== ACCORDION ===== */
+
+/* Conteúdo do accordion */
+.accordion-content {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 1;
+}
+
+.accordion-collapsed {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    padding: 0 !important;
+}
+
+.accordion-expanded {
+    max-height: 1000px !important;
+    opacity: 1 !important;
+}
+
 /* ===== HEADER CONTAINER ===== */
 
 /* Header com layout limpo */

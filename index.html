@@ -255,22 +255,47 @@
                 </div>
             </div>
 
-            <!-- Coluna Direita: Dashboard Expandido -->
-            <div class="flex flex-col gap-4">
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💰 Maior Despesa</h3>
-                    <p id="maior-despesa" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
-                    <p id="maior-despesa-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">📊 Categoria Top</h3>
-                    <p id="categoria-top" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
-                    <p id="categoria-top-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💵 Média Diária</h3>
-                    <p id="media-diaria" class="text-lg font-bold text-gray-800 dark:text-white">R$ 0,00</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Gastos por dia</p>
+            <!-- Coluna Direita: Dashboard Expandido com Accordion -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+                <!-- Cabeçalho do Accordion -->
+                <button 
+                    onclick="toggleAccordion('dashboard-stats')" 
+                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                        📊 Dashboard de Estatísticas
+                    </h2>
+                    <svg 
+                        id="dashboard-stats-icon" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        class="h-6 w-6 text-gray-600 dark:text-gray-400 transform transition-transform duration-300" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                
+                <!-- Conteúdo do Accordion -->
+                <div id="dashboard-stats-content" class="accordion-content">
+                    <div class="p-4 flex flex-col gap-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💰 Maior Despesa</h3>
+                            <p id="maior-despesa" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
+                            <p id="maior-despesa-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">📊 Categoria Top</h3>
+                            <p id="categoria-top" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
+                            <p id="categoria-top-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💵 Média Diária</h3>
+                            <p id="media-diaria" class="text-lg font-bold text-gray-800 dark:text-white">R$ 0,00</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Gastos por dia</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -523,6 +548,24 @@
     
     <!-- Scripts -->
     <script>
+        // ===== FUNÇÃO DE ACCORDION =====
+        function toggleAccordion(id) {
+            const content = document.getElementById(id + '-content');
+            const icon = document.getElementById(id + '-icon');
+            
+            if (content.classList.contains('accordion-collapsed')) {
+                // Expandir
+                content.classList.remove('accordion-collapsed');
+                content.classList.add('accordion-expanded');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                // Colapsar
+                content.classList.remove('accordion-expanded');
+                content.classList.add('accordion-collapsed');
+                icon.style.transform = 'rotate(-180deg)';
+            }
+        }
+        
         // Toggle mostrar/ocultar senha
         document.addEventListener('DOMContentLoaded', function() {
             const toggleSenha = document.getElementById('toggle-senha');
