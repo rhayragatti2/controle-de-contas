@@ -549,7 +549,8 @@ const salvarDados = () => {
     if (!mesAtual) return;
     const dados = {
         entradas: entradas,
-        despesas: despesas
+        despesas: despesas,
+        poupanca: poupanca
     };
     
     const chave = getChaveMes(mesAtual);
@@ -576,9 +577,11 @@ const carregarDados = (mes) => {
         const dados = JSON.parse(dadosSalvos);
         entradas = dados.entradas || [];
         despesas = dados.despesas || [];
+        poupanca = dados.poupanca || [];
     } else {
         entradas = [];
         despesas = [];
+        poupanca = [];
     }
     
     // Carregar gastos avulsos do mês
@@ -595,6 +598,7 @@ const carregarDados = (mes) => {
 
 const renderizarTudo = () => {
     renderizarEntradas();
+    renderizarPoupanca();
     renderizarDespesas();
 };
 
@@ -1954,6 +1958,131 @@ const carregarGastosAvulsos = (mes) => {
     const dados = localStorage.getItem(chave);
     gastosAvulsos = dados ? JSON.parse(dados) : [];
     renderizarGastosAvulsos();
+};
+
+// ===== POUPANÇA =====
+
+let poupanca = [];
+const formPoupanca = document.getElementById('form-poupanca');
+const tabelaPoupanca = document.getElementById('tabela-poupanca');
+
+const renderizarPoupanca = () => {
+    if (!tabelaPoupanca) return;
+    
+    tabelaPoupanca.innerHTML = '';
+    
+    // Ordenar por data (mais recente primeiro)
+    const poupancaOrdenada = [...poupanca].sort((a, b) => new Date(b.data) - new Date(a.data));
+    
+    poupancaOrdenada.forEach((item, index) => {
+        const indexOriginal = poupanca.indexOf(item);
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors';
+        
+        const tipoClass = item.tipo === 'deposito' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+        const tipoIcon = item.tipo === 'deposito' ? '💰 Depósito' : '💸 Retirada';
+        const sinalValor = item.tipo === 'deposito' ? '+' : '-';
+        
+        tr.innerHTML = `
+            <td class="p-3 text-gray-700 dark:text-gray-300">${formatarData(item.data)}</td>
+            <td class="p-3 font-medium dark:text-gray-300">${item.descricao}</td>
+            <td class="p-3 ${tipoClass} font-semibold">${tipoIcon}</td>
+            <td class="p-3 text-gray-600 dark:text-gray-400 text-sm">${item.notas || '---'}</td>
+            <td class="p-3 text-right ${tipoClass} font-bold">${sinalValor}${formatarMoeda(item.valor)}</td>
+            <td class="p-3 text-right flex gap-2 justify-end">
+                <button onclick="editarPoupanca(${indexOriginal})" class="text-blue-500 hover:text-blue-700 font-semibold text-sm">
+                    ✏️ Editar
+                </button>
+                <button onclick="excluirPoupanca(${indexOriginal})" class="text-red-500 hover:text-red-700 font-semibold text-sm">
+                    🗑️ Excluir
+                </button>
+            </td>
+        `;
+        tabelaPoupanca.appendChild(tr);
+    });
+    
+    // Calcular totais
+    const totalDepositos = poupanca.filter(p => p.tipo === 'deposito').reduce((acc, p) => acc + p.valor, 0);
+    const totalRetiradas = poupanca.filter(p => p.tipo === 'retirada').reduce((acc, p) => acc + p.valor, 0);
+    const saldoPoupanca = totalDepositos - totalRetiradas;
+    
+    // Atualizar elementos
+    const totalDepositosEl = document.getElementById('total-depositos-poupanca');
+    const totalRetiradasEl = document.getElementById('total-retiradas-poupanca');
+    const saldoPoupancaEl = document.getElementById('saldo-poupanca');
+    const totalPoupancaResumoEl = document.getElementById('total-poupanca-resumo');
+    
+    if (totalDepositosEl) totalDepositosEl.textContent = formatarMoeda(totalDepositos);
+    if (totalRetiradasEl) totalRetiradasEl.textContent = formatarMoeda(totalRetiradas);
+    if (saldoPoupancaEl) saldoPoupancaEl.textContent = formatarMoeda(saldoPoupanca);
+    if (totalPoupancaResumoEl) totalPoupancaResumoEl.textContent = formatarMoeda(saldoPoupanca);
+};
+
+if (formPoupanca) {
+    formPoupanca.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const descricao = document.getElementById('poupanca-descricao').value.trim();
+        const data = parseBRDateToISO(document.getElementById('poupanca-data').value);
+        const valor = parseFloat(document.getElementById('poupanca-valor').value);
+        const tipo = document.getElementById('poupanca-tipo').value;
+        const notas = document.getElementById('poupanca-notas').value.trim();
+        const idEdicao = document.getElementById('poupanca-id-edicao').value;
+        
+        if (!descricao || !data || valor <= 0 || !tipo) {
+            mostrarToast('Preencha todos os campos corretamente!', 'error');
+            return;
+        }
+        
+        if (idEdicao !== '') {
+            // Modo edição
+            const index = parseInt(idEdicao);
+            poupanca[index].descricao = descricao;
+            poupanca[index].data = data;
+            poupanca[index].valor = valor;
+            poupanca[index].tipo = tipo;
+            poupanca[index].notas = notas;
+            mostrarToast('Movimentação atualizada!', 'success');
+            document.getElementById('poupanca-btn-texto').textContent = 'Adicionar Movimentação';
+            document.getElementById('poupanca-id-edicao').value = '';
+        } else {
+            // Modo adição
+            poupanca.push({
+                descricao,
+                data,
+                valor,
+                tipo,
+                notas
+            });
+            const tipoTexto = tipo === 'deposito' ? 'Depósito' : 'Retirada';
+            mostrarToast(`${tipoTexto} adicionado à poupança!`, 'success');
+        }
+        
+        salvarDados();
+        renderizarPoupanca();
+        formPoupanca.reset();
+    });
+}
+
+window.editarPoupanca = (index) => {
+    const item = poupanca[index];
+    document.getElementById('poupanca-descricao').value = item.descricao;
+    document.getElementById('poupanca-data').value = formatISODateToBR(item.data);
+    document.getElementById('poupanca-valor').value = item.valor;
+    document.getElementById('poupanca-tipo').value = item.tipo;
+    document.getElementById('poupanca-notas').value = item.notas || '';
+    document.getElementById('poupanca-id-edicao').value = index;
+    document.getElementById('poupanca-btn-texto').textContent = 'Atualizar Movimentação';
+    
+    formPoupanca.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.excluirPoupanca = (index) => {
+    if (!confirm('Tem certeza que deseja excluir esta movimentação?')) return;
+    
+    poupanca.splice(index, 1);
+    salvarDados();
+    renderizarPoupanca();
+    mostrarToast('Movimentação excluída!', 'success');
 };
 
 // Nota: Autenticação agora é gerenciada pelo auth-simple.js
