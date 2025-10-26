@@ -424,3 +424,303 @@ body.dark #despesa-parcelas:disabled {
     color: #6b7280 !important;
 }
 
+/* ===== MELHORIAS DE LOGIN ===== */
+
+/* Animação de entrada da tela de login */
+#login-screen {
+    animation: fadeInLogin 0.5s ease-in;
+}
+
+@keyframes fadeInLogin {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animação de shake para erro de login */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+    20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+#login-error.shake {
+    animation: shake 0.5s;
+}
+
+/* Spinner de loading */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Botão de login com loading */
+#login-form button[type="submit"]:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ===== INDICADOR DE USUÁRIO LOGADO ===== */
+
+#user-indicator {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.user-avatar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+}
+
+/* ===== INDICADOR DE SINCRONIZAÇÃO ===== */
+
+#sync-indicator-firebase {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.sync-icon {
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.sync-success {
+    animation: checkmark 0.5s ease-in-out;
+}
+
+@keyframes checkmark {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== MELHORIAS DE RESPONSIVIDADE MOBILE ===== */
+
+@media (max-width: 640px) {
+    /* Tela de login mobile */
+    #login-screen > div {
+        margin: 0.5rem;
+        padding: 1.5rem;
+        max-width: calc(100vw - 1rem);
+    }
+    
+    /* Inputs maiores para mobile (evita zoom automático no iOS) */
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    input[type="month"],
+    select {
+        font-size: 16px !important;
+    }
+    
+    /* Header responsivo */
+    .max-w-7xl {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    /* Cards de resumo em mobile */
+    .grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Botões menores em mobile */
+    button {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    /* Modais ocupam mais espaço */
+    #modal-relatorio > div,
+    #modal-backup > div,
+    #modal-exportar > div {
+        max-width: calc(100vw - 1rem);
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+    
+    /* Tabelas scroll horizontal em mobile */
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Título menor em tablet */
+    h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    h2 {
+        font-size: 1.25rem !important;
+    }
+    
+    /* Grid de 2 colunas vira 1 */
+    .md\:grid-cols-2,
+    .md\:grid-cols-3,
+    .md\:grid-cols-5 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ===== CORREÇÃO DARK MODE - MODAL BACKUP ===== */
+
+body.dark #modal-backup .bg-blue-50 {
+    background-color: #1e3a5f !important;
+}
+
+body.dark #modal-backup .text-blue-800 {
+    color: #93c5fd !important;
+}
+
+body.dark #modal-backup .text-gray-600 {
+    color: #e5e7eb !important;
+}
+
+body.dark #modal-backup .bg-green-50 {
+    background-color: #064e3b !important;
+}
+
+body.dark #modal-backup .text-green-800 {
+    color: #86efac !important;
+}
+
+body.dark #modal-backup .border-blue-200 {
+    border-color: #3b82f6 !important;
+}
+
+body.dark #modal-backup .border-green-200 {
+    border-color: #10b981 !important;
+}
+
+/* Melhor contraste para textos no modal dark */
+body.dark #modal-backup p,
+body.dark #modal-exportar p,
+body.dark #modal-relatorio p {
+    color: #e5e7eb !important;
+}
+
+body.dark #modal-backup h3,
+body.dark #modal-exportar h3,
+body.dark #modal-relatorio h3 {
+    color: #f3f4f6 !important;
+}
+
+/* ===== CORREÇÃO OVERFLOW GRÁFICO ===== */
+
+#chart-container {
+    max-width: 100%;
+    overflow: hidden;
+    padding: 1rem;
+}
+
+#grafico-despesas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* Container do gráfico no modal */
+#modal-relatorio #chart-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    #chart-container {
+        max-width: 100%;
+        padding: 0.5rem;
+    }
+    
+    #modal-relatorio #chart-container {
+        max-width: 100%;
+    }
+}
+
+/* ===== MELHORIAS GERAIS DE UX ===== */
+
+/* Transições suaves */
+* {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Remove transição de elementos que não precisam */
+button,
+input,
+select,
+textarea {
+    transition: all 0.2s ease;
+}
+
+/* Foco visual melhorado */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Hover states melhorados */
+button:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:not(:disabled):active {
+    transform: translateY(0);
+}
+
+/* Cards com sombra suave */
+.shadow-md,
+.shadow-lg,
+.shadow-xl {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.shadow-md:hover,
+.shadow-lg:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Loading overlay para sincronização */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.loading-overlay .spinner {
+    width: 48px;
+    height: 48px;
+    border-width: 4px;
+}
+

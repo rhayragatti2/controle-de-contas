@@ -265,9 +265,29 @@ const salvarCategorias = () => {
     const chave = 'contas-firebase-categorias';
     localStorage.setItem(chave, JSON.stringify(categorias));
     
-    // Sincronizar com Firebase
+    // Sincronizar com Firebase com indicador visual
     if (window.firebaseSync && window.firebaseSync.isEnabled()) {
+        mostrarIndicadorSincronizacao(true);
         window.firebaseSync.sincronizarCategoriasParaFirebase(categorias);
+        setTimeout(() => mostrarIndicadorSincronizacao(false), 800);
+    }
+};
+
+/**
+ * Mostra/oculta indicador de sincronização
+ */
+const mostrarIndicadorSincronizacao = (mostrar) => {
+    const indicator = document.getElementById('sync-indicator-firebase');
+    const mainIndicator = document.getElementById('sync-indicator');
+    
+    if (indicator && mainIndicator) {
+        if (mostrar) {
+            indicator.classList.remove('hidden');
+            mainIndicator.textContent = '';
+        } else {
+            indicator.classList.add('hidden');
+            mainIndicator.textContent = '🌐 Sincronizado';
+        }
     }
 };
 
@@ -535,9 +555,11 @@ const salvarDados = () => {
     const chave = getChaveMes(mesAtual);
     localStorage.setItem(chave, JSON.stringify(dados));
     
-    // Sincronizar com Firebase
+    // Sincronizar com Firebase com indicador visual
     if (window.firebaseSync && window.firebaseSync.isEnabled()) {
+        mostrarIndicadorSincronizacao(true);
         window.firebaseSync.sincronizarMesParaFirebase(mesAtual, dados);
+        setTimeout(() => mostrarIndicadorSincronizacao(false), 800);
     }
 };
 

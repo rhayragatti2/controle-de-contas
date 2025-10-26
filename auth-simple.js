@@ -27,6 +27,8 @@ function verificarSessao() {
  */
 function criarSessao() {
     sessionStorage.setItem(CHAVE_SESSAO, 'true');
+    // Salvar timestamp da sessão
+    sessionStorage.setItem('contas-sessao-timestamp', Date.now().toString());
 }
 
 /**
@@ -34,6 +36,8 @@ function criarSessao() {
  */
 function encerrarSessao() {
     sessionStorage.removeItem(CHAVE_SESSAO);
+    sessionStorage.removeItem('contas-sessao-timestamp');
+    sessionStorage.removeItem('contas-usuario');
 }
 
 // ===== CONTROLE DE TELA =====
@@ -81,24 +85,38 @@ function validarCredenciais(usuario, senha) {
  * Processa o login
  */
 function realizarLogin(usuario, senha) {
-    if (validarCredenciais(usuario, senha)) {
-        criarSessao();
-        mostrarApp();
-        
-        // Carregar dados
-        if (typeof carregarCategorias === 'function') {
-            carregarCategorias();
+    mostrarLoadingLogin(true);
+    
+    // Simular pequeno delay para melhor UX
+    setTimeout(() => {
+        if (validarCredenciais(usuario, senha)) {
+            criarSessao();
+            
+            // Atualizar indicador de usuário
+            atualizarIndicadorUsuario(usuario);
+            
+            mostrarApp();
+            
+            // Carregar dados
+            if (typeof carregarCategorias === 'function') {
+                carregarCategorias();
+            }
+            if (typeof carregarDados === 'function' && mesAtual) {
+                carregarDados(mesAtual);
+            }
+            
+            // Iniciar sincronização Firebase se disponível
+            if (window.firebaseSync && window.firebaseSync.iniciarSincronizacao) {
+                window.firebaseSync.iniciarSincronizacao();
+            }
+            
+            mostrarToast('✅ Login realizado com sucesso!', 'success');
+            mostrarLoadingLogin(false);
+        } else {
+            mostrarLoadingLogin(false);
+            mostrarErroLogin();
         }
-        if (typeof carregarDados === 'function' && mesAtual) {
-            carregarDados(mesAtual);
-        }
-        
-        mostrarToast('✅ Login realizado com sucesso!', 'success');
-        return true;
-    } else {
-        mostrarErroLogin();
-        return false;
-    }
+    }, 300);
 }
 
 /**
@@ -119,17 +137,59 @@ function realizarLogout() {
 }
 
 /**
- * Mostra erro de login
+ * Mostra erro de login com animação
  */
 function mostrarErroLogin() {
     const errorDiv = document.getElementById('login-error');
     if (errorDiv) {
         errorDiv.classList.remove('hidden');
+        errorDiv.classList.add('shake');
+        
+        // Remover animação após completar
+        setTimeout(() => {
+            errorDiv.classList.remove('shake');
+        }, 500);
         
         // Ocultar após 3 segundos
         setTimeout(() => {
             errorDiv.classList.add('hidden');
         }, 3000);
+    }
+}
+
+/**
+ * Mostra loading no botão de login
+ */
+function mostrarLoadingLogin(mostrar) {
+    const btnSubmit = document.getElementById('btn-login-submit');
+    const btnText = document.getElementById('login-btn-text');
+    const spinner = document.getElementById('login-spinner');
+    
+    if (btnSubmit && btnText && spinner) {
+        if (mostrar) {
+            btnSubmit.disabled = true;
+            btnText.textContent = 'Entrando';
+            spinner.classList.remove('hidden');
+        } else {
+            btnSubmit.disabled = false;
+            btnText.textContent = '🔓 Entrar';
+            spinner.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Atualiza o indicador de usuário logado
+ */
+function atualizarIndicadorUsuario(usuario) {
+    const userInitial = document.getElementById('user-initial');
+    const userNameDisplay = document.getElementById('user-name-display');
+    
+    if (userInitial && userNameDisplay) {
+        // Pegar primeira letra do usuário em maiúscula
+        const inicial = usuario.charAt(0).toUpperCase();
+        userInitial.textContent = inicial;
+        userNameDisplay.textContent = usuario;
     }
 }
 
@@ -141,9 +201,27 @@ function mostrarErroLogin() {
 function inicializarAuth() {
     // Verificar se já tem sessão ativa
     if (verificarSessao()) {
+        // Recuperar usuário do sessionStorage se disponível
+        const usuarioSalvo = sessionStorage.getItem('contas-usuario');
+        if (usuarioSalvo) {
+            atualizarIndicadorUsuario(usuarioSalvo);
+        }
         mostrarApp();
+        
+        // Iniciar sincronização Firebase
+        if (window.firebaseSync && window.firebaseSync.iniciarSincronizacao) {
+            window.firebaseSync.iniciarSincronizacao();
+        }
     } else {
         mostrarTelaLogin();
+        
+        // Auto-foco no campo de usuário após pequeno delay
+        setTimeout(() => {
+            const inputUsuario = document.getElementById('login-usuario');
+            if (inputUsuario) {
+                inputUsuario.focus();
+            }
+        }, 100);
     }
     
     // Adicionar listener ao formulário de login
@@ -155,10 +233,13 @@ function inicializarAuth() {
             const usuario = document.getElementById('login-usuario').value.trim();
             const senha = document.getElementById('login-senha').value;
             
-            if (realizarLogin(usuario, senha)) {
-                // Limpar campos
-                loginForm.reset();
-            }
+            // Salvar usuário para recuperar depois
+            sessionStorage.setItem('contas-usuario', usuario);
+            
+            realizarLogin(usuario, senha);
+            
+            // Limpar apenas a senha por segurança
+            document.getElementById('login-senha').value = '';
         });
     }
     

@@ -101,9 +101,11 @@
                 
                 <button 
                     type="submit" 
-                    class="w-full bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg text-lg"
+                    id="btn-login-submit"
+                    class="w-full bg-blue-600 text-white px-6 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg text-lg flex items-center justify-center gap-2"
                 >
-                    🔓 Entrar
+                    <span id="login-btn-text">🔓 Entrar</span>
+                    <span id="login-spinner" class="spinner hidden"></span>
                 </button>
             </form>
             
@@ -120,11 +122,25 @@
                 <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400">
                     Controle de Contas Mensais
                 </h1>
-                <div id="status-sync" class="text-sm mt-1 text-gray-600 dark:text-gray-400">
-                    <span id="sync-indicator">🌐 Dados Compartilhados</span>
+                <div class="flex items-center gap-3 mt-2">
+                    <div id="user-indicator" class="flex items-center gap-2 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-lg shadow-sm">
+                        <div class="user-avatar w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            <span id="user-initial">A</span>
+                        </div>
+                        <span id="user-name-display" class="text-sm font-medium text-gray-700 dark:text-gray-200">admin</span>
+                    </div>
+                    <div id="status-sync" class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <span id="sync-indicator">🌐 Sincronizado</span>
+                        <span id="sync-indicator-firebase" class="hidden text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                            <svg class="sync-icon w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Salvando...
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div class="flex gap-2 items-center">
+            <div class="flex gap-2 items-center flex-wrap">
                 <!-- Área de Logout -->
                 <div id="auth-container" class="flex items-center gap-2">
                     <button id="btn-logout" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-md flex items-center gap-2">
