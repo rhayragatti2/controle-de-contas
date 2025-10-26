@@ -211,120 +211,6 @@
             <!-- Alertas serão inseridos aqui via JS -->
         </div>
 
-        <!-- Layout com Duas Colunas: Resumo Mensal e Dashboard -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Coluna Esquerda: Resumo Mensal com Accordion -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-                <!-- Cabeçalho do Accordion -->
-                <button 
-                    onclick="toggleAccordion('resumo-mensal')" 
-                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                        💰 Resumo Mensal
-                    </h2>
-                    <svg 
-                        id="resumo-mensal-icon" 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        class="h-6 w-6 text-gray-600 dark:text-gray-400 transform transition-transform duration-300" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                
-                <!-- Conteúdo do Accordion -->
-                <div id="resumo-mensal-content" class="accordion-content">
-                    <div class="p-6 border-t border-gray-200 dark:border-gray-700">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm font-light opacity-80">Total Entradas</p>
-                        <p id="total-entradas" class="text-xl font-bold text-green-600 dark:text-green-400">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm font-light opacity-80">Previsto Despesas</p>
-                        <p id="total-previsto" class="text-xl font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm font-light opacity-80">Total Pago</p>
-                        <p id="total-pago" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <p class="text-sm font-light opacity-80">Saldo Atual</p>
-                        <p id="saldo" class="text-xl font-bold text-gray-800 dark:text-gray-100">R$ 0,00</p>
-                    </div>
-                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg sm:col-span-2">
-                        <!-- Previsão Final com Tooltip Explicativo -->
-                        <p class="text-sm font-light opacity-80 flex items-center justify-center gap-1">
-                            🔮 Previsão Final
-                            <span class="group relative inline-flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 dark:text-blue-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span class="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-3 px-4 text-left shadow-xl z-50">
-                                    <strong class="text-sm">Saldo previsto no fim do mês:</strong><br>
-                                    Total Entradas - Total Pago - Despesas Pendentes<br><br>
-                                    <span style="color: #6ee7b7;">🟢 Verde:</span> Sobra dinheiro<br>
-                                    <span style="color: #fca5a5;">🔴 Vermelho:</span> Vai faltar<br>
-                                    <span style="color: #67e8f9;">🔵 Ciano:</span> Zero a zero
-                                    <span class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></span>
-                                </span>
-                            </span>
-                        </p>
-                        <p id="previsao-saldo" class="text-xl font-bold text-cyan-600 dark:text-cyan-300">R$ 0,00</p>
-                    </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Coluna Direita: Dashboard Expandido com Accordion -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-                <!-- Cabeçalho do Accordion -->
-                <button 
-                    onclick="toggleAccordion('dashboard-stats')" 
-                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                        📊 Dashboard de Estatísticas
-                    </h2>
-                    <svg 
-                        id="dashboard-stats-icon" 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        class="h-6 w-6 text-gray-600 dark:text-gray-400 transform transition-transform duration-300" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                
-                <!-- Conteúdo do Accordion -->
-                <div id="dashboard-stats-content" class="accordion-content">
-                    <div class="p-4 flex flex-col gap-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💰 Maior Despesa</h3>
-                            <p id="maior-despesa" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
-                            <p id="maior-despesa-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">📊 Categoria Top</h3>
-                            <p id="categoria-top" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
-                            <p id="categoria-top-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💵 Média Diária</h3>
-                            <p id="media-diaria" class="text-lg font-bold text-gray-800 dark:text-white">R$ 0,00</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Gastos por dia</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Gerenciar Categorias com Accordion -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-8 overflow-hidden">
             <!-- Cabeçalho do Accordion -->
@@ -745,6 +631,120 @@
                         </div>
                         <!-- Fim Tab Content: Gastos Avulsos -->
                         
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layout com Duas Colunas: Resumo Mensal e Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mt-8">
+            <!-- Coluna Esquerda: Resumo Mensal com Accordion -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+                <!-- Cabeçalho do Accordion -->
+                <button 
+                    onclick="toggleAccordion('resumo-mensal')" 
+                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                        💰 Resumo Mensal
+                    </h2>
+                    <svg 
+                        id="resumo-mensal-icon" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        class="h-6 w-6 text-gray-600 dark:text-gray-400 transform transition-transform duration-300" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                
+                <!-- Conteúdo do Accordion -->
+                <div id="resumo-mensal-content" class="accordion-content">
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-light opacity-80">Total Entradas</p>
+                        <p id="total-entradas" class="text-xl font-bold text-green-600 dark:text-green-400">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-light opacity-80">Previsto Despesas</p>
+                        <p id="total-previsto" class="text-xl font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-light opacity-80">Total Pago</p>
+                        <p id="total-pago" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <p class="text-sm font-light opacity-80">Saldo Atual</p>
+                        <p id="saldo" class="text-xl font-bold text-gray-800 dark:text-gray-100">R$ 0,00</p>
+                    </div>
+                    <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg sm:col-span-2">
+                        <!-- Previsão Final com Tooltip Explicativo -->
+                        <p class="text-sm font-light opacity-80 flex items-center justify-center gap-1">
+                            🔮 Previsão Final
+                            <span class="group relative inline-flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 dark:text-blue-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span class="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg py-3 px-4 text-left shadow-xl z-50">
+                                    <strong class="text-sm">Saldo previsto no fim do mês:</strong><br>
+                                    Total Entradas - Total Pago - Despesas Pendentes<br><br>
+                                    <span style="color: #6ee7b7;">🟢 Verde:</span> Sobra dinheiro<br>
+                                    <span style="color: #fca5a5;">🔴 Vermelho:</span> Vai faltar<br>
+                                    <span style="color: #67e8f9;">🔵 Ciano:</span> Zero a zero
+                                    <span class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></span>
+                                </span>
+                            </span>
+                        </p>
+                        <p id="previsao-saldo" class="text-xl font-bold text-cyan-600 dark:text-cyan-300">R$ 0,00</p>
+                    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna Direita: Dashboard Expandido com Accordion -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+                <!-- Cabeçalho do Accordion -->
+                <button 
+                    onclick="toggleAccordion('dashboard-stats')" 
+                    class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                        📊 Dashboard de Estatísticas
+                    </h2>
+                    <svg 
+                        id="dashboard-stats-icon" 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        class="h-6 w-6 text-gray-600 dark:text-gray-400 transform transition-transform duration-300" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                
+                <!-- Conteúdo do Accordion -->
+                <div id="dashboard-stats-content" class="accordion-content">
+                    <div class="p-4 flex flex-col gap-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💰 Maior Despesa</h3>
+                            <p id="maior-despesa" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
+                            <p id="maior-despesa-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">📊 Categoria Top</h3>
+                            <p id="categoria-top" class="text-lg font-bold text-gray-800 dark:text-white">---</p>
+                            <p id="categoria-top-valor" class="text-sm text-gray-500 dark:text-gray-400">---</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">💵 Média Diária</h3>
+                            <p id="media-diaria" class="text-lg font-bold text-gray-800 dark:text-white">R$ 0,00</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Gastos por dia</p>
+                        </div>
                     </div>
                 </div>
             </div>
