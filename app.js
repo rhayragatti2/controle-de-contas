@@ -3085,3 +3085,178 @@ window.deletarConta = (index) => {
     }
 };
 
+// ===== MENU DRAWER/LAUNCHPAD =====
+
+const abrirMenuDrawer = () => {
+    const drawer = document.getElementById('menu-drawer');
+    const sidebar = document.getElementById('menu-sidebar');
+    
+    drawer.classList.remove('hidden');
+    // Delay para animação
+    setTimeout(() => {
+        sidebar.classList.remove('-translate-x-full');
+    }, 10);
+};
+
+const fecharMenuDrawer = () => {
+    const drawer = document.getElementById('menu-drawer');
+    const sidebar = document.getElementById('menu-sidebar');
+    
+    sidebar.classList.add('-translate-x-full');
+    // Delay para completar animação antes de esconder
+    setTimeout(() => {
+        drawer.classList.add('hidden');
+    }, 300);
+};
+
+// Event Listeners para Menu
+document.getElementById('btn-menu-hamburguer').addEventListener('click', abrirMenuDrawer);
+document.getElementById('btn-fechar-menu').addEventListener('click', fecharMenuDrawer);
+document.getElementById('menu-overlay').addEventListener('click', fecharMenuDrawer);
+
+// Event Listeners para Cards do Launchpad (fechar menu ao clicar)
+document.querySelectorAll('.launchpad-card').forEach(card => {
+    card.addEventListener('click', () => {
+        fecharMenuDrawer();
+    });
+});
+
+// ===== CALENDÁRIO =====
+
+let calendarioMesAtual = new Date();
+
+window.abrirCalendario = () => {
+    document.getElementById('modal-calendario').classList.remove('hidden');
+    calendarioMesAtual = new Date(mesAtual + '-01');
+    renderizarCalendario();
+};
+
+window.fecharCalendario = (event) => {
+    if (!event || event.target.id === 'modal-calendario') {
+        document.getElementById('modal-calendario').classList.add('hidden');
+    }
+};
+
+const renderizarCalendario = () => {
+    const ano = calendarioMesAtual.getFullYear();
+    const mes = calendarioMesAtual.getMonth();
+    
+    // Atualizar título
+    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    document.getElementById('calendario-mes-ano').textContent = `${meses[mes]} ${ano}`;
+    
+    // Primeiro dia do mês
+    const primeiroDia = new Date(ano, mes, 1);
+    const ultimoDia = new Date(ano, mes + 1, 0);
+    const diasNoMes = ultimoDia.getDate();
+    const diaSemanaInicio = primeiroDia.getDay();
+    
+    // Montar chave do mês para buscar dados
+    const mesKey = `${ano}-${String(mes + 1).padStart(2, '0')}`;
+    
+    // Buscar entradas e despesas do mês
+    const chave = getChaveMes(mesKey);
+    const dadosSalvos = localStorage.getItem(chave);
+    let dados = { entradas: [], despesas: [] };
+    if (dadosSalvos) {
+        try {
+            dados = JSON.parse(dadosSalvos);
+        } catch (e) {
+            console.error('Erro ao carregar dados do calendário:', e);
+        }
+    }
+    
+    // Criar grid do calendário
+    const grid = document.getElementById('calendario-grid');
+    
+    // Limpar grid (manter cabeçalho)
+    while (grid.children.length > 7) {
+        grid.removeChild(grid.lastChild);
+    }
+    
+    // Preencher dias vazios antes do início do mês
+    for (let i = 0; i < diaSemanaInicio; i++) {
+        const diaVazio = document.createElement('div');
+        diaVazio.className = 'p-2';
+        grid.appendChild(diaVazio);
+    }
+    
+    // Data atual para comparação
+    const hoje = new Date();
+    const hojeStr = hoje.toISOString().split('T')[0];
+    
+    // Preencher dias do mês
+    for (let dia = 1; dia <= diasNoMes; dia++) {
+        const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+        
+        // Verificar se há entradas ou despesas neste dia
+        const entradasDia = dados.entradas.filter(e => e.data === dataStr);
+        const despesasDia = dados.despesas.filter(d => d.vencimento === dataStr || d.dataPagamento === dataStr);
+        
+        const totalEntradas = entradasDia.reduce((acc, e) => acc + e.valor, 0);
+        const totalDespesas = despesasDia.reduce((acc, d) => acc + (d.pago || d.previsto), 0);
+        
+        const diaDiv = document.createElement('div');
+        const ehHoje = dataStr === hojeStr;
+        
+        diaDiv.className = `p-2 min-h-[80px] border rounded-lg ${
+            ehHoje ? 'bg-blue-100 dark:bg-blue-900 border-blue-500' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+        } hover:shadow-lg transition-shadow cursor-pointer`;
+        
+        diaDiv.innerHTML = `
+            <div class="text-center font-bold ${ehHoje ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'} mb-1">
+                ${dia}
+            </div>
+            ${totalEntradas > 0 ? `<div class="text-xs bg-green-500 text-white px-1 py-0.5 rounded mb-1 text-center">+${formatarMoeda(totalEntradas)}</div>` : ''}
+            ${totalDespesas > 0 ? `<div class="text-xs bg-red-500 text-white px-1 py-0.5 rounded text-center">-${formatarMoeda(totalDespesas)}</div>` : ''}
+        `;
+        
+        // Adicionar evento de clique para mostrar detalhes
+        if (entradasDia.length > 0 || despesasDia.length > 0) {
+            diaDiv.addEventListener('click', () => {
+                mostrarDetalhesDia(dataStr, entradasDia, despesasDia);
+            });
+        }
+        
+        grid.appendChild(diaDiv);
+    }
+};
+
+const mostrarDetalhesDia = (data, entradas, despesas) => {
+    const dataFormatada = formatarData(data);
+    let detalhes = `📅 ${dataFormatada}\n\n`;
+    
+    if (entradas.length > 0) {
+        detalhes += '💰 ENTRADAS:\n';
+        entradas.forEach(e => {
+            detalhes += `  • ${e.descricao}: ${formatarMoeda(e.valor)}\n`;
+        });
+        detalhes += '\n';
+    }
+    
+    if (despesas.length > 0) {
+        detalhes += '💸 DESPESAS:\n';
+        despesas.forEach(d => {
+            const valor = d.pago > 0 ? d.pago : d.previsto;
+            const status = d.pago > 0 ? '✓' : '○';
+            detalhes += `  ${status} ${d.descricao}: ${formatarMoeda(valor)}\n`;
+        });
+    }
+    
+    alert(detalhes);
+};
+
+// Event Listeners do Calendário
+document.getElementById('btn-calendario').addEventListener('click', abrirCalendario);
+
+document.getElementById('btn-mes-anterior').addEventListener('click', () => {
+    calendarioMesAtual.setMonth(calendarioMesAtual.getMonth() - 1);
+    renderizarCalendario();
+});
+
+document.getElementById('btn-mes-proximo').addEventListener('click', () => {
+    calendarioMesAtual.setMonth(calendarioMesAtual.getMonth() + 1);
+    renderizarCalendario();
+});
+
