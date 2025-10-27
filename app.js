@@ -975,8 +975,7 @@ window.salvarEdicaoInlineEntrada = (index) => {
     entradas[index] = { data, descricao, valor, categoria, observacoes };
     estadoEdicaoEntrada = -1;
     salvarDados();
-    renderizarEntradas();
-    atualizarResumo();
+    renderizarTudo();
     mostrarToast('Entrada atualizada!', 'success');
 };
 
@@ -1020,8 +1019,8 @@ formEntrada.addEventListener('submit', (e) => {
 
     console.log('💾 Chamando salvarDados()...');
     salvarDados();
-    console.log('🎨 Chamando renderizarEntradas()...');
-    renderizarEntradas();
+    console.log('🎨 Atualizando toda a aplicação...');
+    renderizarTudo();
     console.log('✅ Processo de entrada completo');
     formEntrada.reset();
 });
@@ -1031,7 +1030,7 @@ window.excluirEntrada = (index) => {
 
     entradas.splice(index, 1);
     salvarDados();
-    renderizarEntradas();
+    renderizarTudo();
     mostrarToast('Entrada excluída!', 'success');
 };
 
@@ -1069,7 +1068,7 @@ window.salvarPagamento = (index) => {
 
     salvarDados();
     estadoEdicaoDespesa = -1;
-    renderizarDespesas();
+    renderizarTudo();
     verificarVencimentos();
     mostrarToast('Pagamento registrado!', 'success');
 };
@@ -1101,8 +1100,7 @@ window.salvarEdicaoInlineDespesa = (index) => {
 
     estadoEdicaoCompletaDespesa = -1;
     salvarDados();
-    renderizarDespesas();
-    atualizarResumo();
+    renderizarTudo();
     verificarVencimentos();
     mostrarToast('Despesa atualizada!', 'success');
 };
@@ -1323,7 +1321,7 @@ formDespesa.addEventListener('submit', (e) => {
         document.getElementById('despesa-btn-texto').textContent = 'Adicionar Despesa (Planejamento)';
         document.getElementById('despesa-id-edicao').value = '';
         salvarDados();
-        renderizarDespesas();
+        renderizarTudo();
     } else {
         // Modo adição
         if (parcelada && parcelas > 0) {
@@ -1369,7 +1367,7 @@ formDespesa.addEventListener('submit', (e) => {
             }
             
             salvarDados();
-            renderizarDespesas();
+            renderizarTudo();
         }
     }
 
@@ -1385,7 +1383,7 @@ window.excluirDespesa = (index) => {
 
     despesas.splice(index, 1);
     salvarDados();
-    renderizarDespesas();
+    renderizarTudo();
     verificarVencimentos();
     mostrarToast('Despesa excluída!', 'success');
 };
@@ -2410,15 +2408,12 @@ window.confirmarGastoAvulso = () => {
     // Salvar no localStorage
     salvarGastosAvulsos();
     
-    // Renderizar tabela
-    renderizarGastosAvulsos();
+    // Atualizar toda a aplicação
+    renderizarTudo();
     
     // Limpar campos
     document.getElementById('input-gasto-natural').value = '';
     document.getElementById('preview-gasto-avulso').classList.add('hidden');
-    
-    // Atualizar resumo (somar gastos avulsos ao total pago)
-    atualizarResumo();
 };
 
 // Cancelar preview
@@ -2547,8 +2542,7 @@ window.excluirGastoAvulso = (gastoId) => {
     if (index !== -1) {
     gastosAvulsos.splice(index, 1);
     salvarGastosAvulsos();
-    renderizarGastosAvulsos();
-    atualizarResumo();
+        renderizarTudo();
     mostrarToast('Gasto excluído!', 'success');
     }
 };
