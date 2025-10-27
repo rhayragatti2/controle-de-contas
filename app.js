@@ -687,6 +687,9 @@ const carregarDados = (mes) => {
         gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mes);
     }
     
+    // Adicionar IDs aos gastos avulsos antigos que não têm ID
+    adicionarIDsGastosAvulsos();
+    
     // Poupança é GLOBAL, não precisa carregar por mês
     // (será carregada uma única vez no início)
 
@@ -1795,7 +1798,7 @@ if (btnDarkMode) {
 // ===== GASTOS AVULSOS COM LINGUAGEM NATURAL =====
 
 let gastosAvulsos = [];
-let estadoEdicaoGastoAvulso = -1;
+let estadoEdicaoGastoAvulso = null;
 
 // Trocar entre tabs
 window.trocarTabDespesa = (tab) => {
@@ -2020,8 +2023,13 @@ window.confirmarGastoAvulso = () => {
         return;
     }
     
-    // Criar ou atualizar gasto avulso
-    const gastoAvulso = {
+    // Verificar se está editando ou adicionando
+    if (estadoEdicaoGastoAvulso !== null) {
+        // Modo edição - encontrar e atualizar gasto existente pelo ID
+        const index = gastosAvulsos.findIndex(g => g.id === estadoEdicaoGastoAvulso);
+        if (index !== -1) {
+            gastosAvulsos[index] = {
+                id: estadoEdicaoGastoAvulso,
         pessoa,
         descricao: local,
         formaPagamento,
@@ -2030,17 +2038,23 @@ window.confirmarGastoAvulso = () => {
         categoria: categoria || 'Sem categoria',
         mes: mesAtual
     };
-    
-    // Verificar se está editando ou adicionando
-    if (estadoEdicaoGastoAvulso !== -1) {
-        // Modo edição - atualizar gasto existente
-        gastosAvulsos[estadoEdicaoGastoAvulso] = gastoAvulso;
-        mostrarToast('✅ Gasto avulso atualizado!', 'success');
-        estadoEdicaoGastoAvulso = -1;
+            mostrarToast('✅ Gasto avulso atualizado!', 'success');
+        }
+        estadoEdicaoGastoAvulso = null;
     } else {
-        // Modo adição - adicionar novo gasto
-        if (!gastosAvulsos) gastosAvulsos = [];
-        gastosAvulsos.push(gastoAvulso);
+        // Modo adição - adicionar novo gasto com ID único
+    if (!gastosAvulsos) gastosAvulsos = [];
+        const novoGasto = {
+            id: Date.now() + Math.random(), // ID único baseado em timestamp + random
+            pessoa,
+            descricao: local,
+            formaPagamento,
+            data: parseBRDateToISO(data),
+            valor,
+            categoria: categoria || 'Sem categoria',
+            mes: mesAtual
+        };
+        gastosAvulsos.push(novoGasto);
         mostrarToast('💰 Gasto avulso adicionado!', 'success');
     }
     
@@ -2062,13 +2076,18 @@ window.confirmarGastoAvulso = () => {
 window.cancelarGastoAvulso = () => {
     document.getElementById('preview-gasto-avulso').classList.add('hidden');
     document.getElementById('input-gasto-natural').value = '';
-    estadoEdicaoGastoAvulso = -1;
+    estadoEdicaoGastoAvulso = null;
 };
 
 // Editar gasto avulso
-window.editarGastoAvulso = (index) => {
-    const gasto = gastosAvulsos[index];
-    estadoEdicaoGastoAvulso = index;
+window.editarGastoAvulso = (gastoId) => {
+    const gasto = gastosAvulsos.find(g => g.id === gastoId);
+    if (!gasto) {
+        mostrarToast('Gasto não encontrado!', 'error');
+        return;
+    }
+    
+    estadoEdicaoGastoAvulso = gastoId;
     
     // Preencher o preview com os dados do gasto
     document.getElementById('preview-pessoa').value = gasto.pessoa;
@@ -2141,14 +2160,14 @@ const renderizarGastosAvulsos = () => {
             <td class="p-3 text-right text-red-600 dark:text-red-400 font-bold">${formatarMoeda(gasto.valor)}</td>
             <td class="p-3 text-right">
                 <div class="flex gap-2 justify-end">
-                    <button onclick="editarGastoAvulso(${gastosAvulsos.indexOf(gasto)})" 
+                    <button onclick="editarGastoAvulso(${gasto.id})" 
                             class="text-blue-500 hover:text-blue-700 font-semibold text-sm">
                         ✏️ Editar
                     </button>
-                    <button onclick="excluirGastoAvulso(${gastosAvulsos.indexOf(gasto)})" 
-                            class="text-red-500 hover:text-red-700 font-semibold text-sm">
-                        🗑️ Excluir
-                    </button>
+                <button onclick="excluirGastoAvulso(${gasto.id})" 
+                        class="text-red-500 hover:text-red-700 font-semibold text-sm">
+                    🗑️ Excluir
+                </button>
                 </div>
             </td>
         `;
@@ -2165,14 +2184,17 @@ const renderizarGastosAvulsos = () => {
 };
 
 // Excluir gasto avulso
-window.excluirGastoAvulso = (index) => {
+window.excluirGastoAvulso = (gastoId) => {
     if (!confirm('Tem certeza que deseja excluir este gasto?')) return;
     
+    const index = gastosAvulsos.findIndex(g => g.id === gastoId);
+    if (index !== -1) {
     gastosAvulsos.splice(index, 1);
     salvarGastosAvulsos();
     renderizarGastosAvulsos();
     atualizarResumo();
     mostrarToast('Gasto excluído!', 'success');
+    }
 };
 
 // Salvar gastos avulsos (agora integrado com salvarDados)
@@ -2186,6 +2208,27 @@ const carregarGastosAvulsos = (mes) => {
     // Os gastos avulsos agora são carregados junto com entradas e despesas em carregarDados
     // Esta função é mantida para compatibilidade, mas apenas renderiza
     renderizarGastosAvulsos();
+};
+
+// Adicionar IDs únicos a gastos avulsos antigos
+const adicionarIDsGastosAvulsos = () => {
+    let houveAlteracao = false;
+    
+    gastosAvulsos = gastosAvulsos.map(gasto => {
+        if (!gasto.id) {
+            houveAlteracao = true;
+            return {
+                ...gasto,
+                id: Date.now() + Math.random()
+            };
+        }
+        return gasto;
+    });
+    
+    if (houveAlteracao) {
+        console.log('✅ IDs adicionados aos gastos avulsos antigos');
+        salvarDados();
+    }
 };
 
 // ===== MIGRAÇÃO E SINCRONIZAÇÃO DE GASTOS AVULSOS =====
