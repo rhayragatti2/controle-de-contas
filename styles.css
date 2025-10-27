@@ -884,7 +884,15 @@ body.dark #modal-relatorio #chart-container {
     height: 0 !important;
     opacity: 0 !important;
     padding: 0 !important;
+    margin: 0 !important;
     overflow: hidden !important;
+    visibility: hidden !important;
+    border: none !important;
+}
+
+/* Esconder todos os elementos dentro do accordion colapsado */
+.accordion-collapsed * {
+    display: none !important;
 }
 
 .accordion-expanded {
@@ -893,6 +901,7 @@ body.dark #modal-relatorio #chart-container {
     height: auto !important;
     opacity: 1 !important;
     overflow: visible !important;
+    visibility: visible !important;
 }
 
 /* Forçar todos os elementos dentro do accordion a serem visíveis */

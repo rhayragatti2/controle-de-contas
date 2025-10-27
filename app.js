@@ -715,7 +715,7 @@ const atualizarResumo = () => {
     const totalPrevistoFixos = despesas.reduce((acc, item) => acc + item.previsto, 0);
     const totalPagoFixos = despesas.reduce((acc, item) => acc + item.pago, 0);
     
-    // Gastos Avulsos
+    // Gastos Avulsos (não planejados - entra direto no pago)
     let totalGastosAvulsos = 0;
     if (gastosAvulsos && gastosAvulsos.length > 0) {
         const gastosMes = gastosAvulsos.filter(g => g.mes === mesAtual);
@@ -723,8 +723,8 @@ const atualizarResumo = () => {
     }
     
     // Total Geral de Despesas
-    const totalPrevisto = totalPrevistoFixos + totalGastosAvulsos; // Avulsos conta como previsto também
-    const totalPago = totalPagoFixos + totalGastosAvulsos;
+    const totalPrevisto = totalPrevistoFixos; // Gastos avulsos NÃO entram no previsto
+    const totalPago = totalPagoFixos + totalGastosAvulsos; // Gastos avulsos SÓ entram no pago
     
     // 3. SALDO DISPONÍVEL (Entradas - Despesas Pagas)
     const saldoDisponivel = totalEntradas - totalPago;
