@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="102" fill="#1e40af"/>
+  
+  <!-- Coin/Money Symbol -->
+  <circle cx="256" cy="256" r="165" fill="#60a5fa" stroke="#ffffff" stroke-width="16"/>
+  
+  <!-- R$ Symbol -->
+  <text x="256" y="317" font-family="Arial, sans-serif" font-size="180" font-weight="bold" fill="#ffffff" text-anchor="middle">R$</text>
+  
+  <!-- Small chart bars at bottom -->
+  <rect x="102" y="358" width="42" height="80" fill="#34d399" rx="10"/>
+  <rect x="165" y="332" width="42" height="106" fill="#34d399" rx="10"/>
+  <rect x="228" y="305" width="42" height="133" fill="#34d399" rx="10"/>
+</svg>
+
