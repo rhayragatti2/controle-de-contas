@@ -2423,5 +2423,203 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnGerarRecorrentes) {
         btnGerarRecorrentes.addEventListener('click', gerarDespesasRecorrentes);
     }
+    
+    // Conecta o botão de contas bancárias
+    const btnContasBancarias = document.getElementById('btn-contas-bancarias');
+    if (btnContasBancarias) {
+        btnContasBancarias.addEventListener('click', abrirModalContasBancarias);
+    }
 });
+
+// ============================================
+// SISTEMA DE CONTAS BANCÁRIAS
+// ============================================
+
+let contasBancarias = [];
+let estadoEdicaoConta = -1;
+const CHAVE_CONTAS_BANCARIAS = 'contas-bancarias';
+
+// ===== FUNÇÕES DO MODAL =====
+
+window.abrirModalContasBancarias = () => {
+    carregarContasBancarias();
+    renderizarContasBancarias();
+    document.getElementById('modal-contas-bancarias').classList.remove('hidden');
+};
+
+window.fecharModalContasBancarias = (event = null) => {
+    if (event && event.target.id !== 'modal-contas-bancarias') return;
+    document.getElementById('modal-contas-bancarias').classList.add('hidden');
+    cancelarEdicaoConta();
+};
+
+// ===== CARREGAR E SALVAR =====
+
+const carregarContasBancarias = () => {
+    const dados = localStorage.getItem(CHAVE_CONTAS_BANCARIAS);
+    if (dados) {
+        try {
+            contasBancarias = JSON.parse(dados);
+        } catch (e) {
+            console.error('Erro ao carregar contas bancárias:', e);
+            contasBancarias = [];
+        }
+    } else {
+        contasBancarias = [];
+    }
+};
+
+const salvarContasBancarias = () => {
+    localStorage.setItem(CHAVE_CONTAS_BANCARIAS, JSON.stringify(contasBancarias));
+};
+
+// ===== RENDERIZAR =====
+
+const renderizarContasBancarias = () => {
+    const lista = document.getElementById('lista-contas-bancarias');
+    lista.innerHTML = '';
+    
+    if (contasBancarias.length === 0) {
+        lista.innerHTML = `
+            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                <p class="text-lg font-medium">Nenhuma conta cadastrada</p>
+                <p class="text-sm">Adicione sua primeira conta bancária acima</p>
+            </div>
+        `;
+        atualizarTotalContas();
+        return;
+    }
+    
+    contasBancarias.forEach((conta, index) => {
+        const saldoClass = conta.saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+        const digitosTexto = conta.ultimosDigitos ? `•••• ${conta.ultimosDigitos}` : '';
+        
+        const div = document.createElement('div');
+        div.className = 'bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md border-l-4 border-yellow-500 transition-all hover:shadow-lg';
+        div.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <h4 class="text-lg font-bold text-gray-800 dark:text-white">${conta.banco}</h4>
+                        ${digitosTexto ? `<span class="text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">${digitosTexto}</span>` : ''}
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="text-sm text-gray-600 dark:text-gray-300">
+                            <strong>Tipo:</strong> ${conta.tipo}
+                        </span>
+                        <span class="text-xl font-bold ${saldoClass}">
+                            ${formatarMoeda(conta.saldo)}
+                        </span>
+                        ${conta.observacao ? `
+                            <span class="text-xs text-gray-500 dark:text-gray-400 italic mt-1">
+                                ${conta.observacao}
+                            </span>
+                        ` : ''}
+                    </div>
+                </div>
+                <div class="flex gap-2 ml-4">
+                    <button onclick="editarConta(${index})" class="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                        ✏️ Editar
+                    </button>
+                    <button onclick="deletarConta(${index})" class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm">
+                        🗑️ Excluir
+                    </button>
+                </div>
+            </div>
+        `;
+        lista.appendChild(div);
+    });
+    
+    atualizarTotalContas();
+};
+
+const atualizarTotalContas = () => {
+    const total = contasBancarias.reduce((acc, conta) => acc + conta.saldo, 0);
+    document.getElementById('total-contas-bancarias').textContent = formatarMoeda(total);
+};
+
+// ===== ADICIONAR/EDITAR =====
+
+const formContaBancaria = document.getElementById('form-conta-bancaria');
+
+formContaBancaria.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const banco = document.getElementById('conta-banco').value.trim();
+    const tipo = document.getElementById('conta-tipo').value.trim();
+    const saldo = parseFloat(document.getElementById('conta-saldo').value) || 0;
+    const ultimosDigitos = document.getElementById('conta-ultimos-digitos').value.trim();
+    const observacao = document.getElementById('conta-observacao').value.trim();
+    
+    if (!banco || !tipo) {
+        mostrarToast('Preencha os campos obrigatórios!', 'error');
+        return;
+    }
+    
+    const novaConta = {
+        banco,
+        tipo,
+        saldo,
+        ultimosDigitos,
+        observacao,
+        dataCriacao: estadoEdicaoConta === -1 ? new Date().toISOString() : contasBancarias[estadoEdicaoConta].dataCriacao,
+        dataAtualizacao: new Date().toISOString()
+    };
+    
+    if (estadoEdicaoConta === -1) {
+        // Adicionar nova conta
+        contasBancarias.push(novaConta);
+        mostrarToast('Conta adicionada com sucesso!', 'success');
+    } else {
+        // Editar conta existente
+        contasBancarias[estadoEdicaoConta] = novaConta;
+        mostrarToast('Conta atualizada com sucesso!', 'success');
+        estadoEdicaoConta = -1;
+    }
+    
+    salvarContasBancarias();
+    renderizarContasBancarias();
+    formContaBancaria.reset();
+    cancelarEdicaoConta();
+});
+
+window.editarConta = (index) => {
+    const conta = contasBancarias[index];
+    estadoEdicaoConta = index;
+    
+    document.getElementById('conta-banco').value = conta.banco;
+    document.getElementById('conta-tipo').value = conta.tipo;
+    document.getElementById('conta-saldo').value = conta.saldo;
+    document.getElementById('conta-ultimos-digitos').value = conta.ultimosDigitos || '';
+    document.getElementById('conta-observacao').value = conta.observacao || '';
+    document.getElementById('conta-id-edicao').value = index;
+    
+    document.getElementById('titulo-form-conta').textContent = 'Editar Conta';
+    document.getElementById('btn-texto-conta').textContent = 'Salvar Alterações';
+    document.getElementById('btn-cancelar-conta').classList.remove('hidden');
+    
+    // Scroll para o formulário
+    document.getElementById('form-conta-bancaria').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
+window.cancelarEdicaoConta = () => {
+    estadoEdicaoConta = -1;
+    formContaBancaria.reset();
+    document.getElementById('titulo-form-conta').textContent = 'Adicionar Nova Conta';
+    document.getElementById('btn-texto-conta').textContent = 'Adicionar Conta';
+    document.getElementById('btn-cancelar-conta').classList.add('hidden');
+};
+
+window.deletarConta = (index) => {
+    const conta = contasBancarias[index];
+    if (confirm(`Tem certeza que deseja excluir a conta "${conta.banco}"?\n\nEsta ação não pode ser desfeita.`)) {
+        contasBancarias.splice(index, 1);
+        salvarContasBancarias();
+        renderizarContasBancarias();
+        mostrarToast('Conta excluída com sucesso!', 'success');
+    }
+};
 

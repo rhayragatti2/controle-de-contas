@@ -190,6 +190,13 @@
                         </svg>
                     </button>
                     
+                    <!-- Botão Contas Bancárias (Apenas Ícone) -->
+                    <button id="btn-contas-bancarias" class="bg-yellow-600 text-white p-2.5 rounded-lg hover:bg-yellow-700 transition-colors shadow-md" title="Contas Bancárias">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                    </button>
+                    
                     <!-- Botão Backup (Apenas Ícone) -->
                     <button id="btn-backup" class="bg-gray-600 text-white p-2.5 rounded-lg hover:bg-gray-700 transition-colors shadow-md" title="Backup e Restauração">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -956,6 +963,56 @@
                     <p class="text-sm text-gray-600">
                         <strong>Mês selecionado:</strong> <span id="mes-exportacao"></span>
                     </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Contas Bancárias -->
+    <div id="modal-contas-bancarias" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" onclick="fecharModalContasBancarias(event)">
+        <div class="relative bg-white dark:bg-gray-800 max-w-4xl mx-auto my-12 p-8 rounded-xl shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="fecharModalContasBancarias()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white border-b dark:border-gray-700 pb-3 mb-6">💳 Contas Bancárias</h2>
+            
+            <div class="mb-6 bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                <p class="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>ℹ️ Informação:</strong> Este é um controle paralelo apenas para acompanhamento. Os valores aqui não afetam o dashboard principal.
+                </p>
+            </div>
+            
+            <!-- Formulário para Adicionar/Editar Conta -->
+            <form id="form-conta-bancaria" class="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
+                    <span id="titulo-form-conta">Adicionar Nova Conta</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="conta-banco" placeholder="Nome do Banco (ex: Nubank)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" required>
+                    <input type="text" id="conta-tipo" placeholder="Tipo (ex: Corrente, Poupança)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" required>
+                    <input type="number" id="conta-saldo" placeholder="Saldo (R$)" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" required>
+                    <input type="text" id="conta-ultimos-digitos" placeholder="Últimos 4 dígitos (opcional)" maxlength="4" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500">
+                </div>
+                <textarea id="conta-observacao" placeholder="Observações (opcional)" class="w-full mt-4 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" rows="2"></textarea>
+                <input type="hidden" id="conta-id-edicao">
+                <div class="flex gap-3 mt-4">
+                    <button type="submit" class="flex-1 bg-yellow-600 text-white p-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors">
+                        <span id="btn-texto-conta">Adicionar Conta</span>
+                    </button>
+                    <button type="button" onclick="cancelarEdicaoConta()" id="btn-cancelar-conta" class="hidden bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-500 transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Lista de Contas Bancárias -->
+            <div class="space-y-3" id="lista-contas-bancarias">
+                <!-- Contas serão adicionadas aqui via JavaScript -->
+            </div>
+            
+            <!-- Resumo Total -->
+            <div class="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900 dark:to-amber-900 rounded-lg border-2 border-yellow-200 dark:border-yellow-700">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-semibold text-gray-800 dark:text-gray-200">Saldo Total (todas as contas)</span>
+                    <span id="total-contas-bancarias" class="text-2xl font-bold text-yellow-700 dark:text-yellow-300">R$ 0,00</span>
                 </div>
             </div>
         </div>
