@@ -1732,6 +1732,36 @@ window.fecharModalBackup = (event = null) => {
     document.getElementById('modal-backup').classList.add('hidden');
 };
 
+// ===== RECUPERAÇÃO DE DADOS =====
+
+/**
+ * Função para recuperar dados do localStorage
+ * Útil caso os dados pareçam ter sido perdidos
+ */
+window.verificarDadosLocalStorage = () => {
+    console.log('🔍 Verificando dados no localStorage...');
+    const chaves = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('contas-firebase-')) {
+            chaves.push(key);
+        }
+    }
+    
+    console.log(`📦 Encontradas ${chaves.length} chaves de dados:`, chaves);
+    
+    chaves.forEach(chave => {
+        try {
+            const dados = JSON.parse(localStorage.getItem(chave));
+            console.log(`\n📋 ${chave}:`, dados);
+        } catch (e) {
+            console.error(`❌ Erro ao ler ${chave}:`, e);
+        }
+    });
+    
+    return chaves;
+};
+
 // ===== INICIALIZAÇÃO =====
 
 seletorMes.addEventListener('change', (e) => {
@@ -1765,6 +1795,7 @@ if (btnDarkMode) {
 // ===== GASTOS AVULSOS COM LINGUAGEM NATURAL =====
 
 let gastosAvulsos = [];
+let estadoEdicaoGastoAvulso = -1;
 
 // Trocar entre tabs
 window.trocarTabDespesa = (tab) => {
@@ -1989,7 +2020,7 @@ window.confirmarGastoAvulso = () => {
         return;
     }
     
-    // Criar gasto avulso
+    // Criar ou atualizar gasto avulso
     const gastoAvulso = {
         pessoa,
         descricao: local,
@@ -2000,9 +2031,18 @@ window.confirmarGastoAvulso = () => {
         mes: mesAtual
     };
     
-    // Adicionar ao array
-    if (!gastosAvulsos) gastosAvulsos = [];
-    gastosAvulsos.push(gastoAvulso);
+    // Verificar se está editando ou adicionando
+    if (estadoEdicaoGastoAvulso !== -1) {
+        // Modo edição - atualizar gasto existente
+        gastosAvulsos[estadoEdicaoGastoAvulso] = gastoAvulso;
+        mostrarToast('✅ Gasto avulso atualizado!', 'success');
+        estadoEdicaoGastoAvulso = -1;
+    } else {
+        // Modo adição - adicionar novo gasto
+        if (!gastosAvulsos) gastosAvulsos = [];
+        gastosAvulsos.push(gastoAvulso);
+        mostrarToast('💰 Gasto avulso adicionado!', 'success');
+    }
     
     // Salvar no localStorage
     salvarGastosAvulsos();
@@ -2014,8 +2054,6 @@ window.confirmarGastoAvulso = () => {
     document.getElementById('input-gasto-natural').value = '';
     document.getElementById('preview-gasto-avulso').classList.add('hidden');
     
-    mostrarToast('💰 Gasto avulso adicionado!', 'success');
-    
     // Atualizar resumo (somar gastos avulsos ao total pago)
     atualizarResumo();
 };
@@ -2024,6 +2062,27 @@ window.confirmarGastoAvulso = () => {
 window.cancelarGastoAvulso = () => {
     document.getElementById('preview-gasto-avulso').classList.add('hidden');
     document.getElementById('input-gasto-natural').value = '';
+    estadoEdicaoGastoAvulso = -1;
+};
+
+// Editar gasto avulso
+window.editarGastoAvulso = (index) => {
+    const gasto = gastosAvulsos[index];
+    estadoEdicaoGastoAvulso = index;
+    
+    // Preencher o preview com os dados do gasto
+    document.getElementById('preview-pessoa').value = gasto.pessoa;
+    document.getElementById('preview-valor').value = gasto.valor;
+    document.getElementById('preview-pagamento').value = gasto.formaPagamento;
+    document.getElementById('preview-local').value = gasto.descricao;
+    document.getElementById('preview-data').value = formatISODateToBR(gasto.data);
+    document.getElementById('preview-categoria').value = gasto.categoria;
+    
+    // Mostrar preview
+    document.getElementById('preview-gasto-avulso').classList.remove('hidden');
+    
+    // Scroll para o preview
+    document.getElementById('preview-gasto-avulso').scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
 // Renderizar tabela de gastos avulsos
@@ -2081,10 +2140,16 @@ const renderizarGastosAvulsos = () => {
             <td class="p-3 text-gray-600 dark:text-gray-400">${formatarData(gasto.data)}</td>
             <td class="p-3 text-right text-red-600 dark:text-red-400 font-bold">${formatarMoeda(gasto.valor)}</td>
             <td class="p-3 text-right">
-                <button onclick="excluirGastoAvulso(${gastosAvulsos.indexOf(gasto)})" 
-                        class="text-red-500 hover:text-red-700 font-semibold text-sm">
-                    🗑️ Excluir
-                </button>
+                <div class="flex gap-2 justify-end">
+                    <button onclick="editarGastoAvulso(${gastosAvulsos.indexOf(gasto)})" 
+                            class="text-blue-500 hover:text-blue-700 font-semibold text-sm">
+                        ✏️ Editar
+                    </button>
+                    <button onclick="excluirGastoAvulso(${gastosAvulsos.indexOf(gasto)})" 
+                            class="text-red-500 hover:text-red-700 font-semibold text-sm">
+                        🗑️ Excluir
+                    </button>
+                </div>
             </td>
         `;
         tabela.appendChild(tr);
