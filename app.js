@@ -3225,30 +3225,52 @@ const renderizarCalendario = () => {
         
         const temMovimentacao = totalEntradas > 0 || totalDespesasCompleto > 0;
         
+        // Todos os dias são clicáveis para adicionar/ver transações
         diaDiv.className = `p-2 min-h-[80px] border rounded-lg ${
             ehHoje ? 'bg-blue-100 dark:bg-blue-900 border-blue-500' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-        } ${temMovimentacao ? 'hover:shadow-lg cursor-pointer' : ''} transition-shadow`;
+        } hover:shadow-lg cursor-pointer transition-shadow`;
+        
+        // Indicadores visuais simples
+        let indicadores = '';
+        if (totalEntradas > 0 || totalDespesasCompleto > 0) {
+            indicadores = '<div class="flex justify-center gap-1 mt-1">';
+            if (totalEntradas > 0) {
+                const qtdEntradas = entradasDia.length;
+                indicadores += `<div class="flex items-center gap-0.5" title="${qtdEntradas} entrada(s): ${formatarMoeda(totalEntradas)}">
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span class="text-xs text-green-600 dark:text-green-400 font-semibold">${qtdEntradas}</span>
+                </div>`;
+            }
+            if (totalDespesasCompleto > 0) {
+                const qtdDespesas = despesasDia.length + gastosAvulsosDia.length;
+                indicadores += `<div class="flex items-center gap-0.5" title="${qtdDespesas} despesa(s): ${formatarMoeda(totalDespesasCompleto)}">
+                    <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span class="text-xs text-red-600 dark:text-red-400 font-semibold">${qtdDespesas}</span>
+                </div>`;
+            }
+            indicadores += '</div>';
+        }
         
         diaDiv.innerHTML = `
             <div class="text-center font-bold ${ehHoje ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'} mb-1">
                 ${dia}
             </div>
-            ${totalEntradas > 0 ? `<div class="text-xs bg-green-500 text-white px-1 py-0.5 rounded mb-1 text-center">+${formatarMoeda(totalEntradas)}</div>` : ''}
-            ${totalDespesasCompleto > 0 ? `<div class="text-xs bg-red-500 text-white px-1 py-0.5 rounded text-center">-${formatarMoeda(totalDespesasCompleto)}</div>` : ''}
+            ${indicadores}
         `;
         
-        // Adicionar evento de clique para mostrar detalhes
-        if (temMovimentacao) {
-            diaDiv.addEventListener('click', () => {
-                mostrarDetalhesDia(dataStr, entradasDia, despesasDia, gastosAvulsosDia);
-            });
-        }
+        // Adicionar evento de clique para mostrar detalhes/adicionar
+        diaDiv.addEventListener('click', () => {
+            mostrarDetalhesDia(dataStr, entradasDia, despesasDia, gastosAvulsosDia);
+        });
         
         grid.appendChild(diaDiv);
     }
 };
 
 const mostrarDetalhesDia = (data, entradas, despesas, gastosAvulsos = []) => {
+    // Armazenar data selecionada globalmente
+    window.calendarioDataSelecionada = data;
+    
     // Ocultar view principal e mostrar view de detalhes
     document.getElementById('calendario-view-principal').classList.add('hidden');
     document.getElementById('calendario-view-detalhes').classList.remove('hidden');
@@ -3257,8 +3279,32 @@ const mostrarDetalhesDia = (data, entradas, despesas, gastosAvulsos = []) => {
     const dataFormatada = formatarData(data);
     document.getElementById('detalhes-data').textContent = `📅 ${dataFormatada}`;
     
+    // Botões de ação para adicionar transações
+    let botoesAcao = `
+        <div class="flex gap-2 mb-6 flex-wrap">
+            <button onclick="abrirFormularioNoCalendario('entrada')" class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Nova Entrada
+            </button>
+            <button onclick="abrirFormularioNoCalendario('gastoFixo')" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Gasto Fixo
+            </button>
+            <button onclick="abrirFormularioNoCalendario('gastoAvulso')" class="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Gasto Avulso
+            </button>
+        </div>
+    `;
+    
     // Construir HTML dos detalhes
-    let detalhesHTML = '';
+    let detalhesHTML = botoesAcao;
     
     if (entradas.length > 0) {
         detalhesHTML += `
@@ -3362,5 +3408,270 @@ document.getElementById('btn-voltar-calendario').addEventListener('click', () =>
     // Voltar para a view principal do calendário
     document.getElementById('calendario-view-detalhes').classList.add('hidden');
     document.getElementById('calendario-view-principal').classList.remove('hidden');
+    // Fechar formulário se estiver aberto
+    fecharFormularioCalendario();
 });
+
+// ===== FORMULÁRIOS NO CALENDÁRIO =====
+
+window.abrirFormularioNoCalendario = (tipo) => {
+    const container = document.getElementById('calendario-formulario-container');
+    const titulo = document.getElementById('calendario-formulario-titulo');
+    const conteudo = document.getElementById('calendario-formulario-conteudo');
+    const data = window.calendarioDataSelecionada;
+    
+    // Mostrar container
+    container.classList.remove('hidden');
+    
+    // Scroll suave para o formulário
+    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    if (tipo === 'entrada') {
+        titulo.textContent = '💰 Nova Entrada';
+        conteudo.innerHTML = `
+            <form id="form-entrada-calendario" class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição *</label>
+                    <input type="text" id="cal-entrada-descricao" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: Salário, Freelance">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor (R$) *</label>
+                    <input type="number" id="cal-entrada-valor" step="0.01" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="0,00">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data *</label>
+                    <input type="date" id="cal-entrada-data" value="${data}" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
+                    <select id="cal-entrada-categoria" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                        <option value="">Selecione...</option>
+                        ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}">${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
+                    <textarea id="cal-entrada-observacoes" rows="2" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Observações opcionais"></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                        Adicionar Entrada
+                    </button>
+                    <button type="button" onclick="fecharFormularioCalendario()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-semibold transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        `;
+        
+        document.getElementById('form-entrada-calendario').addEventListener('submit', (e) => {
+            e.preventDefault();
+            salvarEntradaDoCalendario();
+        });
+    } else if (tipo === 'gastoFixo') {
+        titulo.textContent = '💸 Novo Gasto Fixo';
+        conteudo.innerHTML = `
+            <form id="form-gasto-fixo-calendario" class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição *</label>
+                    <input type="text" id="cal-gasto-descricao" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: Aluguel, Internet">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Previsto (R$) *</label>
+                        <input type="number" id="cal-gasto-previsto" step="0.01" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="0,00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pago (R$)</label>
+                        <input type="number" id="cal-gasto-pago" step="0.01" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="0,00">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vencimento *</label>
+                        <input type="date" id="cal-gasto-vencimento" value="${data}" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pagamento</label>
+                        <input type="date" id="cal-gasto-pagamento" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
+                    <select id="cal-gasto-categoria" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                        <option value="">Selecione...</option>
+                        ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}">${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                        <input type="checkbox" id="cal-gasto-recorrente" class="w-4 h-4">
+                        Recorrente
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                        <input type="checkbox" id="cal-gasto-debito" class="w-4 h-4">
+                        Débito Automático
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações</label>
+                    <textarea id="cal-gasto-observacoes" rows="2" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Observações opcionais"></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                        Adicionar Gasto Fixo
+                    </button>
+                    <button type="button" onclick="fecharFormularioCalendario()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-semibold transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        `;
+        
+        document.getElementById('form-gasto-fixo-calendario').addEventListener('submit', (e) => {
+            e.preventDefault();
+            salvarGastoFixoDoCalendario();
+        });
+    } else if (tipo === 'gastoAvulso') {
+        titulo.textContent = '🛒 Novo Gasto Avulso';
+        conteudo.innerHTML = `
+            <form id="form-gasto-avulso-calendario" class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pessoa</label>
+                    <input type="text" id="cal-avulso-pessoa" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: João, Maria">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição *</label>
+                    <input type="text" id="cal-avulso-descricao" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: Mercado, Farmácia">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor (R$) *</label>
+                    <input type="number" id="cal-avulso-valor" step="0.01" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="0,00">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data *</label>
+                    <input type="date" id="cal-avulso-data" value="${data}" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
+                    <select id="cal-avulso-categoria" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                        <option value="">Selecione...</option>
+                        ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}">${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                        Adicionar Gasto Avulso
+                    </button>
+                    <button type="button" onclick="fecharFormularioCalendario()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-semibold transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        `;
+        
+        document.getElementById('form-gasto-avulso-calendario').addEventListener('submit', (e) => {
+            e.preventDefault();
+            salvarGastoAvulsoDoCalendario();
+        });
+    }
+};
+
+window.fecharFormularioCalendario = () => {
+    document.getElementById('calendario-formulario-container').classList.add('hidden');
+};
+
+const salvarEntradaDoCalendario = () => {
+    const novaEntrada = {
+        descricao: document.getElementById('cal-entrada-descricao').value.trim(),
+        valor: parseFloat(document.getElementById('cal-entrada-valor').value) || 0,
+        data: document.getElementById('cal-entrada-data').value,
+        categoria: document.getElementById('cal-entrada-categoria').value || '---',
+        observacoes: document.getElementById('cal-entrada-observacoes').value.trim()
+    };
+    
+    entradas.push(novaEntrada);
+    salvarDados();
+    fecharFormularioCalendario();
+    mostrarToast('Entrada adicionada com sucesso!', 'success');
+    
+    // Recarregar calendário e detalhes
+    renderizarCalendario();
+    const data = window.calendarioDataSelecionada;
+    const mesKey = data.substring(0, 7);
+    const chave = `contas-firebase-${mesKey}`;
+    const dadosSalvos = localStorage.getItem(chave);
+    if (dadosSalvos) {
+        const dados = JSON.parse(dadosSalvos);
+        const entradasDia = (dados.entradas || []).filter(e => e.data === data);
+        const despesasDia = (dados.despesas || []).filter(d => d.vencimento === data || d.dataPagamento === data);
+        const gastosAvulsosDia = (dados.gastosAvulsos || []).filter(g => g.data === data && g.mes === mesKey);
+        mostrarDetalhesDia(data, entradasDia, despesasDia, gastosAvulsosDia);
+    }
+};
+
+const salvarGastoFixoDoCalendario = () => {
+    const novoGasto = {
+        descricao: document.getElementById('cal-gasto-descricao').value.trim(),
+        previsto: parseFloat(document.getElementById('cal-gasto-previsto').value) || 0,
+        pago: parseFloat(document.getElementById('cal-gasto-pago').value) || 0,
+        vencimento: document.getElementById('cal-gasto-vencimento').value,
+        dataPagamento: document.getElementById('cal-gasto-pagamento').value || '',
+        categoria: document.getElementById('cal-gasto-categoria').value || '---',
+        recorrente: document.getElementById('cal-gasto-recorrente').checked,
+        debitoAutomatico: document.getElementById('cal-gasto-debito').checked,
+        observacoes: document.getElementById('cal-gasto-observacoes').value.trim()
+    };
+    
+    despesas.push(novoGasto);
+    salvarDados();
+    fecharFormularioCalendario();
+    mostrarToast('Gasto fixo adicionado com sucesso!', 'success');
+    
+    // Recarregar calendário e detalhes
+    renderizarCalendario();
+    const data = window.calendarioDataSelecionada;
+    const mesKey = data.substring(0, 7);
+    const chave = `contas-firebase-${mesKey}`;
+    const dadosSalvos = localStorage.getItem(chave);
+    if (dadosSalvos) {
+        const dados = JSON.parse(dadosSalvos);
+        const entradasDia = (dados.entradas || []).filter(e => e.data === data);
+        const despesasDia = (dados.despesas || []).filter(d => d.vencimento === data || d.dataPagamento === data);
+        const gastosAvulsosDia = (dados.gastosAvulsos || []).filter(g => g.data === data && g.mes === mesKey);
+        mostrarDetalhesDia(data, entradasDia, despesasDia, gastosAvulsosDia);
+    }
+};
+
+const salvarGastoAvulsoDoCalendario = () => {
+    const data = document.getElementById('cal-avulso-data').value;
+    const mesKey = data.substring(0, 7);
+    
+    const novoGastoAvulso = {
+        id: Date.now(),
+        pessoa: document.getElementById('cal-avulso-pessoa').value.trim() || 'Sem pessoa',
+        descricao: document.getElementById('cal-avulso-descricao').value.trim(),
+        valor: parseFloat(document.getElementById('cal-avulso-valor').value) || 0,
+        data: data,
+        mes: mesKey,
+        categoria: document.getElementById('cal-avulso-categoria').value || 'Sem categoria'
+    };
+    
+    gastosAvulsos.push(novoGastoAvulso);
+    salvarDados();
+    fecharFormularioCalendario();
+    mostrarToast('Gasto avulso adicionado com sucesso!', 'success');
+    
+    // Recarregar calendário e detalhes
+    renderizarCalendario();
+    const chave = `contas-firebase-${mesKey}`;
+    const dadosSalvos = localStorage.getItem(chave);
+    if (dadosSalvos) {
+        const dados = JSON.parse(dadosSalvos);
+        const entradasDia = (dados.entradas || []).filter(e => e.data === data);
+        const despesasDia = (dados.despesas || []).filter(d => d.vencimento === data || d.dataPagamento === data);
+        const gastosAvulsosDia = (dados.gastosAvulsos || []).filter(g => g.data === data && g.mes === mesKey);
+        mostrarDetalhesDia(data, entradasDia, despesasDia, gastosAvulsosDia);
+    }
+};
 
