@@ -3593,13 +3593,18 @@ const salvarEntradaDoCalendario = () => {
     entradas.push(novaEntrada);
     salvarDados();
     
+    // Atualizar TODA a aplicação imediatamente
+    renderizarEntradas();
+    renderizarDespesas();
+    renderizarGastosAvulsos();
+    atualizarResumo();
+    atualizarDashboardEstatisticas();
+    renderizarPoupanca();
+    
     // Sincronizar com Firebase
     if (typeof sincronizarMesParaFirebase === 'function') {
         sincronizarMesParaFirebase(mesAtual, { entradas, despesas, gastosAvulsos });
     }
-    
-    // Atualizar TODA a aplicação
-    renderizarTudo();
     
     fecharFormularioCalendario();
     mostrarToast('Entrada adicionada com sucesso!', 'success');
@@ -3635,13 +3640,18 @@ const salvarGastoFixoDoCalendario = () => {
     despesas.push(novoGasto);
     salvarDados();
     
+    // Atualizar TODA a aplicação imediatamente
+    renderizarEntradas();
+    renderizarDespesas();
+    renderizarGastosAvulsos();
+    atualizarResumo();
+    atualizarDashboardEstatisticas();
+    renderizarPoupanca();
+    
     // Sincronizar com Firebase
     if (typeof sincronizarMesParaFirebase === 'function') {
         sincronizarMesParaFirebase(mesAtual, { entradas, despesas, gastosAvulsos });
     }
-    
-    // Atualizar TODA a aplicação
-    renderizarTudo();
     
     fecharFormularioCalendario();
     mostrarToast('Gasto fixo adicionado com sucesso!', 'success');
@@ -3678,13 +3688,18 @@ const salvarGastoAvulsoDoCalendario = () => {
     gastosAvulsos.push(novoGastoAvulso);
     salvarDados();
     
+    // Atualizar TODA a aplicação imediatamente
+    renderizarEntradas();
+    renderizarDespesas();
+    renderizarGastosAvulsos();
+    atualizarResumo();
+    atualizarDashboardEstatisticas();
+    renderizarPoupanca();
+    
     // Sincronizar com Firebase
     if (typeof sincronizarMesParaFirebase === 'function') {
         sincronizarMesParaFirebase(mesAtual, { entradas, despesas, gastosAvulsos });
     }
-    
-    // Atualizar TODA a aplicação
-    renderizarTudo();
     
     fecharFormularioCalendario();
     mostrarToast('Gasto avulso adicionado com sucesso!', 'success');
