@@ -3535,39 +3535,61 @@ window.abrirFormularioNoCalendario = (tipo) => {
     } else if (tipo === 'gastoAvulso') {
         titulo.textContent = '🛒 Novo Gasto Avulso';
         conteudo.innerHTML = `
-            <form id="form-gasto-avulso-calendario" class="space-y-3">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pessoa</label>
-                    <input type="text" id="cal-avulso-pessoa" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: João, Maria">
+            <div class="space-y-4">
+                <!-- Área de Processamento de Texto Natural -->
+                <div class="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 border-2 border-purple-300 dark:border-purple-700 rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-lg">💬</span>
+                        <h5 class="font-bold text-purple-800 dark:text-purple-300">Adicione gastos falando naturalmente!</h5>
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mb-2 space-y-1">
+                        <p><strong>Exemplos:</strong></p>
+                        <p class="italic">"Mary gastei 50 reais hoje no débito no Mercado"</p>
+                        <p class="italic">"João comprei 100 ontem no crédito na Farmácia"</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <textarea id="cal-texto-natural" rows="2" class="flex-1 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" placeholder="Ex: Mary gastei 30 reais hoje no débito no Mercado"></textarea>
+                        <button type="button" onclick="processarTextoCalendario()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 rounded-lg font-semibold text-sm transition-colors">
+                            🧠 Processar
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição *</label>
-                    <input type="text" id="cal-avulso-descricao" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: Mercado, Farmácia">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor (R$) *</label>
-                    <input type="number" id="cal-avulso-valor" step="0.01" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="0,00">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data *</label>
-                    <input type="date" id="cal-avulso-data" value="${data}" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
-                    <select id="cal-avulso-categoria" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
-                        <option value="">Selecione...</option>
-                        ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}">${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
-                        Adicionar Gasto Avulso
-                    </button>
-                    <button type="button" onclick="fecharFormularioCalendario()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-semibold transition-colors">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
+
+                <!-- Formulário Manual -->
+                <form id="form-gasto-avulso-calendario" class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pessoa</label>
+                        <input type="text" id="cal-avulso-pessoa" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: João, Maria">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição *</label>
+                        <input type="text" id="cal-avulso-descricao" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: Mercado, Farmácia">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor (R$) *</label>
+                        <input type="number" id="cal-avulso-valor" step="0.01" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="0,00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data *</label>
+                        <input type="date" id="cal-avulso-data" value="${data}" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
+                        <select id="cal-avulso-categoria" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                            <option value="">Selecione...</option>
+                            ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}">${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                            Adicionar Gasto Avulso
+                        </button>
+                        <button type="button" onclick="fecharFormularioCalendario()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-semibold transition-colors">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
         `;
         
         document.getElementById('form-gasto-avulso-calendario').addEventListener('submit', (e) => {
@@ -3579,6 +3601,46 @@ window.abrirFormularioNoCalendario = (tipo) => {
 
 window.fecharFormularioCalendario = () => {
     document.getElementById('calendario-formulario-container').classList.add('hidden');
+};
+
+// Função para processar texto natural no calendário
+window.processarTextoCalendario = () => {
+    const texto = document.getElementById('cal-texto-natural').value.trim();
+    
+    if (!texto) {
+        mostrarToast('Digite algo para processar!', 'error');
+        return;
+    }
+    
+    // Usar a mesma lógica de processamento de texto da aplicação principal
+    const resultado = processarTextoNaturalGasto(texto);
+    
+    if (resultado.erro) {
+        mostrarToast(resultado.erro, 'error');
+        return;
+    }
+    
+    // Preencher os campos do formulário
+    if (resultado.pessoa) {
+        document.getElementById('cal-avulso-pessoa').value = resultado.pessoa;
+    }
+    if (resultado.descricao) {
+        document.getElementById('cal-avulso-descricao').value = resultado.descricao;
+    }
+    if (resultado.valor) {
+        document.getElementById('cal-avulso-valor').value = resultado.valor;
+    }
+    if (resultado.data) {
+        document.getElementById('cal-avulso-data').value = resultado.data;
+    }
+    if (resultado.categoria) {
+        document.getElementById('cal-avulso-categoria').value = resultado.categoria;
+    }
+    
+    // Limpar o campo de texto
+    document.getElementById('cal-texto-natural').value = '';
+    
+    mostrarToast('✅ Texto processado! Verifique os campos abaixo.', 'success');
 };
 
 const salvarEntradaDoCalendario = () => {
