@@ -1764,16 +1764,110 @@ window.verificarDadosLocalStorage = () => {
     
     console.log(`📦 Encontradas ${chaves.length} chaves de dados:`, chaves);
     
+    const todosOsDados = {};
     chaves.forEach(chave => {
         try {
             const dados = JSON.parse(localStorage.getItem(chave));
+            todosOsDados[chave] = dados;
             console.log(`\n📋 ${chave}:`, dados);
+            
+            // Mostrar resumo
+            if (dados.entradas) {
+                console.log(`  💰 Entradas: ${dados.entradas.length} itens`);
+            }
+            if (dados.despesas) {
+                console.log(`  💸 Despesas: ${dados.despesas.length} itens`);
+            }
+            if (dados.gastosAvulsos) {
+                console.log(`  🛒 Gastos Avulsos: ${dados.gastosAvulsos.length} itens`);
+            }
         } catch (e) {
             console.error(`❌ Erro ao ler ${chave}:`, e);
         }
     });
     
-    return chaves;
+    return todosOsDados;
+};
+
+/**
+ * Função para recuperar entradas de todos os meses no localStorage
+ */
+window.recuperarTodasEntradas = () => {
+    console.log('🔄 Buscando todas as entradas no localStorage...');
+    
+    const todasEntradas = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('contas-firebase-') && key.match(/\d{4}-\d{2}/)) {
+            try {
+                const dados = JSON.parse(localStorage.getItem(key));
+                if (dados.entradas && Array.isArray(dados.entradas) && dados.entradas.length > 0) {
+                    const mes = key.replace('contas-firebase-', '');
+                    console.log(`✅ Encontradas ${dados.entradas.length} entradas em ${mes}:`, dados.entradas);
+                    todasEntradas.push({ mes, entradas: dados.entradas });
+                }
+            } catch (e) {
+                console.error(`❌ Erro ao ler ${key}:`, e);
+            }
+        }
+    }
+    
+    if (todasEntradas.length === 0) {
+        console.log('⚠️ Nenhuma entrada encontrada no localStorage');
+    } else {
+        console.log(`\n📊 RESUMO: Encontradas entradas em ${todasEntradas.length} mês(es)`);
+        todasEntradas.forEach(({ mes, entradas }) => {
+            console.log(`  ${mes}: ${entradas.length} entradas`);
+            entradas.forEach(e => {
+                console.log(`    - ${e.descricao}: R$ ${e.valor.toFixed(2)}`);
+            });
+        });
+    }
+    
+    return todasEntradas;
+};
+
+/**
+ * Função para restaurar entradas de um mês específico
+ */
+window.restaurarEntradasDoMes = (mes) => {
+    if (!mes) {
+        console.error('❌ Informe o mês no formato YYYY-MM (ex: 2025-10)');
+        return;
+    }
+    
+    const chave = `contas-firebase-${mes}`;
+    const dadosSalvos = localStorage.getItem(chave);
+    
+    if (!dadosSalvos) {
+        console.log(`⚠️ Nenhum dado encontrado para ${mes}`);
+        return;
+    }
+    
+    try {
+        const dados = JSON.parse(dadosSalvos);
+        if (dados.entradas && Array.isArray(dados.entradas) && dados.entradas.length > 0) {
+            console.log(`✅ Encontradas ${dados.entradas.length} entradas em ${mes}`);
+            
+            // Se é o mês atual, restaurar
+            if (mes === mesAtual) {
+                entradas = dados.entradas;
+                renderizarEntradas();
+                atualizarResumo();
+                console.log(`✅ Entradas restauradas para o mês atual (${mes})`);
+                mostrarToast(`✅ ${dados.entradas.length} entradas restauradas!`, 'success');
+            } else {
+                console.log(`ℹ️ Mês ${mes} não é o mês atual. Mude para ${mes} e tente novamente.`);
+            }
+            
+            return dados.entradas;
+        } else {
+            console.log(`⚠️ Nenhuma entrada encontrada em ${mes}`);
+            return [];
+        }
+    } catch (e) {
+        console.error(`❌ Erro ao restaurar entradas:`, e);
+    }
 };
 
 // ===== INICIALIZAÇÃO =====
