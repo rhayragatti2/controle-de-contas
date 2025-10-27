@@ -589,8 +589,17 @@ const getChaveMes = (mes) => {
 const salvarDados = () => {
     if (!mesAtual) return;
     
+    console.log('💾 Salvando dados...', {
+        mesAtual,
+        totalEntradas: entradas.length,
+        totalDespesas: despesas.length,
+        totalGastosAvulsos: gastosAvulsos.length
+    });
+    
     // Filtrar gastos avulsos do mês atual
     const gastosAvulsosMes = gastosAvulsos ? gastosAvulsos.filter(g => g.mes === mesAtual) : [];
+    
+    console.log('💾 Gastos avulsos do mês:', gastosAvulsosMes.length);
     
     const dados = {
         entradas: entradas,
@@ -600,6 +609,7 @@ const salvarDados = () => {
     
     const chave = getChaveMes(mesAtual);
     localStorage.setItem(chave, JSON.stringify(dados));
+    console.log('✅ Dados salvos no localStorage');
     
     // Sincronizar com Firebase com indicador visual
     if (window.firebaseSync && window.firebaseSync.isEnabled()) {
@@ -930,6 +940,7 @@ window.editarDespesa = (index) => {
 };
 
 const renderizarDespesas = () => {
+    console.log('🎨 Renderizando despesas:', despesas.length, 'itens');
     tabelaDespesas.innerHTML = '';
     despesas.forEach((item, index) => {
         const corCategoria = getCorCategoria(item.categoria);
@@ -2106,13 +2117,22 @@ window.editarGastoAvulso = (gastoId) => {
 
 // Renderizar tabela de gastos avulsos
 const renderizarGastosAvulsos = () => {
+    console.log('🎨 Renderizando gastos avulsos...', {
+        totalGlobal: gastosAvulsos.length,
+        mesAtual: mesAtual
+    });
+    
     const tabela = document.getElementById('tabela-gastos-avulsos');
-    if (!tabela) return;
+    if (!tabela) {
+        console.warn('⚠️ Tabela de gastos avulsos não encontrada!');
+        return;
+    }
     
     tabela.innerHTML = '';
     
     // Filtrar gastos do mês atual
     const gastosMes = gastosAvulsos.filter(g => g.mes === mesAtual);
+    console.log('🎨 Gastos do mês atual:', gastosMes.length, 'itens');
     
     if (gastosMes.length === 0) {
         tabela.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500 dark:text-gray-400 italic">Nenhum gasto avulso registrado neste mês</td></tr>';
@@ -2213,21 +2233,23 @@ const carregarGastosAvulsos = (mes) => {
 // Adicionar IDs únicos a gastos avulsos antigos
 const adicionarIDsGastosAvulsos = () => {
     let houveAlteracao = false;
+    let contador = 0;
     
     gastosAvulsos = gastosAvulsos.map(gasto => {
         if (!gasto.id) {
             houveAlteracao = true;
+            // Usar contador para garantir IDs únicos mesmo em operações rápidas
+            contador++;
             return {
                 ...gasto,
-                id: Date.now() + Math.random()
+                id: Date.now() + Math.random() + contador
             };
         }
         return gasto;
     });
     
     if (houveAlteracao) {
-        console.log('✅ IDs adicionados aos gastos avulsos antigos');
-        salvarDados();
+        console.log('✅ IDs adicionados aos gastos avulsos antigos:', contador, 'gastos atualizados');
     }
 };
 

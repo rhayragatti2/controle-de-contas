@@ -37,6 +37,7 @@ try {
 // ===== SINCRONIZAÇÃO DE DADOS =====
 
 let listenersAtivos = {};
+let ignorarProximaAtualizacaoFirebase = false;
 
 // Constantes para prefixos de armazenamento
 const PREFIX_FIREBASE = 'contas-firebase-';
@@ -173,10 +174,21 @@ async function sincronizarMesParaFirebase(mes, dados) {
     if (!isFirebaseEnabled) return;
 
     try {
+        // Ativar flag para ignorar a próxima atualização do listener
+        ignorarProximaAtualizacaoFirebase = true;
+        console.log('🔒 Bloqueando listener temporariamente...');
+        
         await database.ref(`dados-compartilhados/meses/${mes}`).set(dados);
-        console.log(`Mês ${mes} sincronizado`);
+        console.log(`✅ Mês ${mes} sincronizado com Firebase`);
+        
+        // Desativar o flag após 2 segundos (tempo suficiente para o Firebase processar)
+        setTimeout(() => {
+            ignorarProximaAtualizacaoFirebase = false;
+            console.log('🔓 Listener desbloqueado');
+        }, 2000);
     } catch (error) {
-        console.error('Erro ao sincronizar mês:', error);
+        console.error('❌ Erro ao sincronizar mês:', error);
+        ignorarProximaAtualizacaoFirebase = false; // Desbloquear em caso de erro
     }
 }
 
@@ -249,6 +261,12 @@ function iniciarListenersSincronizacao() {
     // Listener para mudanças no mês atual compartilhado
     const refMesAtual = database.ref(`dados-compartilhados/meses/${mesAtual}`);
     listenersAtivos.mesAtual = refMesAtual.on('value', (snapshot) => {
+        // Se estamos ignorando atualizações (acabamos de salvar localmente), pular
+        if (ignorarProximaAtualizacaoFirebase) {
+            console.log('⏭️ Ignorando atualização do Firebase (salvamento local recente)');
+            return;
+        }
+        
         const dadosMesFirebase = snapshot.val();
         if (dadosMesFirebase) {
             const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
@@ -256,6 +274,7 @@ function iniciarListenersSincronizacao() {
             const dadosFirebaseStr = JSON.stringify(dadosMesFirebase);
             
             if (dadosLocaisStr !== dadosFirebaseStr) {
+                console.log('☁️ Recebendo atualização do Firebase...');
                 entradas = dadosMesFirebase.entradas || [];
                 despesas = dadosMesFirebase.despesas || [];
                 
@@ -321,6 +340,12 @@ function atualizarListenerMes(novoMes) {
     // Iniciar novo listener
     const refNovoMes = database.ref(`dados-compartilhados/meses/${novoMes}`);
     listenersAtivos.mesAtual = refNovoMes.on('value', (snapshot) => {
+        // Se estamos ignorando atualizações (acabamos de salvar localmente), pular
+        if (ignorarProximaAtualizacaoFirebase) {
+            console.log('⏭️ Ignorando atualização do Firebase (salvamento local recente)');
+            return;
+        }
+        
         const dadosMesFirebase = snapshot.val();
         const chaveMesFirebase = `${PREFIX_FIREBASE}${novoMes}`;
         
@@ -329,6 +354,7 @@ function atualizarListenerMes(novoMes) {
             const dadosFirebaseStr = JSON.stringify(dadosMesFirebase);
             
             if (dadosLocaisStr !== dadosFirebaseStr) {
+                console.log(`☁️ Recebendo atualização do Firebase para ${novoMes}...`);
                 entradas = dadosMesFirebase.entradas || [];
                 despesas = dadosMesFirebase.despesas || [];
                 
