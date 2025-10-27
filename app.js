@@ -3132,7 +3132,14 @@ let calendarioMesAtual = new Date();
 
 window.abrirCalendario = () => {
     document.getElementById('modal-calendario').classList.remove('hidden');
-    calendarioMesAtual = new Date(mesAtual + '-01');
+    // Sempre começar no mês atual do usuário
+    const hoje = new Date();
+    calendarioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    
+    // Resetar para view principal
+    document.getElementById('calendario-view-principal').classList.remove('hidden');
+    document.getElementById('calendario-view-detalhes').classList.add('hidden');
+    
     renderizarCalendario();
 };
 
@@ -3242,39 +3249,100 @@ const renderizarCalendario = () => {
 };
 
 const mostrarDetalhesDia = (data, entradas, despesas, gastosAvulsos = []) => {
+    // Ocultar view principal e mostrar view de detalhes
+    document.getElementById('calendario-view-principal').classList.add('hidden');
+    document.getElementById('calendario-view-detalhes').classList.remove('hidden');
+    
+    // Atualizar título com a data
     const dataFormatada = formatarData(data);
-    let detalhes = `📅 ${dataFormatada}\n\n`;
+    document.getElementById('detalhes-data').textContent = `📅 ${dataFormatada}`;
+    
+    // Construir HTML dos detalhes
+    let detalhesHTML = '';
     
     if (entradas.length > 0) {
-        detalhes += '💰 ENTRADAS:\n';
+        detalhesHTML += `
+            <div class="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 border-l-4 border-green-500 p-4 rounded-lg">
+                <h4 class="text-lg font-bold text-green-700 dark:text-green-400 mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Entradas
+                </h4>
+                <ul class="space-y-2">
+        `;
         entradas.forEach(e => {
-            detalhes += `  • ${e.descricao}: ${formatarMoeda(e.valor)}\n`;
+            detalhesHTML += `
+                <li class="flex justify-between items-center">
+                    <span class="text-gray-700 dark:text-gray-300">• ${e.descricao}</span>
+                    <span class="font-bold text-green-700 dark:text-green-400">${formatarMoeda(e.valor)}</span>
+                </li>
+            `;
         });
-        detalhes += '\n';
+        detalhesHTML += `</ul></div>`;
     }
     
     if (despesas.length > 0) {
-        detalhes += '💸 DESPESAS FIXAS:\n';
+        detalhesHTML += `
+            <div class="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border-l-4 border-red-500 p-4 rounded-lg">
+                <h4 class="text-lg font-bold text-red-700 dark:text-red-400 mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                    </svg>
+                    Despesas Fixas
+                </h4>
+                <ul class="space-y-2">
+        `;
         despesas.forEach(d => {
             const valor = d.pago > 0 ? d.pago : d.previsto;
             const status = d.pago > 0 ? '✓' : '○';
-            detalhes += `  ${status} ${d.descricao}: ${formatarMoeda(valor)}\n`;
+            const statusClass = d.pago > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-400';
+            detalhesHTML += `
+                <li class="flex justify-between items-center">
+                    <span class="text-gray-700 dark:text-gray-300">
+                        <span class="${statusClass}">${status}</span> ${d.descricao}
+                    </span>
+                    <span class="font-bold text-red-700 dark:text-red-400">${formatarMoeda(valor)}</span>
+                </li>
+            `;
         });
-        detalhes += '\n';
+        detalhesHTML += `</ul></div>`;
     }
     
     if (gastosAvulsos.length > 0) {
-        detalhes += '🛒 GASTOS AVULSOS:\n';
+        detalhesHTML += `
+            <div class="bg-orange-50 dark:bg-orange-900 dark:bg-opacity-20 border-l-4 border-orange-500 p-4 rounded-lg">
+                <h4 class="text-lg font-bold text-orange-700 dark:text-orange-400 mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Gastos Avulsos
+                </h4>
+                <ul class="space-y-2">
+        `;
         gastosAvulsos.forEach(g => {
-            detalhes += `  • ${g.descricao} (${g.pessoa || 'Sem pessoa'}): ${formatarMoeda(g.valor)}\n`;
+            detalhesHTML += `
+                <li class="flex justify-between items-center">
+                    <span class="text-gray-700 dark:text-gray-300">
+                        • ${g.descricao} ${g.pessoa ? `<span class="text-xs text-gray-500 dark:text-gray-400">(${g.pessoa})</span>` : ''}
+                    </span>
+                    <span class="font-bold text-orange-700 dark:text-orange-400">${formatarMoeda(g.valor)}</span>
+                </li>
+            `;
         });
+        detalhesHTML += `</ul></div>`;
     }
     
     if (entradas.length === 0 && despesas.length === 0 && gastosAvulsos.length === 0) {
-        detalhes += 'Nenhuma movimentação neste dia.';
+        detalhesHTML = `
+            <div class="bg-gray-50 dark:bg-gray-700 p-8 rounded-lg text-center">
+                <p class="text-gray-500 dark:text-gray-400 text-lg">Nenhuma movimentação neste dia.</p>
+            </div>
+        `;
     }
     
-    alert(detalhes);
+    // Inserir HTML na div de detalhes
+    document.getElementById('detalhes-conteudo').innerHTML = detalhesHTML;
 };
 
 // Event Listeners do Calendário
@@ -3288,5 +3356,11 @@ document.getElementById('btn-mes-anterior').addEventListener('click', () => {
 document.getElementById('btn-mes-proximo').addEventListener('click', () => {
     calendarioMesAtual.setMonth(calendarioMesAtual.getMonth() + 1);
     renderizarCalendario();
+});
+
+document.getElementById('btn-voltar-calendario').addEventListener('click', () => {
+    // Voltar para a view principal do calendário
+    document.getElementById('calendario-view-detalhes').classList.add('hidden');
+    document.getElementById('calendario-view-principal').classList.remove('hidden');
 });
 
