@@ -1215,3 +1215,48 @@ button:not(:disabled):active {
     border-width: 4px;
 }
 
+/* Scroll horizontal para botões do header em mobile */
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Estilização da scrollbar para navegadores Webkit (Chrome, Safari, Edge) */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode scrollbar */
+body.dark .overflow-x-auto::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+body.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Mobile: Adicionar padding extra para scroll horizontal */
+@media (max-width: 640px) {
+    .overflow-x-auto {
+        padding-bottom: 0.5rem;
+        margin-bottom: -0.5rem;
+    }
+}
+
