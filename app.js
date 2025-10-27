@@ -1239,18 +1239,18 @@ const renderizarDespesas = () => {
                 </td>
                 <td class="p-3 text-right">
                     <div class="flex flex-col gap-1 items-end">
-                        <button onclick="editarPagamento(${index})" 
-                                class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors w-full">
+                    <button onclick="editarPagamento(${index})" 
+                            class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors w-full">
                             ${estaPago ? '💰 Editar Pag.' : '💰 Registrar Pag.'}
-                        </button>
+                    </button>
                         <button onclick="editarDespesa(${index})" 
                                 class="text-blue-500 hover:text-blue-700 font-semibold text-sm w-full">
                             ✏️ Editar Despesa
-                        </button>
+                    </button>
                         <button onclick="excluirDespesa(${index})" 
                                 class="text-red-500 hover:text-red-700 font-semibold text-sm w-full">
-                            🗑️ Excluir
-                        </button>
+                        🗑️ Excluir
+                    </button>
                     </div>
                 </td>
             `;
@@ -1500,23 +1500,37 @@ const renderizarGraficoMensal = (despesasDoMes) => {
         chartDespesas.destroy();
     }
 
+    // Inicializar objeto com todas as despesas pagas
     const despesasPorCategoria = despesasDoMes
-        .filter(d => d.pago > 0 && d.categoria)
+        .filter(d => d.pago > 0)
         .reduce((acc, item) => {
-            acc[item.categoria] = (acc[item.categoria] || 0) + item.pago;
+            const cat = item.categoria || 'Sem categoria';
+            acc[cat] = (acc[cat] || 0) + item.pago;
             return acc;
         }, {});
+    
+    // Adicionar gastos avulsos do mês
+    const mesDoRelatorio = mesAtual; // Usar o mês atual do relatório
+    const gastosAvulsosMes = gastosAvulsos.filter(g => g.mes === mesDoRelatorio);
+    gastosAvulsosMes.forEach(gasto => {
+        const cat = gasto.categoria || 'Sem categoria';
+        despesasPorCategoria[cat] = (despesasPorCategoria[cat] || 0) + gasto.valor;
+    });
 
     const categoriasOrdenadas = Object.keys(despesasPorCategoria).sort((a, b) => despesasPorCategoria[b] - despesasPorCategoria[a]);
     const labels = categoriasOrdenadas;
     const data = categoriasOrdenadas.map(cat => despesasPorCategoria[cat]);
     const backgroundColors = labels.map(getCorHexCategoria);
 
+    const msgSemGrafico = document.getElementById('msg-sem-grafico');
+
     if (data.length === 0) {
         canvasEl.style.display = 'none';
+        if (msgSemGrafico) msgSemGrafico.classList.remove('hidden');
         return;
     } else {
         canvasEl.style.display = 'block';
+        if (msgSemGrafico) msgSemGrafico.classList.add('hidden');
     }
 
     const totalGasto = data.reduce((sum, val) => sum + val, 0);
@@ -1616,7 +1630,7 @@ const renderizarRelatorioUnico = (mesKey) => {
                 <div id="chart-container" class="w-full p-4 bg-white rounded-lg shadow-md" style="max-width: 100%; overflow: hidden; box-sizing: border-box;">
                     <canvas id="grafico-despesas" style="max-width: 100%; height: auto;"></canvas>
                 </div>
-                ${resumo.despesas.filter(d => d.pago > 0).length === 0 ? '<p class="mt-4 text-gray-500">Nenhuma despesa paga neste mês para gerar o gráfico.</p>' : ''}
+                <p id="msg-sem-grafico" class="hidden mt-4 text-gray-500 italic">Nenhuma despesa paga neste mês para gerar o gráfico.</p>
             </div>
         </div>
     `;
@@ -2491,7 +2505,7 @@ const renderizarGastosAvulsos = () => {
             <td class="p-3 font-medium dark:text-gray-300">${gasto.descricao}</td>
             <td class="p-3 text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
-                <span>${gasto.categoria}</span>
+                <span>${gasto.categoria || 'Sem categoria'}</span>
             </td>
             <td class="p-3">${badgePagamento}</td>
             <td class="p-3 text-gray-600 dark:text-gray-400">${formatarData(gasto.data)}</td>
