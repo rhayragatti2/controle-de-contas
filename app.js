@@ -3092,9 +3092,9 @@ const abrirMenuDrawer = () => {
     const sidebar = document.getElementById('menu-sidebar');
     
     drawer.classList.remove('hidden');
-    // Delay para animação
+    // Delay para animação (da DIREITA)
     setTimeout(() => {
-        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.remove('translate-x-full');
     }, 10);
 };
 
@@ -3102,7 +3102,7 @@ const fecharMenuDrawer = () => {
     const drawer = document.getElementById('menu-drawer');
     const sidebar = document.getElementById('menu-sidebar');
     
-    sidebar.classList.add('-translate-x-full');
+    sidebar.classList.add('translate-x-full');
     // Delay para completar animação antes de esconder
     setTimeout(() => {
         drawer.classList.add('hidden');
@@ -3114,11 +3114,16 @@ document.getElementById('btn-menu-hamburguer').addEventListener('click', abrirMe
 document.getElementById('btn-fechar-menu').addEventListener('click', fecharMenuDrawer);
 document.getElementById('menu-overlay').addEventListener('click', fecharMenuDrawer);
 
-// Event Listeners para Cards do Launchpad (fechar menu ao clicar)
-document.querySelectorAll('.launchpad-card').forEach(card => {
-    card.addEventListener('click', () => {
-        fecharMenuDrawer();
-    });
+// Event Listeners para botões do menu (fechar ao clicar)
+const menuBtns = ['btn-calendario', 'btn-relatorio', 'btn-exportar', 'btn-contas-bancarias', 'btn-backup', 'btn-sync-gastos', 'btn-logout'];
+menuBtns.forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+        const originalHandler = btn.onclick;
+        btn.addEventListener('click', () => {
+            fecharMenuDrawer();
+        });
+    }
 });
 
 // ===== CALENDÁRIO =====
@@ -3156,15 +3161,23 @@ const renderizarCalendario = () => {
     const mesKey = `${ano}-${String(mes + 1).padStart(2, '0')}`;
     
     // Buscar entradas e despesas do mês
-    const chave = getChaveMes(mesKey);
+    const chave = `contas-firebase-${mesKey}`;
+    console.log('📅 Buscando dados do calendário:', chave);
     const dadosSalvos = localStorage.getItem(chave);
-    let dados = { entradas: [], despesas: [] };
+    let dados = { entradas: [], despesas: [], gastosAvulsos: [] };
     if (dadosSalvos) {
         try {
             dados = JSON.parse(dadosSalvos);
+            console.log('📅 Dados carregados:', {
+                entradas: dados.entradas?.length || 0,
+                despesas: dados.despesas?.length || 0,
+                gastosAvulsos: dados.gastosAvulsos?.length || 0
+            });
         } catch (e) {
-            console.error('Erro ao carregar dados do calendário:', e);
+            console.error('❌ Erro ao carregar dados do calendário:', e);
         }
+    } else {
+        console.log('⚠️ Nenhum dado encontrado para', mesKey);
     }
     
     // Criar grid do calendário
@@ -3191,31 +3204,36 @@ const renderizarCalendario = () => {
         const dataStr = `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
         
         // Verificar se há entradas ou despesas neste dia
-        const entradasDia = dados.entradas.filter(e => e.data === dataStr);
-        const despesasDia = dados.despesas.filter(d => d.vencimento === dataStr || d.dataPagamento === dataStr);
+        const entradasDia = (dados.entradas || []).filter(e => e.data === dataStr);
+        const despesasDia = (dados.despesas || []).filter(d => d.vencimento === dataStr || d.dataPagamento === dataStr);
+        const gastosAvulsosDia = (dados.gastosAvulsos || []).filter(g => g.data === dataStr && g.mes === mesKey);
         
-        const totalEntradas = entradasDia.reduce((acc, e) => acc + e.valor, 0);
-        const totalDespesas = despesasDia.reduce((acc, d) => acc + (d.pago || d.previsto), 0);
+        const totalEntradas = entradasDia.reduce((acc, e) => acc + (e.valor || 0), 0);
+        const totalDespesas = despesasDia.reduce((acc, d) => acc + (d.pago || d.previsto || 0), 0);
+        const totalGastosAvulsos = gastosAvulsosDia.reduce((acc, g) => acc + (g.valor || 0), 0);
+        const totalDespesasCompleto = totalDespesas + totalGastosAvulsos;
         
         const diaDiv = document.createElement('div');
         const ehHoje = dataStr === hojeStr;
         
+        const temMovimentacao = totalEntradas > 0 || totalDespesasCompleto > 0;
+        
         diaDiv.className = `p-2 min-h-[80px] border rounded-lg ${
             ehHoje ? 'bg-blue-100 dark:bg-blue-900 border-blue-500' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-        } hover:shadow-lg transition-shadow cursor-pointer`;
+        } ${temMovimentacao ? 'hover:shadow-lg cursor-pointer' : ''} transition-shadow`;
         
         diaDiv.innerHTML = `
             <div class="text-center font-bold ${ehHoje ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'} mb-1">
                 ${dia}
             </div>
             ${totalEntradas > 0 ? `<div class="text-xs bg-green-500 text-white px-1 py-0.5 rounded mb-1 text-center">+${formatarMoeda(totalEntradas)}</div>` : ''}
-            ${totalDespesas > 0 ? `<div class="text-xs bg-red-500 text-white px-1 py-0.5 rounded text-center">-${formatarMoeda(totalDespesas)}</div>` : ''}
+            ${totalDespesasCompleto > 0 ? `<div class="text-xs bg-red-500 text-white px-1 py-0.5 rounded text-center">-${formatarMoeda(totalDespesasCompleto)}</div>` : ''}
         `;
         
         // Adicionar evento de clique para mostrar detalhes
-        if (entradasDia.length > 0 || despesasDia.length > 0) {
+        if (temMovimentacao) {
             diaDiv.addEventListener('click', () => {
-                mostrarDetalhesDia(dataStr, entradasDia, despesasDia);
+                mostrarDetalhesDia(dataStr, entradasDia, despesasDia, gastosAvulsosDia);
             });
         }
         
@@ -3223,7 +3241,7 @@ const renderizarCalendario = () => {
     }
 };
 
-const mostrarDetalhesDia = (data, entradas, despesas) => {
+const mostrarDetalhesDia = (data, entradas, despesas, gastosAvulsos = []) => {
     const dataFormatada = formatarData(data);
     let detalhes = `📅 ${dataFormatada}\n\n`;
     
@@ -3236,12 +3254,24 @@ const mostrarDetalhesDia = (data, entradas, despesas) => {
     }
     
     if (despesas.length > 0) {
-        detalhes += '💸 DESPESAS:\n';
+        detalhes += '💸 DESPESAS FIXAS:\n';
         despesas.forEach(d => {
             const valor = d.pago > 0 ? d.pago : d.previsto;
             const status = d.pago > 0 ? '✓' : '○';
             detalhes += `  ${status} ${d.descricao}: ${formatarMoeda(valor)}\n`;
         });
+        detalhes += '\n';
+    }
+    
+    if (gastosAvulsos.length > 0) {
+        detalhes += '🛒 GASTOS AVULSOS:\n';
+        gastosAvulsos.forEach(g => {
+            detalhes += `  • ${g.descricao} (${g.pessoa || 'Sem pessoa'}): ${formatarMoeda(g.valor)}\n`;
+        });
+    }
+    
+    if (entradas.length === 0 && despesas.length === 0 && gastosAvulsos.length === 0) {
+        detalhes += 'Nenhuma movimentação neste dia.';
     }
     
     alert(detalhes);

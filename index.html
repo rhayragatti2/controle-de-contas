@@ -146,15 +146,8 @@
             
             <!-- Container de Informações e Botões -->
             <div class="flex justify-between items-center gap-4 w-full">
-                <!-- Lado Esquerdo: Menu Hamburguer + Usuário + Status -->
+                <!-- Lado Esquerdo: Usuário + Status -->
                 <div class="flex items-center gap-3">
-                    <!-- Botão Menu Hamburguer -->
-                    <button id="btn-menu-hamburguer" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-lg transition-colors shadow-md" title="Menu">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
-                    
                     <div id="user-indicator" class="flex items-center bg-white dark:bg-gray-700 p-1 rounded-lg shadow-sm" title="Usuário: admin">
                         <div class="user-avatar w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm">
                             <span id="user-initial">A</span>
@@ -172,22 +165,30 @@
                     </div>
                 </div>
                 
-                <!-- Lado Direito: Dark Mode -->
-                <button id="btn-dark-mode" class="bg-gray-600 text-white p-2.5 rounded-lg hover:bg-gray-700 transition-colors shadow-md" title="Alternar Modo Escuro">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                </button>
+                <!-- Lado Direito: Dark Mode + Menu -->
+                <div class="flex items-center gap-2">
+                    <button id="btn-dark-mode" class="bg-gray-600 text-white p-2.5 rounded-lg hover:bg-gray-700 transition-colors shadow-md" title="Alternar Modo Escuro">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+                    
+                    <button id="btn-menu-hamburguer" class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-lg transition-colors shadow-md" title="Menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Drawer/Sidebar Menu Launchpad -->
+        <!-- Drawer/Sidebar Menu -->
         <div id="menu-drawer" class="fixed inset-0 z-50 hidden">
             <!-- Overlay -->
             <div id="menu-overlay" class="absolute inset-0 bg-black bg-opacity-50 transition-opacity"></div>
             
-            <!-- Sidebar -->
-            <div id="menu-sidebar" class="absolute left-0 top-0 h-full w-80 bg-white dark:bg-gray-800 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+            <!-- Sidebar (DIREITA) -->
+            <div id="menu-sidebar" class="absolute right-0 top-0 h-full w-80 bg-white dark:bg-gray-800 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
                 <!-- Header do Menu -->
                 <div class="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 p-6 flex justify-between items-center">
                     <h2 class="text-2xl font-bold text-white">Menu</h2>
@@ -198,69 +199,83 @@
                     </button>
                 </div>
                 
-                <!-- Launchpad Grid -->
-                <div class="p-6 grid grid-cols-2 gap-4">
-                    <!-- Card: Calendário -->
-                    <button id="btn-calendario" class="launchpad-card bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white p-4 rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Lista Vertical de Botões -->
+                <div class="p-4 space-y-3">
+                    <!-- Botão: Calendário -->
+                    <button id="btn-calendario" class="w-full flex items-center gap-4 p-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-md transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        <span class="text-sm font-semibold block">Calendário</span>
-                        <span class="text-xs opacity-90 block mt-1">Ver por data</span>
+                        <div class="text-left flex-1">
+                            <div class="font-semibold">Calendário</div>
+                            <div class="text-xs opacity-90">Ver por data</div>
+                        </div>
                     </button>
                     
-                    <!-- Card: Relatório -->
-                    <button id="btn-relatorio" class="launchpad-card bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white p-4 rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Botão: Relatório -->
+                    <button id="btn-relatorio" class="w-full flex items-center gap-4 p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-                        <span class="text-sm font-semibold block">Relatório</span>
-                        <span class="text-xs opacity-90 block mt-1">Análise mensal</span>
+                        <div class="text-left flex-1">
+                            <div class="font-semibold">Relatório</div>
+                            <div class="text-xs opacity-90">Análise mensal</div>
+                        </div>
                     </button>
                     
-                    <!-- Card: Exportar -->
-                    <button id="btn-exportar" class="launchpad-card bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-4 rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Botão: Exportar -->
+                    <button id="btn-exportar" class="w-full flex items-center gap-4 p-4 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                        <span class="text-sm font-semibold block">Exportar</span>
-                        <span class="text-xs opacity-90 block mt-1">Baixar dados</span>
+                        <div class="text-left flex-1">
+                            <div class="font-semibold">Exportar</div>
+                            <div class="text-xs opacity-90">Baixar dados</div>
+                        </div>
                     </button>
                     
-                    <!-- Card: Contas Bancárias -->
-                    <button id="btn-contas-bancarias" class="launchpad-card bg-gradient-to-br from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white p-4 rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Botão: Contas Bancárias -->
+                    <button id="btn-contas-bancarias" class="w-full flex items-center gap-4 p-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg shadow-md transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                         </svg>
-                        <span class="text-sm font-semibold block">Contas</span>
-                        <span class="text-xs opacity-90 block mt-1">Bancos</span>
+                        <div class="text-left flex-1">
+                            <div class="font-semibold">Contas Bancárias</div>
+                            <div class="text-xs opacity-90">Gerenciar bancos</div>
+                        </div>
                     </button>
                     
-                    <!-- Card: Backup -->
-                    <button id="btn-backup" class="launchpad-card bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white p-4 rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                    <!-- Botão: Backup -->
+                    <button id="btn-backup" class="w-full flex items-center gap-4 p-4 bg-gray-600 hover:bg-gray-700 text-white rounded-lg shadow-md transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
                         </svg>
-                        <span class="text-sm font-semibold block">Backup</span>
-                        <span class="text-xs opacity-90 block mt-1">Salvar/Restaurar</span>
+                        <div class="text-left flex-1">
+                            <div class="font-semibold">Backup</div>
+                            <div class="text-xs opacity-90">Salvar/Restaurar</div>
+                        </div>
                     </button>
                     
-                    <!-- Card: Sincronizar -->
-                    <button id="btn-sync-gastos" class="launchpad-card bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-4 rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                    <!-- Botão: Sincronizar -->
+                    <button id="btn-sync-gastos" class="w-full flex items-center gap-4 p-4 bg-purple-700 hover:bg-purple-800 text-white rounded-lg shadow-md transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
                         </svg>
-                        <span class="text-sm font-semibold block">Sincronizar</span>
-                        <span class="text-xs opacity-90 block mt-1">Firebase</span>
+                        <div class="text-left flex-1">
+                            <div class="font-semibold">Sincronizar</div>
+                            <div class="text-xs opacity-90">Firebase</div>
+                        </div>
                     </button>
                     
-                    <!-- Card: Sair -->
-                    <button id="btn-logout" class="launchpad-card bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white p-4 rounded-xl shadow-lg transition-all hover:scale-105 hover:shadow-xl col-span-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                    <!-- Botão: Sair -->
+                    <button id="btn-logout" class="w-full flex items-center gap-4 p-4 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/>
                         </svg>
-                        <span class="text-sm font-semibold block">Sair</span>
-                        <span class="text-xs opacity-90 block mt-1">Desconectar da conta</span>
+                        <div class="text-left flex-1">
+                            <div class="font-semibold">Sair</div>
+                            <div class="text-xs opacity-90">Desconectar</div>
+                        </div>
                     </button>
                 </div>
             </div>
