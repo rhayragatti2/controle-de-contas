@@ -902,7 +902,7 @@ const renderizarEntradas = () => {
                 <td class="p-2">
                     <select id="edit-entrada-categoria-${index}" 
                             class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
-                        ${categorias.map(cat => `<option value="${cat}" ${item.categoria === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                        ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}" ${item.categoria === (typeof cat === 'object' ? cat.nome : cat) ? 'selected' : ''}>${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
                     </select>
                 </td>
                 <td class="p-2" colspan="2">
@@ -1131,7 +1131,7 @@ const renderizarDespesas = () => {
                 <td class="p-2">
                     <select id="edit-despesa-categoria-${index}" 
                             class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
-                        ${categorias.map(cat => `<option value="${cat}" ${item.categoria === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                        ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}" ${item.categoria === (typeof cat === 'object' ? cat.nome : cat) ? 'selected' : ''}>${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
                     </select>
                 </td>
                 <td class="p-2" colspan="2">
@@ -1460,7 +1460,7 @@ const calcularResumoParaMes = (mesKey) => {
     const chave = getChaveMes(mesKey);
     const dadosSalvos = localStorage.getItem(chave);
 
-    let dados = { entradas: [], despesas: [] };
+    let dados = { entradas: [], despesas: [], gastosAvulsos: [] };
     if (dadosSalvos) {
         try {
             dados = JSON.parse(dadosSalvos);
@@ -1471,7 +1471,12 @@ const calcularResumoParaMes = (mesKey) => {
 
     const totalEntradas = (dados.entradas || []).reduce((acc, item) => acc + item.valor, 0);
     const totalPrevisto = (dados.despesas || []).reduce((acc, item) => acc + item.previsto, 0);
-    const totalPago = (dados.despesas || []).reduce((acc, item) => acc + item.pago, 0);
+    
+    // Total Pago = Despesas Pagas + Gastos Avulsos
+    const totalPagoDespesas = (dados.despesas || []).reduce((acc, item) => acc + item.pago, 0);
+    const totalGastosAvulsos = (dados.gastosAvulsos || []).reduce((acc, item) => acc + item.valor, 0);
+    const totalPago = totalPagoDespesas + totalGastosAvulsos;
+    
     const saldo = totalEntradas - totalPago;
 
     return {
@@ -1481,7 +1486,8 @@ const calcularResumoParaMes = (mesKey) => {
         totalPrevisto,
         totalPago,
         saldo,
-        despesas: dados.despesas || []
+        despesas: dados.despesas || [],
+        gastosAvulsos: dados.gastosAvulsos || []
     };
 };
 
@@ -1492,7 +1498,7 @@ const renderizarLinhaResumo = (titulo, valor, corClass) => `
     </div>
 `;
 
-const renderizarGraficoMensal = (despesasDoMes) => {
+const renderizarGraficoMensal = (despesasDoMes, gastosAvulsosDoMes = []) => {
     const canvasEl = document.getElementById('grafico-despesas');
     if (!canvasEl) return;
 
@@ -1510,9 +1516,7 @@ const renderizarGraficoMensal = (despesasDoMes) => {
         }, {});
     
     // Adicionar gastos avulsos do mês
-    const mesDoRelatorio = mesAtual; // Usar o mês atual do relatório
-    const gastosAvulsosMes = gastosAvulsos.filter(g => g.mes === mesDoRelatorio);
-    gastosAvulsosMes.forEach(gasto => {
+    (gastosAvulsosDoMes || []).forEach(gasto => {
         const cat = gasto.categoria || 'Sem categoria';
         despesasPorCategoria[cat] = (despesasPorCategoria[cat] || 0) + gasto.valor;
     });
@@ -1635,7 +1639,7 @@ const renderizarRelatorioUnico = (mesKey) => {
         </div>
     `;
 
-    renderizarGraficoMensal(resumo.despesas);
+    renderizarGraficoMensal(resumo.despesas, resumo.gastosAvulsos);
 };
 
 const renderizarLinhaComparacao = (metrica, val1, val2, corClasse, bgClasse, isSaldo = false) => {
