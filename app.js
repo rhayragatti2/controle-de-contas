@@ -807,11 +807,54 @@ const renderizarEntradas = () => {
         const corCategoria = getCorCategoria(item.categoria);
 
         const tr = document.createElement('tr');
-        tr.className = 'border-b border-gray-200 hover:bg-gray-50 transition-colors';
+        tr.className = 'border-b border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors';
+        
+        // Modo de edição inline
+        if (index === estadoEdicaoEntrada) {
+            tr.classList.add('bg-blue-50', 'dark:bg-blue-900');
         tr.innerHTML = `
-            <td class="p-3">${formatarData(item.data)}</td>
-            <td class="p-3">${item.descricao}</td>
-            <td class="p-3 text-gray-600 flex items-center gap-2">
+                <td class="p-2">
+                    <input type="text" id="edit-entrada-data-${index}" value="${formatISODateToBR(item.data)}" 
+                           placeholder="DD/MM/AAAA"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                </td>
+                <td class="p-2">
+                    <input type="text" id="edit-entrada-descricao-${index}" value="${item.descricao}" 
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                </td>
+                <td class="p-2">
+                    <select id="edit-entrada-categoria-${index}" 
+                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                        ${categorias.map(cat => `<option value="${cat}" ${item.categoria === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                    </select>
+                </td>
+                <td class="p-2" colspan="2">
+                    <input type="text" id="edit-entrada-observacoes-${index}" value="${item.observacoes || ''}" 
+                           placeholder="Observações"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                </td>
+                <td class="p-2">
+                    <input type="number" id="edit-entrada-valor-${index}" value="${item.valor}" 
+                           step="0.01" min="0"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm text-right">
+                </td>
+                <td class="p-2 text-right">
+                    <button onclick="salvarEdicaoInlineEntrada(${index})" 
+                            class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 mr-1">
+                        ✓ Salvar
+                    </button>
+                    <button onclick="cancelarEdicaoInlineEntrada()" 
+                            class="bg-gray-400 text-white px-3 py-1 rounded text-sm hover:bg-gray-500">
+                        ✕ Cancelar
+                    </button>
+                </td>
+            `;
+        } else {
+            // Modo visualização normal
+            tr.innerHTML = `
+                <td class="p-3 dark:text-gray-300">${formatarData(item.data)}</td>
+                <td class="p-3 dark:text-gray-300">${item.descricao}</td>
+                <td class="p-3 text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
                 <span>${item.categoria || '---'}</span>
             </td>
@@ -827,21 +870,39 @@ const renderizarEntradas = () => {
                 </button>
             </td>
         `;
+        }
         tabelaEntradas.appendChild(tr);
     });
 };
 
 window.editarEntrada = (index) => {
-    const entrada = entradas[index];
-    document.getElementById('entrada-descricao').value = entrada.descricao;
-    document.getElementById('entrada-data').value = formatISODateToBR(entrada.data);
-    document.getElementById('entrada-valor').value = entrada.valor;
-    document.getElementById('entrada-categoria').value = entrada.categoria;
-    document.getElementById('entrada-id-edicao').value = index;
-    document.getElementById('entrada-btn-texto').textContent = 'Atualizar Entrada';
-
-    formEntrada.scrollIntoView({ behavior: 'smooth' });
     estadoEdicaoEntrada = index;
+    renderizarEntradas();
+};
+
+window.salvarEdicaoInlineEntrada = (index) => {
+    const data = parseBRDateToISO(document.getElementById(`edit-entrada-data-${index}`).value);
+    const descricao = document.getElementById(`edit-entrada-descricao-${index}`).value.trim();
+    const categoria = document.getElementById(`edit-entrada-categoria-${index}`).value;
+    const observacoes = document.getElementById(`edit-entrada-observacoes-${index}`).value.trim();
+    const valor = parseFloat(document.getElementById(`edit-entrada-valor-${index}`).value);
+
+    if (!descricao || valor <= 0 || !data) {
+        mostrarToast('Preencha todos os campos corretamente!', 'error');
+        return;
+    }
+
+    entradas[index] = { data, descricao, valor, categoria, observacoes };
+    estadoEdicaoEntrada = -1;
+    salvarDados();
+    renderizarEntradas();
+    atualizarResumo();
+    mostrarToast('Entrada atualizada!', 'success');
+};
+
+window.cancelarEdicaoInlineEntrada = () => {
+    estadoEdicaoEntrada = -1;
+    renderizarEntradas();
 };
 
 formEntrada.addEventListener('submit', (e) => {
@@ -933,20 +994,42 @@ window.salvarPagamento = (index) => {
     mostrarToast('Pagamento registrado!', 'success');
 };
 
-window.editarDespesa = (index) => {
-    const despesa = despesas[index];
-    document.getElementById('despesa-descricao').value = despesa.descricao;
-    document.getElementById('despesa-vencimento').value = formatISODateToBR(despesa.vencimento);
-    document.getElementById('despesa-previsto').value = despesa.previsto;
-    document.getElementById('despesa-categoria').value = despesa.categoria;
-    document.getElementById('despesa-tags').value = despesa.tags ? despesa.tags.join(', ') : '';
-    document.getElementById('despesa-notas').value = despesa.notas || '';
-    document.getElementById('despesa-recorrente').checked = despesa.recorrente || false;
-    document.getElementById('despesa-debito-automatico').checked = despesa.debitoAutomatico || false;
-    document.getElementById('despesa-id-edicao').value = index;
-    document.getElementById('despesa-btn-texto').textContent = 'Atualizar Despesa';
+let estadoEdicaoCompletaDespesa = -1;
 
-    formDespesa.scrollIntoView({ behavior: 'smooth' });
+window.editarDespesa = (index) => {
+    estadoEdicaoCompletaDespesa = index;
+    renderizarDespesas();
+};
+
+window.salvarEdicaoInlineDespesa = (index) => {
+    const descricao = document.getElementById(`edit-despesa-descricao-${index}`).value.trim();
+    const vencimento = parseBRDateToISO(document.getElementById(`edit-despesa-vencimento-${index}`).value);
+    const previsto = parseFloat(document.getElementById(`edit-despesa-previsto-${index}`).value);
+    const categoria = document.getElementById(`edit-despesa-categoria-${index}`).value;
+    const notas = document.getElementById(`edit-despesa-notas-${index}`).value.trim();
+
+    if (!descricao || previsto <= 0 || !vencimento) {
+        mostrarToast('Preencha todos os campos corretamente!', 'error');
+        return;
+    }
+
+    despesas[index].descricao = descricao;
+    despesas[index].vencimento = vencimento;
+    despesas[index].previsto = previsto;
+    despesas[index].categoria = categoria;
+    despesas[index].notas = notas;
+
+    estadoEdicaoCompletaDespesa = -1;
+    salvarDados();
+    renderizarDespesas();
+    atualizarResumo();
+    verificarVencimentos();
+    mostrarToast('Despesa atualizada!', 'success');
+};
+
+window.cancelarEdicaoInlineDespesa = () => {
+    estadoEdicaoCompletaDespesa = -1;
+    renderizarDespesas();
 };
 
 const renderizarDespesas = () => {
@@ -955,12 +1038,62 @@ const renderizarDespesas = () => {
     despesas.forEach((item, index) => {
         const corCategoria = getCorCategoria(item.categoria);
         const tr = document.createElement('tr');
-        tr.className = 'border-b border-gray-200 hover:bg-gray-50 transition-colors';
+        tr.className = 'border-b border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors';
 
         const estaPago = item.pago > 0 && item.dataPagamento;
         const pagoClasseDataValor = estaPago ? 'text-gray-400 line-through' : '';
 
-        if (index === estadoEdicaoDespesa) {
+        // Modo de edição completa (inline)
+        if (index === estadoEdicaoCompletaDespesa) {
+            tr.classList.add('bg-blue-50', 'dark:bg-blue-900');
+            tr.innerHTML = `
+                <td class="p-2">
+                    <input type="text" id="edit-despesa-descricao-${index}" value="${item.descricao}" 
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                </td>
+                <td class="p-2">
+                    <select id="edit-despesa-categoria-${index}" 
+                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                        ${categorias.map(cat => `<option value="${cat}" ${item.categoria === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                    </select>
+                </td>
+                <td class="p-2" colspan="2">
+                    <input type="text" id="edit-despesa-notas-${index}" value="${item.notas || ''}" 
+                           placeholder="Notas"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                </td>
+                <td class="p-2">
+                    <input type="text" id="edit-despesa-vencimento-${index}" value="${formatISODateToBR(item.vencimento)}" 
+                           placeholder="DD/MM/AAAA"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                </td>
+                <td class="p-2">
+                    <input type="text" value="${formatISODateToBR(item.dataPagamento) || '---'}" 
+                           disabled
+                           class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 text-gray-500 text-sm">
+                </td>
+                <td class="p-2">
+                    <input type="number" id="edit-despesa-previsto-${index}" value="${item.previsto}" 
+                           step="0.01" min="0"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm text-right">
+                </td>
+                <td class="p-2">
+                    <input type="number" value="${item.pago}" 
+                           disabled
+                           class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 text-gray-500 text-sm text-right">
+                </td>
+                <td class="p-2 text-right">
+                    <button onclick="salvarEdicaoInlineDespesa(${index})" 
+                            class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 mb-1 w-full">
+                        ✓ Salvar
+                    </button>
+                    <button onclick="cancelarEdicaoInlineDespesa()" 
+                            class="bg-gray-400 text-white px-3 py-1 rounded text-sm hover:bg-gray-500 w-full">
+                        ✕ Cancelar
+                    </button>
+                </td>
+            `;
+        } else if (index === estadoEdicaoDespesa) {
             tr.classList.add('bg-yellow-50', 'shadow-inner');
             tr.innerHTML = `
                 <td class="p-3 font-semibold">${item.descricao}</td>
@@ -1027,17 +1160,21 @@ const renderizarDespesas = () => {
                 <td class="p-3 text-right font-bold ${item.pago > 0 ? 'text-red-700 dark:text-red-500' : 'text-gray-400'}">
                     ${formatarMoeda(item.pago)}
                 </td>
-                <td class="p-3 text-right flex flex-col gap-1 items-end w-40">
-                    <button onclick="editarPagamento(${index})" 
-                            class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors w-full">
-                        ${estaPago ? 'Editar Pag.' : 'Registrar Pag.'}
-                    </button>
-                    <button onclick="editarDespesa(${index})" class="text-blue-500 hover:text-blue-700 font-semibold text-sm w-full mt-1">
-                        ✏️ Editar
-                    </button>
-                    <button onclick="excluirDespesa(${index})" class="text-red-500 hover:text-red-700 font-semibold text-sm w-full mt-1">
-                        🗑️ Excluir
-                    </button>
+                <td class="p-3 text-right">
+                    <div class="flex flex-col gap-1 items-end">
+                        <button onclick="editarPagamento(${index})" 
+                                class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors w-full">
+                            ${estaPago ? '💰 Editar Pag.' : '💰 Registrar Pag.'}
+                        </button>
+                        <button onclick="editarDespesa(${index})" 
+                                class="text-blue-500 hover:text-blue-700 font-semibold text-sm w-full">
+                            ✏️ Editar Despesa
+                        </button>
+                        <button onclick="excluirDespesa(${index})" 
+                                class="text-red-500 hover:text-red-700 font-semibold text-sm w-full">
+                            🗑️ Excluir
+                        </button>
+                    </div>
                 </td>
             `;
         }
