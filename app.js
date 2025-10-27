@@ -3589,6 +3589,110 @@ window.fecharFormularioCalendario = () => {
 // Variável global para armazenar os dados processados temporariamente
 let dadosGastoAvulsoCalendario = null;
 
+// Função auxiliar para extrair dados de texto natural (reutilizável)
+const extrairDadosTextoNatural = (textoOriginal) => {
+    const texto = textoOriginal.trim().toLowerCase();
+    
+    // Extrair pessoa (Mary ou Rhayra)
+    let pessoa = 'Mary'; // Padrão
+    if (texto.includes('rhayra')) {
+        pessoa = 'Rhayra';
+    } else if (texto.includes('mary')) {
+        pessoa = 'Mary';
+    } else if (texto.includes('joão') || texto.includes('joao')) {
+        pessoa = 'João';
+    }
+    
+    // Extrair valor (números inteiros ou decimais)
+    const regexValor = /(\d+(?:[.,]\d{1,2})?)\s*(?:reais?)?/i;
+    const matchValor = texto.match(regexValor);
+    const valor = matchValor ? parseFloat(matchValor[1].replace(',', '.')) : 0;
+    
+    // Extrair local/descrição (após "no" ou "na")
+    let descricao = '';
+    const regexLocal = /n[oa]\s+(?:débito|crédito|pix|dinheiro|vale refeição|vale refeicao|vr|vale alimentação|vale alimentacao|va)\s+n[oa]\s+(.+?)$/i;
+    const matchLocal = texto.match(regexLocal);
+    
+    if (matchLocal && matchLocal[1]) {
+        descricao = matchLocal[1].trim();
+        descricao = descricao.charAt(0).toUpperCase() + descricao.slice(1);
+    } else {
+        // Tentar extrair após última ocorrência de "no" ou "na"
+        const indexUltimoNo = Math.max(
+            texto.lastIndexOf(' no '),
+            texto.lastIndexOf(' na ')
+        );
+        if (indexUltimoNo > 0) {
+            descricao = texto.slice(indexUltimoNo + 4).trim();
+            descricao = descricao.charAt(0).toUpperCase() + descricao.slice(1);
+        }
+    }
+    
+    // Se não encontrou descrição, usar uma parte do texto
+    if (!descricao) {
+        const palavrasLimpas = texto.replace(/gastei|comprei|paguei|reais?|débito|crédito|pix|dinheiro|vale refeição|vale refeicao|vr|vale alimentação|vale alimentacao|va|n[oa]/gi, '').trim();
+        const primeiras = palavrasLimpas.split(/\s+/).slice(0, 3).join(' ');
+        descricao = primeiras.charAt(0).toUpperCase() + primeiras.slice(1);
+    }
+    
+    // Se ainda não tem descrição
+    if (!descricao) {
+        descricao = 'Gasto não especificado';
+    }
+    
+    // Extrair e processar data
+    let dataProcessada = new Date();
+    
+    if (texto.includes('hoje')) {
+        dataProcessada = new Date();
+    } else if (texto.includes('ontem')) {
+        dataProcessada = new Date();
+        dataProcessada.setDate(dataProcessada.getDate() - 1);
+    } else if (texto.includes('anteontem')) {
+        dataProcessada = new Date();
+        dataProcessada.setDate(dataProcessada.getDate() - 2);
+    } else {
+        // Tentar encontrar data no formato DD/MM ou dia DD
+        const regexData = /(?:dia\s+)?(\d{1,2})(?:\/(\d{1,2}))?/;
+        const matchData = texto.match(regexData);
+        if (matchData) {
+            const dia = parseInt(matchData[1]);
+            const mes = matchData[2] ? parseInt(matchData[2]) - 1 : dataProcessada.getMonth();
+            dataProcessada = new Date(dataProcessada.getFullYear(), mes, dia);
+        }
+    }
+    
+    // Formatar data para YYYY-MM-DD
+    const dataFormatada = dataProcessada.toISOString().split('T')[0];
+    
+    // Detectar categoria baseada no texto
+    let categoria = 'Sem categoria';
+    if (texto.includes('mercado') || texto.includes('supermercado')) {
+        categoria = 'Alimentação';
+    } else if (texto.includes('farmácia') || texto.includes('farmacia') || texto.includes('remédio') || texto.includes('remedio')) {
+        categoria = 'Saúde';
+    } else if (texto.includes('restaurante') || texto.includes('lanchonete') || texto.includes('comida')) {
+        categoria = 'Alimentação';
+    } else if (texto.includes('uber') || texto.includes('taxi') || texto.includes('ônibus') || texto.includes('onibus') || texto.includes('transporte')) {
+        categoria = 'Transporte';
+    } else if (texto.includes('cinema') || texto.includes('teatro') || texto.includes('show') || texto.includes('lazer')) {
+        categoria = 'Lazer';
+    }
+    
+    // Validação
+    if (valor <= 0) {
+        return { erro: 'Não consegui identificar o valor! Verifique o texto.' };
+    }
+    
+    return {
+        pessoa,
+        descricao,
+        valor,
+        data: dataFormatada,
+        categoria
+    };
+};
+
 // Função para processar texto natural no calendário
 window.processarTextoCalendario = () => {
     const texto = document.getElementById('cal-texto-natural').value.trim();
@@ -3598,8 +3702,8 @@ window.processarTextoCalendario = () => {
         return;
     }
     
-    // Usar a mesma lógica de processamento de texto da aplicação principal
-    const resultado = processarTextoNaturalGasto(texto);
+    // Usar a função auxiliar para extrair dados
+    const resultado = extrairDadosTextoNatural(texto);
     
     if (resultado.erro) {
         mostrarToast(resultado.erro, 'error');
