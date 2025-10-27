@@ -889,15 +889,15 @@ const renderizarEntradas = () => {
         // Modo de edição inline
         if (index === estadoEdicaoEntrada) {
             tr.classList.add('bg-blue-50', 'dark:bg-blue-900');
-        tr.innerHTML = `
-                <td class="p-2">
-                    <input type="text" id="edit-entrada-data-${index}" value="${formatISODateToBR(item.data)}" 
-                           placeholder="DD/MM/AAAA"
-                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
-                </td>
+            tr.innerHTML = `
                 <td class="p-2">
                     <input type="text" id="edit-entrada-descricao-${index}" value="${item.descricao}" 
                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
+                </td>
+                <td class="p-2">
+                    <input type="number" id="edit-entrada-valor-${index}" value="${item.valor}" 
+                           step="0.01" min="0"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm text-right">
                 </td>
                 <td class="p-2">
                     <select id="edit-entrada-categoria-${index}" 
@@ -905,15 +905,15 @@ const renderizarEntradas = () => {
                         ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}" ${item.categoria === (typeof cat === 'object' ? cat.nome : cat) ? 'selected' : ''}>${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
                     </select>
                 </td>
-                <td class="p-2" colspan="2">
-                    <input type="text" id="edit-entrada-observacoes-${index}" value="${item.observacoes || ''}" 
-                           placeholder="Observações"
+                <td class="p-2">
+                    <input type="text" id="edit-entrada-data-${index}" value="${formatISODateToBR(item.data)}" 
+                           placeholder="DD/MM/AAAA"
                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
                 </td>
                 <td class="p-2">
-                    <input type="number" id="edit-entrada-valor-${index}" value="${item.valor}" 
-                           step="0.01" min="0"
-                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm text-right">
+                    <input type="text" id="edit-entrada-observacoes-${index}" value="${item.observacoes || ''}" 
+                           placeholder="Observações"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
                 </td>
                 <td class="p-2 text-right">
                     <button onclick="salvarEdicaoInlineEntrada(${index})" 
@@ -929,15 +929,14 @@ const renderizarEntradas = () => {
         } else {
             // Modo visualização normal
             tr.innerHTML = `
-                <td class="p-3 dark:text-gray-300">${formatarData(item.data)}</td>
                 <td class="p-3 dark:text-gray-300">${item.descricao}</td>
+                <td class="p-3 text-right text-green-600 dark:text-green-400 font-bold text-lg">${formatarMoeda(item.valor)}</td>
                 <td class="p-3 text-gray-600 dark:text-gray-400 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
                 <span>${item.categoria || '---'}</span>
             </td>
-            <td class="p-3 text-gray-500 dark:text-gray-400">${item.tags || '---'}</td>
-            <td class="p-3 text-gray-500 dark:text-gray-400">${item.observacoes || '---'}</td>
-            <td class="p-3 text-right text-green-600 dark:text-green-400 font-semibold">${formatarMoeda(item.valor)}</td>
+                <td class="p-3 text-gray-600 dark:text-gray-400">${formatarData(item.data)}</td>
+                <td class="p-3 text-gray-500 dark:text-gray-400 text-sm">${item.observacoes || '---'}</td>
             <td class="p-3 text-right">
                 <button onclick="editarEntrada(${index})" class="text-blue-500 hover:text-blue-700 font-semibold mr-2" title="Editar">
                     ✏️
@@ -1129,15 +1128,20 @@ const renderizarDespesas = () => {
                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
                 </td>
                 <td class="p-2">
+                    <input type="number" id="edit-despesa-previsto-${index}" value="${item.previsto}" 
+                           step="0.01" min="0"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm text-right">
+                </td>
+                <td class="p-2">
+                    <input type="number" value="${item.pago}" 
+                           disabled
+                           class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 text-gray-500 text-sm text-right">
+                </td>
+                <td class="p-2">
                     <select id="edit-despesa-categoria-${index}" 
                             class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
                         ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}" ${item.categoria === (typeof cat === 'object' ? cat.nome : cat) ? 'selected' : ''}>${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
                     </select>
-                </td>
-                <td class="p-2" colspan="2">
-                    <input type="text" id="edit-despesa-notas-${index}" value="${item.notas || ''}" 
-                           placeholder="Notas"
-                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
                 </td>
                 <td class="p-2">
                     <input type="text" id="edit-despesa-vencimento-${index}" value="${formatISODateToBR(item.vencimento)}" 
@@ -1150,14 +1154,9 @@ const renderizarDespesas = () => {
                            class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 text-gray-500 text-sm">
                 </td>
                 <td class="p-2">
-                    <input type="number" id="edit-despesa-previsto-${index}" value="${item.previsto}" 
-                           step="0.01" min="0"
-                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm text-right">
-                </td>
-                <td class="p-2">
-                    <input type="number" value="${item.pago}" 
-                           disabled
-                           class="w-full p-2 border rounded bg-gray-100 dark:bg-gray-600 text-gray-500 text-sm text-right">
+                    <input type="text" id="edit-despesa-notas-${index}" value="${item.notas || ''}" 
+                           placeholder="Observações"
+                           class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
                 </td>
                 <td class="p-2 text-right">
                     <button onclick="salvarEdicaoInlineDespesa(${index})" 
@@ -1174,7 +1173,7 @@ const renderizarDespesas = () => {
             tr.classList.add('bg-yellow-50', 'shadow-inner');
             tr.innerHTML = `
                 <td class="p-3 font-semibold">${item.descricao}</td>
-                <td colspan="7" class="p-3">
+                <td colspan="6" class="p-3">
                     <div class="flex flex-col md:flex-row gap-2 items-center w-full">
                         <label class="font-medium text-sm text-gray-700 w-full md:w-auto flex-shrink-0">Pago em:</label>
                         <input type="text" id="input-pagamento-data" 
@@ -1210,7 +1209,7 @@ const renderizarDespesas = () => {
                 badges += '<span class="badge-debito-automatico ml-2">🏦 Débito Automático</span>';
             }
             if (item.recorrente && !item.debitoAutomatico) {
-                badges += '<span class="badge-recorrente ml-2">🔄 Recorrente</span>';
+                badges += '<span class="badge-recorrente ml-2" title="Recorrente">🔄</span>';
             }
             if (item.parcelado) {
                 badges += '<span class="badge-parcelado ml-2">💳 Parcelado</span>';
@@ -1223,34 +1222,33 @@ const renderizarDespesas = () => {
                         ${badges}
                     </div>
                 </td>
-                <td class="p-3 text-gray-600 flex items-center gap-2">
+                <td class="p-3 text-right text-red-500 dark:text-red-400 ${pagoClasseDataValor} font-bold text-lg">
+                    ${formatarMoeda(item.previsto)}
+                </td>
+                <td class="p-3 text-right font-bold text-lg ${item.pago > 0 ? 'text-red-700 dark:text-red-500' : 'text-gray-400'}">
+                    ${formatarMoeda(item.pago)}
+                </td>
+                <td class="p-3 text-gray-600 dark:text-gray-400 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
                     <span>${item.categoria || '---'}</span>
                 </td>
-                <td class="p-3 text-gray-500 dark:text-gray-400">${item.tags || '---'}</td>
-                <td class="p-3 text-gray-500 dark:text-gray-400">${item.observacoes || '---'}</td>
-                <td class="p-3 font-medium ${pagoClasseDataValor}">${formatarData(item.vencimento)}</td>
-                <td class="p-3 ${estaPago ? 'text-gray-700 font-medium' : 'text-gray-400 italic'}">${formatarData(item.dataPagamento)}</td>
-                <td class="p-3 text-right text-red-500 dark:text-red-400 ${pagoClasseDataValor}">
-                    ${formatarMoeda(item.previsto)}
-                </td>
-                <td class="p-3 text-right font-bold ${item.pago > 0 ? 'text-red-700 dark:text-red-500' : 'text-gray-400'}">
-                    ${formatarMoeda(item.pago)}
-                </td>
+                <td class="p-3 font-medium text-gray-700 dark:text-gray-300 ${pagoClasseDataValor}">${formatarData(item.vencimento)}</td>
+                <td class="p-3 ${estaPago ? 'text-gray-700 dark:text-gray-300 font-medium' : 'text-gray-400 italic'}">${formatarData(item.dataPagamento)}</td>
+                <td class="p-3 text-gray-500 dark:text-gray-400 text-sm">${item.observacoes || '---'}</td>
                 <td class="p-3 text-right">
                     <div class="flex flex-col gap-1 items-end">
-                    <button onclick="editarPagamento(${index})" 
-                            class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors w-full">
-                            ${estaPago ? '💰 Editar Pag.' : '💰 Registrar Pag.'}
-                    </button>
+                        <button onclick="editarPagamento(${index})" 
+                                class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors w-full">
+                                ${estaPago ? '💰 Editar Pag.' : '💰 Registrar Pag.'}
+                        </button>
                         <button onclick="editarDespesa(${index})" 
                                 class="text-blue-500 hover:text-blue-700 font-semibold text-sm w-full">
                             ✏️ Editar Despesa
-                    </button>
+                        </button>
                         <button onclick="excluirDespesa(${index})" 
                                 class="text-red-500 hover:text-red-700 font-semibold text-sm w-full">
-                        🗑️ Excluir
-                    </button>
+                            🗑️ Excluir
+                        </button>
                     </div>
                 </td>
             `;
