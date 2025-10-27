@@ -711,16 +711,20 @@ const atualizarResumo = () => {
     // 1. ENTRADAS (Receitas)
     const totalEntradas = entradas.reduce((acc, item) => acc + item.valor, 0);
     
-    // 2. DESPESAS
-    const totalPrevisto = despesas.reduce((acc, item) => acc + item.previsto, 0);
-    let totalPago = despesas.reduce((acc, item) => acc + item.pago, 0);
+    // 2. DESPESAS - Separar Fixos e Avulsos
+    const totalPrevistoFixos = despesas.reduce((acc, item) => acc + item.previsto, 0);
+    const totalPagoFixos = despesas.reduce((acc, item) => acc + item.pago, 0);
     
-    // Adicionar gastos avulsos ao total pago
+    // Gastos Avulsos
+    let totalGastosAvulsos = 0;
     if (gastosAvulsos && gastosAvulsos.length > 0) {
         const gastosMes = gastosAvulsos.filter(g => g.mes === mesAtual);
-        const totalGastosAvulsos = gastosMes.reduce((acc, g) => acc + g.valor, 0);
-        totalPago += totalGastosAvulsos;
+        totalGastosAvulsos = gastosMes.reduce((acc, g) => acc + g.valor, 0);
     }
+    
+    // Total Geral de Despesas
+    const totalPrevisto = totalPrevistoFixos + totalGastosAvulsos; // Avulsos conta como previsto também
+    const totalPago = totalPagoFixos + totalGastosAvulsos;
     
     // 3. SALDO DISPONÍVEL (Entradas - Despesas Pagas)
     const saldoDisponivel = totalEntradas - totalPago;
@@ -730,26 +734,28 @@ const atualizarResumo = () => {
     const totalRetiradas = poupanca.filter(p => p.tipo === 'retirada').reduce((acc, p) => acc + p.valor, 0);
     const saldoPoupanca = totalDepositos - totalRetiradas;
     
-    // 5. SALDO FINAL EM MÃOS (Disponível - Depósitos + Retiradas)
+    // 5. SALDO FINAL DO MÊS (Disponível - Depósitos + Retiradas)
     const saldoFinalMaos = saldoDisponivel - totalDepositos + totalRetiradas;
-    
-    // 6. PREVISÃO FINAL (Se todas despesas forem pagas)
-    const previsaoFinal = totalEntradas - totalPrevisto;
     
     // Atualizar elementos no DOM
     const totalEntradasEl = document.getElementById('total-entradas');
     const totalPrevistoEl = document.getElementById('total-previsto');
     const totalPagoEl = document.getElementById('total-pago');
+    const totalPrevistoFixosEl = document.getElementById('total-previsto-fixos');
+    const totalPagoFixosEl = document.getElementById('total-pago-fixos');
+    const totalGastosAvulsosEl = document.getElementById('total-gastos-avulsos');
     const saldoDisponivelEl = document.getElementById('saldo-disponivel');
     const totalDepositosResumoEl = document.getElementById('total-depositos-poupanca-resumo');
     const totalRetiradasResumoEl = document.getElementById('total-retiradas-poupanca-resumo');
     const saldoPoupancaResumoEl = document.getElementById('saldo-poupanca-resumo');
     const saldoFinalMaosEl = document.getElementById('saldo-final-maos');
-    const previsaoSaldoEl = document.getElementById('previsao-saldo');
     
     if (totalEntradasEl) totalEntradasEl.textContent = formatarMoeda(totalEntradas);
     if (totalPrevistoEl) totalPrevistoEl.textContent = formatarMoeda(totalPrevisto);
     if (totalPagoEl) totalPagoEl.textContent = formatarMoeda(totalPago);
+    if (totalPrevistoFixosEl) totalPrevistoFixosEl.textContent = formatarMoeda(totalPrevistoFixos);
+    if (totalPagoFixosEl) totalPagoFixosEl.textContent = formatarMoeda(totalPagoFixos);
+    if (totalGastosAvulsosEl) totalGastosAvulsosEl.textContent = formatarMoeda(totalGastosAvulsos);
     if (saldoDisponivelEl) {
         saldoDisponivelEl.textContent = formatarMoeda(saldoDisponivel);
         saldoDisponivelEl.classList.remove('text-purple-600', 'text-red-600', 'text-green-600');
@@ -773,17 +779,6 @@ const atualizarResumo = () => {
             saldoFinalMaosEl.classList.add('text-red-600');
         } else {
             saldoFinalMaosEl.classList.add('text-gray-800');
-        }
-    }
-    if (previsaoSaldoEl) {
-        previsaoSaldoEl.textContent = formatarMoeda(previsaoFinal);
-        previsaoSaldoEl.classList.remove('text-green-600', 'text-red-600', 'text-cyan-600');
-        if (previsaoFinal > 0) {
-            previsaoSaldoEl.classList.add('text-green-600');
-        } else if (previsaoFinal < 0) {
-            previsaoSaldoEl.classList.add('text-red-600');
-        } else {
-            previsaoSaldoEl.classList.add('text-cyan-600');
         }
     }
 };
@@ -2495,7 +2490,6 @@ const renderizarContasBancarias = () => {
     
     contasBancarias.forEach((conta, index) => {
         const saldoClass = conta.saldo >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-        const digitosTexto = conta.ultimosDigitos ? `•••• ${conta.ultimosDigitos}` : '';
         
         const div = document.createElement('div');
         div.className = 'bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md border-l-4 border-yellow-500 transition-all hover:shadow-lg';
@@ -2507,7 +2501,6 @@ const renderizarContasBancarias = () => {
                     </div>
                     <div class="flex items-center gap-2 mb-2">
                         <h4 class="text-lg font-bold text-gray-800 dark:text-white">${conta.banco}</h4>
-                        ${digitosTexto ? `<span class="text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">${digitosTexto}</span>` : ''}
                     </div>
                     <div class="flex flex-col gap-1">
                         <span class="text-sm text-gray-600 dark:text-gray-300">
@@ -2555,7 +2548,6 @@ formContaBancaria.addEventListener('submit', (e) => {
     const banco = document.getElementById('conta-banco').value.trim();
     const tipo = document.getElementById('conta-tipo').value.trim();
     const saldo = parseFloat(document.getElementById('conta-saldo').value) || 0;
-    const ultimosDigitos = document.getElementById('conta-ultimos-digitos').value.trim();
     const observacao = document.getElementById('conta-observacao').value.trim();
     
     if (!titular || !banco || !tipo) {
@@ -2568,7 +2560,6 @@ formContaBancaria.addEventListener('submit', (e) => {
         banco,
         tipo,
         saldo,
-        ultimosDigitos,
         observacao,
         dataCriacao: estadoEdicaoConta === -1 ? new Date().toISOString() : contasBancarias[estadoEdicaoConta].dataCriacao,
         dataAtualizacao: new Date().toISOString()
@@ -2599,7 +2590,6 @@ window.editarConta = (index) => {
     document.getElementById('conta-banco').value = conta.banco;
     document.getElementById('conta-tipo').value = conta.tipo;
     document.getElementById('conta-saldo').value = conta.saldo;
-    document.getElementById('conta-ultimos-digitos').value = conta.ultimosDigitos || '';
     document.getElementById('conta-observacao').value = conta.observacao || '';
     document.getElementById('conta-id-edicao').value = index;
     
