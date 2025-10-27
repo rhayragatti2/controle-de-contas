@@ -801,6 +801,7 @@ const atualizarResumo = () => {
 // ===== ENTRADAS =====
 
 const renderizarEntradas = () => {
+    console.log('🎨 Renderizando entradas:', entradas.length, 'itens');
     tabelaEntradas.innerHTML = '';
     entradas.forEach((item, index) => {
         const corCategoria = getCorCategoria(item.categoria);
@@ -851,6 +852,8 @@ formEntrada.addEventListener('submit', (e) => {
     const categoria = document.getElementById('entrada-categoria').value;
     const idEdicao = document.getElementById('entrada-id-edicao').value;
 
+    console.log('📝 Formulário de entrada submetido:', { descricao, data, valor, categoria });
+
     if (!descricao || valor <= 0 || !data) {
         mostrarToast('Preencha todos os campos corretamente!', 'error');
         return;
@@ -860,18 +863,25 @@ formEntrada.addEventListener('submit', (e) => {
         // Modo edição
         const index = parseInt(idEdicao);
         entradas[index] = { data, descricao, valor, categoria };
+        console.log('✏️ Entrada editada no índice', index);
         mostrarToast('Entrada atualizada!', 'success');
         document.getElementById('entrada-btn-texto').textContent = 'Adicionar Entrada';
         document.getElementById('entrada-id-edicao').value = '';
         estadoEdicaoEntrada = -1;
     } else {
         // Modo adição
-        entradas.push({ data, descricao, valor, categoria });
+        const novaEntrada = { data, descricao, valor, categoria };
+        entradas.push(novaEntrada);
+        console.log('➕ Nova entrada adicionada:', novaEntrada);
+        console.log('📊 Total de entradas agora:', entradas.length);
         mostrarToast('Entrada adicionada!', 'success');
     }
 
+    console.log('💾 Chamando salvarDados()...');
     salvarDados();
+    console.log('🎨 Chamando renderizarEntradas()...');
     renderizarEntradas();
+    console.log('✅ Processo de entrada completo');
     formEntrada.reset();
 });
 
