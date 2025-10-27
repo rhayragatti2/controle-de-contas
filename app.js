@@ -703,6 +703,8 @@ const renderizarTudo = () => {
     renderizarEntradas();
     renderizarPoupanca();
     renderizarDespesas();
+    renderizarGastosAvulsos();
+    atualizarResumo();
 };
 
 // ===== RESUMO MENSAL =====
@@ -813,7 +815,6 @@ const renderizarEntradas = () => {
         `;
         tabelaEntradas.appendChild(tr);
     });
-    atualizarResumo();
 };
 
 window.editarEntrada = (index) => {
@@ -1028,8 +1029,6 @@ const renderizarDespesas = () => {
     
     if (totalPrevistoEl) totalPrevistoEl.textContent = formatarMoeda(totalPrevisto);
     if (totalPagoEl) totalPagoEl.textContent = formatarMoeda(totalPago);
-    
-    atualizarResumo();
 };
 
 formDespesa.addEventListener('submit', (e) => {
