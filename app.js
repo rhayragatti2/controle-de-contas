@@ -2502,6 +2502,9 @@ const renderizarContasBancarias = () => {
         div.innerHTML = `
             <div class="flex justify-between items-start">
                 <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-sm font-semibold text-blue-600 dark:text-blue-400">👤 ${conta.titular}</span>
+                    </div>
                     <div class="flex items-center gap-2 mb-2">
                         <h4 class="text-lg font-bold text-gray-800 dark:text-white">${conta.banco}</h4>
                         ${digitosTexto ? `<span class="text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">${digitosTexto}</span>` : ''}
@@ -2548,18 +2551,20 @@ const formContaBancaria = document.getElementById('form-conta-bancaria');
 formContaBancaria.addEventListener('submit', (e) => {
     e.preventDefault();
     
+    const titular = document.getElementById('conta-titular').value.trim();
     const banco = document.getElementById('conta-banco').value.trim();
     const tipo = document.getElementById('conta-tipo').value.trim();
     const saldo = parseFloat(document.getElementById('conta-saldo').value) || 0;
     const ultimosDigitos = document.getElementById('conta-ultimos-digitos').value.trim();
     const observacao = document.getElementById('conta-observacao').value.trim();
     
-    if (!banco || !tipo) {
+    if (!titular || !banco || !tipo) {
         mostrarToast('Preencha os campos obrigatórios!', 'error');
         return;
     }
     
     const novaConta = {
+        titular,
         banco,
         tipo,
         saldo,
@@ -2590,6 +2595,7 @@ window.editarConta = (index) => {
     const conta = contasBancarias[index];
     estadoEdicaoConta = index;
     
+    document.getElementById('conta-titular').value = conta.titular || '';
     document.getElementById('conta-banco').value = conta.banco;
     document.getElementById('conta-tipo').value = conta.tipo;
     document.getElementById('conta-saldo').value = conta.saldo;
@@ -2615,7 +2621,8 @@ window.cancelarEdicaoConta = () => {
 
 window.deletarConta = (index) => {
     const conta = contasBancarias[index];
-    if (confirm(`Tem certeza que deseja excluir a conta "${conta.banco}"?\n\nEsta ação não pode ser desfeita.`)) {
+    const nomeConta = conta.titular ? `${conta.banco} de ${conta.titular}` : conta.banco;
+    if (confirm(`Tem certeza que deseja excluir a conta "${nomeConta}"?\n\nEsta ação não pode ser desfeita.`)) {
         contasBancarias.splice(index, 1);
         salvarContasBancarias();
         renderizarContasBancarias();
