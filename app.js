@@ -889,13 +889,13 @@ const renderizarEntradas = () => {
         // Modo de edição inline
         if (index === estadoEdicaoEntrada) {
             tr.classList.add('bg-blue-50', 'dark:bg-blue-900');
-            tr.innerHTML = `
+        tr.innerHTML = `
                 <td class="p-2 text-center">
                     <button onclick="salvarEdicaoInlineEntrada(${index})" 
                             class="bg-green-600 text-white w-8 h-8 rounded hover:bg-green-700 flex items-center justify-center mx-auto" title="Salvar">
                         ✓
                     </button>
-                </td>
+            </td>
                 <td class="p-2">
                     <input type="text" id="edit-entrada-descricao-${index}" value="${item.descricao}" 
                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
@@ -933,8 +933,8 @@ const renderizarEntradas = () => {
             tr.innerHTML = `
                 <td class="p-3 text-center">
                     <button onclick="editarEntrada(${index})" class="text-blue-500 hover:text-blue-700 text-xl" title="Editar">
-                        ✏️
-                    </button>
+                    ✏️
+                </button>
                 </td>
                 <td class="p-3 dark:text-gray-300">${item.descricao}</td>
                 <td class="p-3 text-right text-green-600 dark:text-green-400 font-bold text-lg">${formatarMoeda(item.valor)}</td>
@@ -946,10 +946,10 @@ const renderizarEntradas = () => {
                 <td class="p-3 text-gray-500 dark:text-gray-400 text-sm">${item.observacoes || '---'}</td>
                 <td class="p-3 text-center">
                     <button onclick="excluirEntrada(${index})" class="text-red-500 hover:text-red-700 text-xl" title="Excluir">
-                        🗑️
-                    </button>
-                </td>
-            `;
+                    🗑️
+                </button>
+            </td>
+        `;
         }
         tabelaEntradas.appendChild(tr);
     });
@@ -3555,53 +3555,39 @@ window.abrirFormularioNoCalendario = (tipo) => {
                     </div>
                 </div>
 
-                <!-- Formulário Manual -->
-                <form id="form-gasto-avulso-calendario" class="space-y-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pessoa</label>
-                        <input type="text" id="cal-avulso-pessoa" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: João, Maria">
+                <!-- Área de Prévia (inicialmente oculta) -->
+                <div id="cal-preview-container" class="hidden bg-white dark:bg-gray-700 border-2 border-green-500 rounded-lg p-4">
+                    <h5 class="font-bold text-gray-800 dark:text-gray-200 mb-3">📋 Confirme os dados:</h5>
+                    <div id="cal-preview-content" class="space-y-2 mb-4">
+                        <!-- Conteúdo será preenchido dinamicamente -->
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição *</label>
-                        <input type="text" id="cal-avulso-descricao" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Ex: Mercado, Farmácia">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor (R$) *</label>
-                        <input type="number" id="cal-avulso-valor" step="0.01" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="0,00">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data *</label>
-                        <input type="date" id="cal-avulso-data" value="${data}" required class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoria</label>
-                        <select id="cal-avulso-categoria" class="w-full p-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white">
-                            <option value="">Selecione...</option>
-                            ${categorias.map(cat => `<option value="${typeof cat === 'object' ? cat.nome : cat}">${typeof cat === 'object' ? cat.nome : cat}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="flex gap-2 pt-2">
-                        <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
-                            Adicionar Gasto Avulso
+                    <div class="flex gap-2">
+                        <button onclick="confirmarGastoAvulsoCalendario()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                            ✅ Confirmar
                         </button>
-                        <button type="button" onclick="fecharFormularioCalendario()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-semibold transition-colors">
-                            Cancelar
+                        <button onclick="cancelarGastoAvulsoCalendario()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-semibold transition-colors">
+                            ❌ Cancelar
                         </button>
                     </div>
-                </form>
+                </div>
+
+                <!-- Botão Fechar (sempre visível) -->
+                <div class="flex justify-end">
+                    <button type="button" onclick="fecharFormularioCalendario()" class="px-6 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-semibold transition-colors">
+                        Fechar
+                    </button>
+                </div>
             </div>
         `;
-        
-        document.getElementById('form-gasto-avulso-calendario').addEventListener('submit', (e) => {
-            e.preventDefault();
-            salvarGastoAvulsoDoCalendario();
-        });
     }
 };
 
 window.fecharFormularioCalendario = () => {
     document.getElementById('calendario-formulario-container').classList.add('hidden');
 };
+
+// Variável global para armazenar os dados processados temporariamente
+let dadosGastoAvulsoCalendario = null;
 
 // Função para processar texto natural no calendário
 window.processarTextoCalendario = () => {
@@ -3620,27 +3606,102 @@ window.processarTextoCalendario = () => {
         return;
     }
     
-    // Preencher os campos do formulário
-    if (resultado.pessoa) {
-        document.getElementById('cal-avulso-pessoa').value = resultado.pessoa;
-    }
-    if (resultado.descricao) {
-        document.getElementById('cal-avulso-descricao').value = resultado.descricao;
-    }
-    if (resultado.valor) {
-        document.getElementById('cal-avulso-valor').value = resultado.valor;
-    }
-    if (resultado.data) {
-        document.getElementById('cal-avulso-data').value = resultado.data;
-    }
-    if (resultado.categoria) {
-        document.getElementById('cal-avulso-categoria').value = resultado.categoria;
-    }
+    // Armazenar os dados processados
+    dadosGastoAvulsoCalendario = resultado;
+    
+    // Gerar ID único
+    dadosGastoAvulsoCalendario.id = Date.now();
+    
+    // Adicionar mes
+    const mesKey = resultado.data.substring(0, 7);
+    dadosGastoAvulsoCalendario.mes = mesKey;
+    
+    // Mostrar prévia
+    const previewContainer = document.getElementById('cal-preview-container');
+    const previewContent = document.getElementById('cal-preview-content');
+    
+    previewContent.innerHTML = `
+        <div class="grid grid-cols-2 gap-2 text-sm">
+            <div class="font-semibold text-gray-700 dark:text-gray-300">👤 Pessoa:</div>
+            <div class="text-gray-900 dark:text-gray-100">${resultado.pessoa || 'Sem pessoa'}</div>
+            
+            <div class="font-semibold text-gray-700 dark:text-gray-300">📝 Descrição:</div>
+            <div class="text-gray-900 dark:text-gray-100">${resultado.descricao}</div>
+            
+            <div class="font-semibold text-gray-700 dark:text-gray-300">💰 Valor:</div>
+            <div class="text-gray-900 dark:text-gray-100">R$ ${resultado.valor.toFixed(2)}</div>
+            
+            <div class="font-semibold text-gray-700 dark:text-gray-300">📅 Data:</div>
+            <div class="text-gray-900 dark:text-gray-100">${new Date(resultado.data + 'T00:00:00').toLocaleDateString('pt-BR')}</div>
+            
+            <div class="font-semibold text-gray-700 dark:text-gray-300">🏷️ Categoria:</div>
+            <div class="text-gray-900 dark:text-gray-100">${resultado.categoria || 'Sem categoria'}</div>
+        </div>
+    `;
+    
+    previewContainer.classList.remove('hidden');
     
     // Limpar o campo de texto
     document.getElementById('cal-texto-natural').value = '';
     
-    mostrarToast('✅ Texto processado! Verifique os campos abaixo.', 'success');
+    mostrarToast('✅ Texto processado! Confirme os dados.', 'success');
+};
+
+// Confirmar e salvar gasto avulso do calendário
+window.confirmarGastoAvulsoCalendario = () => {
+    if (!dadosGastoAvulsoCalendario) {
+        mostrarToast('Nenhum dado para confirmar!', 'error');
+        return;
+    }
+    
+    // Adicionar ao array global
+    gastosAvulsos.push(dadosGastoAvulsoCalendario);
+    salvarDados();
+    
+    // Atualizar TODA a aplicação imediatamente
+    renderizarEntradas();
+    renderizarDespesas();
+    renderizarGastosAvulsos();
+    atualizarResumo();
+    atualizarDashboardEstatisticas();
+    renderizarPoupanca();
+    
+    // Sincronizar com Firebase
+    if (typeof sincronizarMesParaFirebase === 'function') {
+        sincronizarMesParaFirebase(mesAtual, { entradas, despesas, gastosAvulsos });
+    }
+    
+    // Limpar dados temporários
+    dadosGastoAvulsoCalendario = null;
+    
+    // Esconder prévia
+    document.getElementById('cal-preview-container').classList.add('hidden');
+    
+    // Fechar formulário
+    fecharFormularioCalendario();
+    
+    mostrarToast('✅ Gasto avulso adicionado com sucesso!', 'success');
+    
+    // Recarregar calendário e detalhes
+    renderizarCalendario();
+    const data = window.calendarioDataSelecionada;
+    const mesKey = data.substring(0, 7);
+    const chave = `contas-firebase-${mesKey}`;
+    const dadosSalvos = localStorage.getItem(chave);
+    if (dadosSalvos) {
+        const dados = JSON.parse(dadosSalvos);
+        const entradasDia = (dados.entradas || []).filter(e => e.data === data);
+        const despesasDia = (dados.despesas || []).filter(d => d.vencimento === data || d.dataPagamento === data);
+        const gastosAvulsosDia = (dados.gastosAvulsos || []).filter(g => g.data === data && g.mes === mesKey);
+        mostrarDetalhesDia(data, entradasDia, despesasDia, gastosAvulsosDia);
+    }
+};
+
+// Cancelar gasto avulso do calendário
+window.cancelarGastoAvulsoCalendario = () => {
+    dadosGastoAvulsoCalendario = null;
+    document.getElementById('cal-preview-container').classList.add('hidden');
+    mostrarToast('❌ Gasto cancelado.', 'info');
 };
 
 const salvarEntradaDoCalendario = () => {
@@ -3733,49 +3794,4 @@ const salvarGastoFixoDoCalendario = () => {
     }
 };
 
-const salvarGastoAvulsoDoCalendario = () => {
-    const data = document.getElementById('cal-avulso-data').value;
-    const mesKey = data.substring(0, 7);
-    
-    const novoGastoAvulso = {
-        id: Date.now(),
-        pessoa: document.getElementById('cal-avulso-pessoa').value.trim() || 'Sem pessoa',
-        descricao: document.getElementById('cal-avulso-descricao').value.trim(),
-        valor: parseFloat(document.getElementById('cal-avulso-valor').value) || 0,
-        data: data,
-        mes: mesKey,
-        categoria: document.getElementById('cal-avulso-categoria').value || 'Sem categoria'
-    };
-    
-    gastosAvulsos.push(novoGastoAvulso);
-    salvarDados();
-    
-    // Atualizar TODA a aplicação imediatamente
-    renderizarEntradas();
-    renderizarDespesas();
-    renderizarGastosAvulsos();
-    atualizarResumo();
-    atualizarDashboardEstatisticas();
-    renderizarPoupanca();
-    
-    // Sincronizar com Firebase
-    if (typeof sincronizarMesParaFirebase === 'function') {
-        sincronizarMesParaFirebase(mesAtual, { entradas, despesas, gastosAvulsos });
-    }
-    
-    fecharFormularioCalendario();
-    mostrarToast('Gasto avulso adicionado com sucesso!', 'success');
-    
-    // Recarregar calendário e detalhes
-    renderizarCalendario();
-    const chave = `contas-firebase-${mesKey}`;
-    const dadosSalvos = localStorage.getItem(chave);
-    if (dadosSalvos) {
-        const dados = JSON.parse(dadosSalvos);
-        const entradasDia = (dados.entradas || []).filter(e => e.data === data);
-        const despesasDia = (dados.despesas || []).filter(d => d.vencimento === data || d.dataPagamento === data);
-        const gastosAvulsosDia = (dados.gastosAvulsos || []).filter(g => g.data === data && g.mes === mesKey);
-        mostrarDetalhesDia(data, entradasDia, despesasDia, gastosAvulsosDia);
-    }
-};
 
