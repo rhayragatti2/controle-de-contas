@@ -718,6 +718,7 @@ const renderizarTudo = () => {
     renderizarDespesas();
     renderizarGastosAvulsos();
     atualizarResumo();
+    atualizarDashboardEstatisticas();
 };
 
 // ===== RESUMO MENSAL =====
@@ -796,6 +797,82 @@ const atualizarResumo = () => {
             saldoFinalMaosEl.classList.add('text-gray-800');
         }
     }
+};
+
+// ===== DASHBOARD DE ESTATÍSTICAS =====
+
+const atualizarDashboardEstatisticas = () => {
+    console.log('📊 Atualizando Dashboard de Estatísticas...');
+    
+    // 1. MAIOR DESPESA
+    let maiorDespesa = { descricao: '---', valor: 0 };
+    if (despesas.length > 0) {
+        maiorDespesa = despesas.reduce((max, despesa) => {
+            return despesa.previsto > max.valor ? { descricao: despesa.descricao, valor: despesa.previsto } : max;
+        }, { descricao: '---', valor: 0 });
+    }
+    
+    const maiorDespesaEl = document.getElementById('maior-despesa');
+    const maiorDespesaValorEl = document.getElementById('maior-despesa-valor');
+    if (maiorDespesaEl && maiorDespesaValorEl) {
+        maiorDespesaEl.textContent = maiorDespesa.descricao;
+        maiorDespesaValorEl.textContent = maiorDespesa.valor > 0 ? formatarMoeda(maiorDespesa.valor) : '---';
+    }
+    
+    // 2. CATEGORIA TOP (maior total de gastos por categoria)
+    const gastoPorCategoria = {};
+    
+    // Somar despesas fixas por categoria
+    despesas.forEach(despesa => {
+        const cat = despesa.categoria || 'Sem categoria';
+        gastoPorCategoria[cat] = (gastoPorCategoria[cat] || 0) + despesa.previsto;
+    });
+    
+    // Somar gastos avulsos por categoria
+    const gastosAvulsosMes = gastosAvulsos.filter(g => g.mes === mesAtual);
+    gastosAvulsosMes.forEach(gasto => {
+        const cat = gasto.categoria || 'Sem categoria';
+        gastoPorCategoria[cat] = (gastoPorCategoria[cat] || 0) + gasto.valor;
+    });
+    
+    // Encontrar categoria com maior total
+    let categoriaTop = { nome: '---', valor: 0 };
+    Object.entries(gastoPorCategoria).forEach(([categoria, valor]) => {
+        if (valor > categoriaTop.valor) {
+            categoriaTop = { nome: categoria, valor: valor };
+        }
+    });
+    
+    const categoriaTopEl = document.getElementById('categoria-top');
+    const categoriaTopValorEl = document.getElementById('categoria-top-valor');
+    if (categoriaTopEl && categoriaTopValorEl) {
+        categoriaTopEl.textContent = categoriaTop.nome;
+        categoriaTopValorEl.textContent = categoriaTop.valor > 0 ? formatarMoeda(categoriaTop.valor) : '---';
+    }
+    
+    // 3. MÉDIA DIÁRIA (Total gasto dividido pelos dias do mês até hoje)
+    const totalDespesasPagas = despesas.reduce((acc, item) => acc + item.pago, 0);
+    const totalGastosAvulsosMes = gastosAvulsosMes.reduce((acc, g) => acc + g.valor, 0);
+    const totalGasto = totalDespesasPagas + totalGastosAvulsosMes;
+    
+    // Calcular dias decorridos no mês atual
+    const hoje = new Date();
+    const [anoMes, mesMes] = mesAtual.split('-').map(Number);
+    const hojeMesmoMes = (hoje.getFullYear() === anoMes && (hoje.getMonth() + 1) === mesMes);
+    const diasDecorridos = hojeMesmoMes ? hoje.getDate() : new Date(anoMes, mesMes, 0).getDate();
+    
+    const mediaDiaria = diasDecorridos > 0 ? totalGasto / diasDecorridos : 0;
+    
+    const mediaDiariaEl = document.getElementById('media-diaria');
+    if (mediaDiariaEl) {
+        mediaDiariaEl.textContent = formatarMoeda(mediaDiaria);
+    }
+    
+    console.log('✅ Dashboard atualizado:', {
+        maiorDespesa: maiorDespesa.descricao,
+        categoriaTop: categoriaTop.nome,
+        mediaDiaria: formatarMoeda(mediaDiaria)
+    });
 };
 
 // ===== ENTRADAS =====
