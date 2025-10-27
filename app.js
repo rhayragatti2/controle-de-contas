@@ -890,6 +890,12 @@ const renderizarEntradas = () => {
         if (index === estadoEdicaoEntrada) {
             tr.classList.add('bg-blue-50', 'dark:bg-blue-900');
             tr.innerHTML = `
+                <td class="p-2 text-center">
+                    <button onclick="salvarEdicaoInlineEntrada(${index})" 
+                            class="bg-green-600 text-white w-8 h-8 rounded hover:bg-green-700 flex items-center justify-center mx-auto" title="Salvar">
+                        ✓
+                    </button>
+                </td>
                 <td class="p-2">
                     <input type="text" id="edit-entrada-descricao-${index}" value="${item.descricao}" 
                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
@@ -915,37 +921,35 @@ const renderizarEntradas = () => {
                            placeholder="Observações"
                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
                 </td>
-                <td class="p-2 text-right">
-                    <button onclick="salvarEdicaoInlineEntrada(${index})" 
-                            class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 mr-1">
-                        ✓ Salvar
-                    </button>
+                <td class="p-2 text-center">
                     <button onclick="cancelarEdicaoInlineEntrada()" 
-                            class="bg-gray-400 text-white px-3 py-1 rounded text-sm hover:bg-gray-500">
-                        ✕ Cancelar
+                            class="bg-gray-400 text-white w-8 h-8 rounded hover:bg-gray-500 flex items-center justify-center mx-auto" title="Cancelar">
+                        ✕
                     </button>
                 </td>
             `;
         } else {
             // Modo visualização normal
             tr.innerHTML = `
+                <td class="p-3 text-center">
+                    <button onclick="editarEntrada(${index})" class="text-blue-500 hover:text-blue-700 text-xl" title="Editar">
+                        ✏️
+                    </button>
+                </td>
                 <td class="p-3 dark:text-gray-300">${item.descricao}</td>
                 <td class="p-3 text-right text-green-600 dark:text-green-400 font-bold text-lg">${formatarMoeda(item.valor)}</td>
                 <td class="p-3 text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
-                <span>${item.categoria || '---'}</span>
-            </td>
+                    <span class="w-2 h-2 rounded-full ${corCategoria}"></span>
+                    <span>${item.categoria || '---'}</span>
+                </td>
                 <td class="p-3 text-gray-600 dark:text-gray-400">${formatarData(item.data)}</td>
                 <td class="p-3 text-gray-500 dark:text-gray-400 text-sm">${item.observacoes || '---'}</td>
-            <td class="p-3 text-right">
-                <button onclick="editarEntrada(${index})" class="text-blue-500 hover:text-blue-700 font-semibold mr-2" title="Editar">
-                    ✏️
-                </button>
-                <button onclick="excluirEntrada(${index})" class="text-red-500 hover:text-red-700 font-semibold" title="Excluir">
-                    🗑️
-                </button>
-            </td>
-        `;
+                <td class="p-3 text-center">
+                    <button onclick="excluirEntrada(${index})" class="text-red-500 hover:text-red-700 text-xl" title="Excluir">
+                        🗑️
+                    </button>
+                </td>
+            `;
         }
         tabelaEntradas.appendChild(tr);
     });
@@ -1123,6 +1127,12 @@ const renderizarDespesas = () => {
         if (index === estadoEdicaoCompletaDespesa) {
             tr.classList.add('bg-blue-50', 'dark:bg-blue-900');
             tr.innerHTML = `
+                <td class="p-2 text-center">
+                    <button onclick="salvarEdicaoInlineDespesa(${index})" 
+                            class="bg-green-600 text-white w-8 h-8 rounded hover:bg-green-700 flex items-center justify-center mx-auto" title="Salvar">
+                        ✓
+                    </button>
+                </td>
                 <td class="p-2">
                     <input type="text" id="edit-despesa-descricao-${index}" value="${item.descricao}" 
                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
@@ -1158,23 +1168,25 @@ const renderizarDespesas = () => {
                            placeholder="Observações"
                            class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600 text-sm">
                 </td>
-                <td class="p-2 text-right">
-                    <button onclick="salvarEdicaoInlineDespesa(${index})" 
-                            class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 mb-1 w-full">
-                        ✓ Salvar
-                    </button>
+                <td class="p-2 text-center" colspan="2">
                     <button onclick="cancelarEdicaoInlineDespesa()" 
-                            class="bg-gray-400 text-white px-3 py-1 rounded text-sm hover:bg-gray-500 w-full">
-                        ✕ Cancelar
+                            class="bg-gray-400 text-white w-8 h-8 rounded hover:bg-gray-500 flex items-center justify-center mx-auto" title="Cancelar">
+                        ✕
                     </button>
                 </td>
             `;
         } else if (index === estadoEdicaoDespesa) {
             tr.classList.add('bg-yellow-50', 'shadow-inner');
             tr.innerHTML = `
-                <td class="p-3 font-semibold">${item.descricao}</td>
-                <td colspan="6" class="p-3">
+                <td class="p-3 text-center">
+                    <button onclick="salvarPagamento(${index})" 
+                            class="bg-green-600 text-white w-8 h-8 rounded hover:bg-green-700 flex items-center justify-center mx-auto" title="Salvar Pagamento">
+                        ✓
+                    </button>
+                </td>
+                <td colspan="7" class="p-3">
                     <div class="flex flex-col md:flex-row gap-2 items-center w-full">
+                        <span class="font-semibold mr-2">${item.descricao}</span>
                         <label class="font-medium text-sm text-gray-700 w-full md:w-auto flex-shrink-0">Pago em:</label>
                         <input type="text" id="input-pagamento-data" 
                                value="${formatISODateToBR(item.dataPagamento) || ''}" 
@@ -1184,22 +1196,13 @@ const renderizarDespesas = () => {
                         <label class="font-medium text-sm text-gray-700 w-full md:w-auto flex-shrink-0">Valor Pago:</label>
                         <input type="number" id="input-pagamento-valor" value="${item.pago || item.previsto}" 
                                min="0" step="0.01" class="p-1 border rounded w-full md:w-28 text-sm text-right">
-                        
-                        <button onclick="salvarPagamento(${index})" 
-                                class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors flex-shrink-0 w-full md:w-auto">
-                            Salvar
-                        </button>
-                        <button onclick="cancelarEdicao()" 
-                                class="bg-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-400 transition-colors flex-shrink-0 w-full md:w-auto">
-                            Cancelar
-                        </button>
                     </div>
                 </td>
-                <td class="p-3 text-right">
-                    <button onclick="editarDespesa(${index})" class="text-blue-500 hover:text-blue-700 font-semibold mr-2" title="Editar Despesa">
-                        ✏️
+                <td class="p-3 text-center" colspan="2">
+                    <button onclick="cancelarEdicao()" 
+                            class="bg-gray-400 text-white w-8 h-8 rounded hover:bg-gray-500 flex items-center justify-center mx-auto" title="Cancelar">
+                        ✕
                     </button>
-                    <button onclick="excluirDespesa(${index})" class="text-red-500 hover:text-red-700 font-semibold" title="Excluir">🗑️</button>
                 </td>
             `;
         } else {
@@ -1216,6 +1219,11 @@ const renderizarDespesas = () => {
             }
             
             tr.innerHTML = `
+                <td class="p-3 text-center">
+                    <button onclick="editarDespesa(${index})" class="text-blue-500 hover:text-blue-700 text-xl" title="Editar Despesa">
+                        ✏️
+                    </button>
+                </td>
                 <td class="p-3">
                     <div class="flex items-center flex-wrap gap-1">
                         <span>${item.descricao}</span>
@@ -1235,21 +1243,17 @@ const renderizarDespesas = () => {
                 <td class="p-3 font-medium text-gray-700 dark:text-gray-300 ${pagoClasseDataValor}">${formatarData(item.vencimento)}</td>
                 <td class="p-3 ${estaPago ? 'text-gray-700 dark:text-gray-300 font-medium' : 'text-gray-400 italic'}">${formatarData(item.dataPagamento)}</td>
                 <td class="p-3 text-gray-500 dark:text-gray-400 text-sm">${item.observacoes || '---'}</td>
-                <td class="p-3 text-right">
-                    <div class="flex flex-col gap-1 items-end">
-                        <button onclick="editarPagamento(${index})" 
-                                class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors w-full">
-                                ${estaPago ? '💰 Editar Pag.' : '💰 Registrar Pag.'}
-                        </button>
-                        <button onclick="editarDespesa(${index})" 
-                                class="text-blue-500 hover:text-blue-700 font-semibold text-sm w-full">
-                            ✏️ Editar Despesa
-                        </button>
-                        <button onclick="excluirDespesa(${index})" 
-                                class="text-red-500 hover:text-red-700 font-semibold text-sm w-full">
-                            🗑️ Excluir
-                        </button>
-                    </div>
+                <td class="p-3 text-center">
+                    <button onclick="editarPagamento(${index})" 
+                            class="bg-yellow-500 text-white w-8 h-8 rounded hover:bg-yellow-600 flex items-center justify-center mx-auto text-lg" 
+                            title="${estaPago ? 'Editar Pagamento' : 'Registrar Pagamento'}">
+                        💰
+                    </button>
+                </td>
+                <td class="p-3 text-center">
+                    <button onclick="excluirDespesa(${index})" class="text-red-500 hover:text-red-700 text-xl" title="Excluir">
+                        🗑️
+                    </button>
                 </td>
             `;
         }
@@ -2469,7 +2473,7 @@ const renderizarGastosAvulsos = () => {
     console.log('🎨 Gastos do mês atual:', gastosMes.length, 'itens');
     
     if (gastosMes.length === 0) {
-        tabela.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500 dark:text-gray-400 italic">Nenhum gasto avulso registrado neste mês</td></tr>';
+        tabela.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-gray-500 dark:text-gray-400 italic">Nenhum gasto avulso registrado neste mês</td></tr>';
         return;
     }
     
@@ -2503,6 +2507,11 @@ const renderizarGastosAvulsos = () => {
         const tr = document.createElement('tr');
         tr.className = 'border-b border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors';
         tr.innerHTML = `
+            <td class="p-3 text-center">
+                <button onclick="editarGastoAvulso(${gasto.id})" class="text-blue-500 hover:text-blue-700 text-xl" title="Editar">
+                    ✏️
+                </button>
+            </td>
             <td class="p-3">${badgePessoa}</td>
             <td class="p-3 font-medium dark:text-gray-300">${gasto.descricao}</td>
             <td class="p-3 text-gray-600 dark:text-gray-400 flex items-center gap-2">
@@ -2512,17 +2521,10 @@ const renderizarGastosAvulsos = () => {
             <td class="p-3">${badgePagamento}</td>
             <td class="p-3 text-gray-600 dark:text-gray-400">${formatarData(gasto.data)}</td>
             <td class="p-3 text-right text-red-600 dark:text-red-400 font-bold">${formatarMoeda(gasto.valor)}</td>
-            <td class="p-3 text-right">
-                <div class="flex gap-2 justify-end">
-                    <button onclick="editarGastoAvulso(${gasto.id})" 
-                            class="text-blue-500 hover:text-blue-700 font-semibold text-sm">
-                        ✏️ Editar
-                    </button>
-                <button onclick="excluirGastoAvulso(${gasto.id})" 
-                        class="text-red-500 hover:text-red-700 font-semibold text-sm">
-                    🗑️ Excluir
+            <td class="p-3 text-center">
+                <button onclick="excluirGastoAvulso(${gasto.id})" class="text-red-500 hover:text-red-700 text-xl" title="Excluir">
+                    🗑️
                 </button>
-                </div>
             </td>
         `;
         tabela.appendChild(tr);

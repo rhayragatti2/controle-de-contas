@@ -322,12 +322,13 @@
                     <table class="w-full min-w-[750px]">
                         <thead>
                             <tr class="border-b dark:border-gray-700">
+                                <th class="text-center p-3 dark:text-gray-300 w-12">✏️</th>
                                 <th class="text-left p-3 dark:text-gray-300">Descrição</th>
                                 <th class="text-right p-3 dark:text-gray-300">Valor</th>
                                 <th class="text-left p-3 dark:text-gray-300">Categoria</th>
                                 <th class="text-left p-3 dark:text-gray-300">Data</th>
                                 <th class="text-left p-3 dark:text-gray-300">Observações</th>
-                                <th class="text-right p-3 dark:text-gray-300">Ações</th>
+                                <th class="text-center p-3 dark:text-gray-300 w-12">🗑️</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-entradas">
@@ -467,6 +468,7 @@
                     <table class="w-full min-w-[950px]">
                         <thead>
                             <tr class="border-b dark:border-gray-700">
+                                <th class="text-center p-3 dark:text-gray-300 w-12">✏️</th>
                                 <th class="text-left p-3 dark:text-gray-300">Descrição</th>
                                 <th class="text-right p-3 dark:text-gray-300">Previsto</th>
                                 <th class="text-right p-3 dark:text-gray-300">Pago</th>
@@ -474,7 +476,8 @@
                                 <th class="text-left p-3 dark:text-gray-300">Vencimento</th>
                                 <th class="text-left p-3 dark:text-gray-300">Pagamento</th>
                                 <th class="text-left p-3 dark:text-gray-300">Observações</th>
-                                <th class="text-right p-3 w-40 dark:text-gray-300">Ações</th>
+                                <th class="text-center p-3 dark:text-gray-300 w-20">💰</th>
+                                <th class="text-center p-3 dark:text-gray-300 w-12">🗑️</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-despesas">
@@ -482,10 +485,10 @@
                         </tbody>
                         <tfoot>
                             <tr class="border-t-2 border-gray-400 dark:border-gray-500 bg-gray-100 dark:bg-gray-700 font-bold">
-                                <td class="p-3 text-right dark:text-gray-200">TOTAL GASTOS FIXOS:</td>
+                                <td colspan="2" class="p-3 text-right dark:text-gray-200">TOTAL GASTOS FIXOS:</td>
                                 <td class="p-3 text-right text-red-600 dark:text-red-400" id="total-previsto-fixos">R$ 0,00</td>
                                 <td class="p-3 text-right text-red-700 dark:text-red-300" id="total-pago-fixos">R$ 0,00</td>
-                                <td colspan="5"></td>
+                                <td colspan="6"></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -619,13 +622,14 @@
                                 <table class="w-full min-w-[850px]">
                                     <thead>
                                         <tr class="border-b dark:border-gray-700">
+                                            <th class="text-center p-3 dark:text-gray-300 w-12">✏️</th>
                                             <th class="text-left p-3 dark:text-gray-300">Pessoa</th>
                                             <th class="text-left p-3 dark:text-gray-300">Descrição</th>
                                             <th class="text-left p-3 dark:text-gray-300">Categoria</th>
                                             <th class="text-left p-3 dark:text-gray-300">Pagamento</th>
                                             <th class="text-left p-3 dark:text-gray-300">Data</th>
                                             <th class="text-right p-3 dark:text-gray-300">Valor</th>
-                                            <th class="text-right p-3 w-32 dark:text-gray-300">Ações</th>
+                                            <th class="text-center p-3 dark:text-gray-300 w-12">🗑️</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tabela-gastos-avulsos">
@@ -633,7 +637,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr class="border-t-2 border-gray-400 dark:border-gray-500 bg-purple-100 dark:bg-gray-700 font-bold">
-                                            <td colspan="5" class="p-3 text-right dark:text-gray-200">TOTAL GASTOS AVULSOS:</td>
+                                            <td colspan="6" class="p-3 text-right dark:text-gray-200">TOTAL GASTOS AVULSOS:</td>
                                             <td class="p-3 text-right text-purple-700 dark:text-purple-300" id="total-gastos-avulsos">R$ 0,00</td>
                                             <td></td>
                                         </tr>
