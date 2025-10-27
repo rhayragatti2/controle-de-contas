@@ -870,21 +870,86 @@ body.dark #modal-relatorio #chart-container {
 
 /* Conteúdo do accordion */
 .accordion-content {
-    max-height: 1000px;
-    overflow: hidden;
-    transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: none !important;
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    transition: opacity 0.3s ease-in-out;
     opacity: 1;
 }
 
 .accordion-collapsed {
     max-height: 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
     opacity: 0 !important;
     padding: 0 !important;
+    overflow: hidden !important;
 }
 
 .accordion-expanded {
-    max-height: 1000px !important;
+    max-height: none !important;
+    min-height: auto !important;
+    height: auto !important;
     opacity: 1 !important;
+    overflow: visible !important;
+}
+
+/* Forçar todos os elementos dentro do accordion a serem visíveis */
+.accordion-content:not(.accordion-collapsed) * {
+    max-height: none !important;
+}
+
+/* Mobile - garantir que o conteúdo do accordion seja totalmente visível */
+@media (max-width: 768px) {
+    .accordion-content {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    .accordion-content:not(.accordion-collapsed) {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    .accordion-expanded {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* Forçar divs internos a não terem limite de altura */
+    #despesas-content,
+    #despesas-content > div,
+    #tab-content-fixos,
+    #tab-content-avulsos,
+    #entradas-content,
+    #entradas-content > div,
+    #poupanca-content,
+    #poupanca-content > div {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* Permitir scroll horizontal apenas nas tabelas, não no container */
+    .accordion-content .overflow-x-auto {
+        overflow-y: visible !important;
+    }
+    
+    /* Garantir que formulários dentro do accordion sejam totalmente visíveis */
+    .accordion-content form,
+    .accordion-content .mb-4,
+    .accordion-content .mb-6 {
+        max-height: none !important;
+        overflow: visible !important;
+    }
 }
 
 /* ===== TABS DE DESPESAS ===== */
@@ -1016,6 +1081,59 @@ body.dark .grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 > div:last-child > div:ho
 @media (max-width: 1023px) {
     .grid.grid-cols-1.lg\:grid-cols-2.gap-6.mb-8 {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ===== FIX MOBILE - ACCORDION ALTURA TOTAL ===== */
+@media (max-width: 768px) {
+    /* Forçar altura automática em TODOS os níveis do accordion */
+    body #main-app #despesas-content,
+    body #main-app #despesas-content.accordion-content,
+    body #main-app #despesas-content.accordion-expanded,
+    body #main-app #despesas-content:not(.accordion-collapsed) {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    body #main-app #despesas-content > div,
+    body #main-app #despesas-content > div > div {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow-y: visible !important;
+    }
+    
+    body #main-app #tab-content-fixos,
+    body #main-app #tab-content-avulsos {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    /* Garantir que o formulário seja totalmente visível */
+    body #main-app #form-despesa {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    /* Mesma correção para outros accordions */
+    body #main-app #entradas-content,
+    body #main-app #entradas-content.accordion-content,
+    body #main-app #poupanca-content,
+    body #main-app #poupanca-content.accordion-content {
+        max-height: none !important;
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    body #main-app #entradas-content > div,
+    body #main-app #poupanca-content > div {
+        max-height: none !important;
+        overflow-y: visible !important;
     }
 }
 

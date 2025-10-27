@@ -260,7 +260,7 @@
         <div class="grid grid-cols-1 gap-8"> 
             
             <!-- Seção de Entradas com Accordion -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
                 <!-- Cabeçalho do Accordion -->
                 <button 
                     onclick="toggleAccordion('entradas')" 
@@ -334,7 +334,7 @@
             </div>
 
             <!-- Seção de Despesas com Accordion -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
                 <!-- Cabeçalho do Accordion -->
                 <button 
                     onclick="toggleAccordion('despesas')" 
@@ -643,7 +643,7 @@
             </div>
 
             <!-- Seção de Poupança com Accordion -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
                 <!-- Cabeçalho do Accordion -->
                 <button 
                     onclick="toggleAccordion('poupanca')" 
@@ -982,6 +982,11 @@
                 // Expandir
                 content.classList.remove('accordion-collapsed');
                 content.classList.add('accordion-expanded');
+                // Remover qualquer restrição de altura inline
+                content.style.maxHeight = 'none';
+                content.style.height = 'auto';
+                content.style.minHeight = 'auto';
+                content.style.overflow = 'visible';
                 icon.style.transform = 'rotate(0deg)';
             } else {
                 // Colapsar
@@ -990,6 +995,20 @@
                 icon.style.transform = 'rotate(-180deg)';
             }
         }
+        
+        // Inicializar accordions no carregamento da página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Garantir que todos os accordions não collapsed tenham altura automática
+            const accordions = document.querySelectorAll('.accordion-content');
+            accordions.forEach(accordion => {
+                if (!accordion.classList.contains('accordion-collapsed')) {
+                    accordion.style.maxHeight = 'none';
+                    accordion.style.height = 'auto';
+                    accordion.style.minHeight = 'auto';
+                    accordion.style.overflow = 'visible';
+                }
+            });
+        });
         
         // Toggle mostrar/ocultar senha
         document.addEventListener('DOMContentLoaded', function() {
