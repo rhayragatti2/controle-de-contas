@@ -3374,9 +3374,10 @@ const mostrarDetalhesDia = (data, entradas, despesas, gastosAvulsos = []) => {
     }
     
     if (entradas.length === 0 && despesas.length === 0 && gastosAvulsos.length === 0) {
-        detalhesHTML = `
+        detalhesHTML += `
             <div class="bg-gray-50 dark:bg-gray-700 p-8 rounded-lg text-center">
                 <p class="text-gray-500 dark:text-gray-400 text-lg">Nenhuma movimentação neste dia.</p>
+                <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Use os botões acima para adicionar uma transação.</p>
             </div>
         `;
     }

@@ -318,7 +318,7 @@
             <div id="categorias-content" class="accordion-content">
                 <div class="p-6 border-t border-gray-200 dark:border-gray-700">
                     <form id="form-categoria" class="flex flex-col sm:flex-row gap-4 mb-4">
-                        <input type="text" id="categoria-nome" placeholder="Nova Categoria (ex: Moradia)" class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                        <input type="text" id="categoria-nome" placeholder="Nova Categoria (ex: Moradia)" class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
                         <button type="submit" class="bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
                             Adicionar Categoria
                         </button>
@@ -372,9 +372,9 @@
                 </div>
 
                 <form id="form-entrada" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                    <input type="text" id="entrada-descricao" placeholder="Descrição (ex: Salário)" class="sm:col-span-3 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                    <input type="text" id="entrada-descricao" placeholder="Descrição (ex: Salário)" class="sm:col-span-3 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
                     <input type="text" id="entrada-data" placeholder="Data (DD/MM)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                    <input type="number" id="entrada-valor" placeholder="Valor (R$)" min="0.01" step="0.01" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                    <input type="number" id="entrada-valor" placeholder="Valor (R$)" min="0.01" step="0.01" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
                     <select id="entrada-categoria" class="sm:col-span-3 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600">
                         <option value="">Selecione uma categoria...</option>
                     </select>
@@ -484,7 +484,7 @@
                 </div>
                 
                 <form id="form-despesa" class="flex flex-col gap-4 mb-4">
-                    <input type="text" id="despesa-descricao" placeholder="Descrição (ex: Aluguel)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                    <input type="text" id="despesa-descricao" placeholder="Descrição (ex: Aluguel)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
                     
                     <!-- Toggles de Opções -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -505,8 +505,8 @@
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <input type="text" id="despesa-vencimento" placeholder="Vencimento (DD/MM)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
-                        <input type="number" id="despesa-previsto" placeholder="Valor Previsto (R$)" min="0.01" step="0.01" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                        <input type="text" id="despesa-vencimento" placeholder="Vencimento (DD/MM)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                        <input type="number" id="despesa-previsto" placeholder="Valor Previsto (R$)" min="0.01" step="0.01" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
                         <div class="flex items-center justify-between gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg border dark:border-gray-600">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-medium dark:text-white whitespace-nowrap">💳 Parcelado</span>
@@ -752,12 +752,12 @@
                         </div>
                         
                         <form id="form-poupanca" class="flex flex-col gap-4 mb-4">
-                            <input type="text" id="poupanca-descricao" placeholder="Descrição (ex: Depósito mensal, Retirada emergência)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                            <input type="text" id="poupanca-descricao" placeholder="Descrição (ex: Depósito mensal, Retirada emergência)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
                             
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <input type="text" id="poupanca-data" placeholder="Data (DD/MM/AAAA)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
-                                <input type="number" id="poupanca-valor" placeholder="Valor (R$)" min="0.01" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
-                                <select id="poupanca-tipo" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                                <input type="text" id="poupanca-data" placeholder="Data (DD/MM/AAAA)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                                <input type="number" id="poupanca-valor" placeholder="Valor (R$)" min="0.01" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                                <select id="poupanca-tipo" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600">
                                     <option value="">Tipo...</option>
                                     <option value="deposito">💰 Depósito</option>
                                     <option value="retirada">💸 Retirada</option>
@@ -1159,10 +1159,10 @@
                     <span id="titulo-form-conta">Adicionar Nova Conta</span>
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="conta-titular" placeholder="Titular da Conta (ex: João Silva)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" required>
-                    <input type="text" id="conta-banco" placeholder="Nome do Banco (ex: Nubank)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" required>
-                    <input type="text" id="conta-tipo" placeholder="Tipo (ex: Corrente, Poupança)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" required>
-                    <input type="number" id="conta-saldo" placeholder="Saldo (R$)" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" required>
+                    <input type="text" id="conta-titular" placeholder="Titular da Conta (ex: João Silva)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500">
+                    <input type="text" id="conta-banco" placeholder="Nome do Banco (ex: Nubank)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500">
+                    <input type="text" id="conta-tipo" placeholder="Tipo (ex: Corrente, Poupança)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500">
+                    <input type="number" id="conta-saldo" placeholder="Saldo (R$)" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500">
                 </div>
                 <textarea id="conta-observacao" placeholder="Observações (opcional)" class="w-full mt-4 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-600 dark:text-white dark:border-gray-500" rows="2"></textarea>
                 <input type="hidden" id="conta-id-edicao">
