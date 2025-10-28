@@ -374,7 +374,7 @@
                 <form id="form-entrada" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <input type="text" id="entrada-descricao" placeholder="Descrição (ex: Salário)" class="sm:col-span-3 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
                     <input type="text" id="entrada-data" placeholder="Data (DD/MM)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                    <input type="number" id="entrada-valor" placeholder="Valor (R$)" min="0.01" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                    <input type="number" id="entrada-valor" placeholder="Valor (R$)" min="0.01" step="0.01" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
                     <select id="entrada-categoria" class="sm:col-span-3 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600">
                         <option value="">Selecione uma categoria...</option>
                     </select>
@@ -506,7 +506,7 @@
                     
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input type="text" id="despesa-vencimento" placeholder="Vencimento (DD/MM)" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
-                        <input type="number" id="despesa-previsto" placeholder="Valor Previsto (R$)" min="0.01" step="0.01" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
+                        <input type="number" id="despesa-previsto" placeholder="Valor Previsto (R$)" min="0.01" step="0.01" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600" required>
                         <div class="flex items-center justify-between gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg border dark:border-gray-600">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-medium dark:text-white whitespace-nowrap">💳 Parcelado</span>
@@ -515,7 +515,7 @@
                                     <span class="toggle-slider"></span>
                                 </label>
                             </div>
-                            <input type="number" id="despesa-parcelas" placeholder="Qtd" min="2" max="48" class="w-16 p-2 border rounded dark:bg-gray-600 dark:text-white dark:border-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <input type="number" id="despesa-parcelas" placeholder="Qtd" min="2" max="48" inputmode="numeric" pattern="[0-9]*" class="w-16 p-2 border rounded dark:bg-gray-600 dark:text-white dark:border-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500">
                         </div>
                     </div>
                     <select id="despesa-categoria" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600">
@@ -1276,6 +1276,7 @@
     </script>
     <script src="auth-simple.js"></script>
     <script src="firebase-sync.js"></script>
+    <script src="masks-validation.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
