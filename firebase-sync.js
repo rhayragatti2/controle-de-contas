@@ -168,7 +168,47 @@ function inicializarDadosVazios() {
 
 
 /**
+ * Gera um ID único para transações
+ */
+function gerarIdUnico() {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+/**
+ * Adiciona IDs únicos aos itens se ainda não tiverem
+ */
+function garantirIdsUnicos(array) {
+    if (!Array.isArray(array)) return [];
+    return array.map(item => {
+        if (!item.id) {
+            item.id = gerarIdUnico();
+        }
+        return item;
+    });
+}
+
+/**
+ * Mescla dois arrays de transações evitando duplicatas
+ * Prioriza itens existentes (do Firebase) e adiciona novos (locais)
+ */
+function mesclarTransacoes(existentes, novas) {
+    existentes = garantirIdsUnicos(existentes || []);
+    novas = garantirIdsUnicos(novas || []);
+    
+    // Criar mapa de IDs existentes
+    const mapaExistentes = new Map(existentes.map(item => [item.id, item]));
+    
+    // Adicionar ou atualizar itens
+    novas.forEach(novoItem => {
+        mapaExistentes.set(novoItem.id, novoItem);
+    });
+    
+    return Array.from(mapaExistentes.values());
+}
+
+/**
  * Sincroniza um mês específico para o Firebase (área compartilhada)
+ * Agora com MERGE inteligente para evitar sobrescrita de dados
  */
 async function sincronizarMesParaFirebase(mes, dados) {
     if (!isFirebaseEnabled) return;
@@ -177,9 +217,61 @@ async function sincronizarMesParaFirebase(mes, dados) {
         // Ativar flag para ignorar a próxima atualização do listener
         ignorarProximaAtualizacaoFirebase = true;
         console.log('🔒 Bloqueando listener temporariamente...');
+        console.log('🔄 Iniciando merge de dados...');
         
-        await database.ref(`dados-compartilhados/meses/${mes}`).set(dados);
-        console.log(`✅ Mês ${mes} sincronizado com Firebase`);
+        // 1. Buscar dados existentes no Firebase
+        const snapshot = await database.ref(`dados-compartilhados/meses/${mes}`).once('value');
+        const dadosExistentes = snapshot.val() || { entradas: [], despesas: [], gastosAvulsos: [] };
+        
+        console.log('📊 Dados existentes no Firebase:', {
+            entradas: dadosExistentes.entradas?.length || 0,
+            despesas: dadosExistentes.despesas?.length || 0,
+            gastosAvulsos: dadosExistentes.gastosAvulsos?.length || 0
+        });
+        
+        console.log('📊 Dados locais a mesclar:', {
+            entradas: dados.entradas?.length || 0,
+            despesas: dados.despesas?.length || 0,
+            gastosAvulsos: dados.gastosAvulsos?.length || 0
+        });
+        
+        // 2. Mesclar dados (mantém existentes + adiciona novos)
+        const dadosMesclados = {
+            entradas: mesclarTransacoes(dadosExistentes.entradas, dados.entradas),
+            despesas: mesclarTransacoes(dadosExistentes.despesas, dados.despesas),
+            gastosAvulsos: mesclarTransacoes(dadosExistentes.gastosAvulsos, dados.gastosAvulsos)
+        };
+        
+        console.log('✅ Dados mesclados:', {
+            entradas: dadosMesclados.entradas.length,
+            despesas: dadosMesclados.despesas.length,
+            gastosAvulsos: dadosMesclados.gastosAvulsos.length
+        });
+        
+        // 3. Salvar dados mesclados no Firebase
+        await database.ref(`dados-compartilhados/meses/${mes}`).set(dadosMesclados);
+        console.log(`✅ Mês ${mes} sincronizado com merge bem-sucedido!`);
+        
+        // 4. Atualizar dados locais com os dados mesclados
+        if (mes === mesAtual) {
+            entradas = dadosMesclados.entradas;
+            despesas = dadosMesclados.despesas;
+            
+            // Atualizar gastos avulsos mantendo outros meses
+            gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mes);
+            gastosAvulsos.push(...dadosMesclados.gastosAvulsos);
+            
+            // Salvar no localStorage
+            const chaveMesFirebase = `${PREFIX_FIREBASE}${mes}`;
+            localStorage.setItem(chaveMesFirebase, JSON.stringify(dadosMesclados));
+            
+            // Re-renderizar interface
+            if (typeof renderizarTudo === 'function') {
+                renderizarTudo();
+            }
+            
+            console.log('✅ Interface atualizada com dados mesclados');
+        }
         
         // Desativar o flag após 2 segundos (tempo suficiente para o Firebase processar)
         setTimeout(() => {
@@ -397,12 +489,102 @@ if (isFirebaseEnabled) {
     }, 100);
 }
 
+/**
+ * Força resincronização completa - busca TODOS os dados do Firebase
+ * e mescla com os dados locais. Útil para recuperar dados perdidos.
+ */
+async function forcarResincronizacaoCompleta() {
+    if (!isFirebaseEnabled) {
+        alert('Firebase não está habilitado');
+        return;
+    }
+
+    try {
+        console.log('🔄 Iniciando resincronização completa...');
+        
+        // Buscar TODOS os dados do Firebase
+        const snapshot = await database.ref('dados-compartilhados').once('value');
+        const dadosFirebase = snapshot.val();
+        
+        if (!dadosFirebase) {
+            alert('Nenhum dado encontrado no Firebase');
+            return;
+        }
+        
+        // Mesclar dados do mês atual
+        if (dadosFirebase.meses && dadosFirebase.meses[mesAtual]) {
+            const dadosMesFirebase = dadosFirebase.meses[mesAtual];
+            
+            // Mesclar com dados locais
+            const dadosLocais = {
+                entradas: entradas || [],
+                despesas: despesas || [],
+                gastosAvulsos: gastosAvulsos.filter(g => g.mes === mesAtual) || []
+            };
+            
+            const dadosMesclados = {
+                entradas: mesclarTransacoes(dadosMesFirebase.entradas, dadosLocais.entradas),
+                despesas: mesclarTransacoes(dadosMesFirebase.despesas, dadosLocais.despesas),
+                gastosAvulsos: mesclarTransacoes(dadosMesFirebase.gastosAvulsos, dadosLocais.gastosAvulsos)
+            };
+            
+            // Atualizar variáveis globais
+            entradas = dadosMesclados.entradas;
+            despesas = dadosMesclados.despesas;
+            gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
+            gastosAvulsos.push(...dadosMesclados.gastosAvulsos);
+            
+            // Salvar localmente
+            const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
+            localStorage.setItem(chaveMesFirebase, JSON.stringify(dadosMesclados));
+            
+            // Salvar de volta no Firebase (garantir que todos os dados estão lá)
+            await database.ref(`dados-compartilhados/meses/${mesAtual}`).set(dadosMesclados);
+            
+            console.log('✅ Dados do mês atual mesclados:', {
+                entradas: dadosMesclados.entradas.length,
+                despesas: dadosMesclados.despesas.length,
+                gastosAvulsos: dadosMesclados.gastosAvulsos.length
+            });
+        }
+        
+        // Atualizar categorias
+        if (dadosFirebase.categorias) {
+            categorias = dadosFirebase.categorias;
+            localStorage.setItem(CHAVE_CATEGORIAS_FIREBASE, JSON.stringify(categorias));
+            renderizarCategorias();
+        }
+        
+        // Atualizar poupança
+        if (dadosFirebase.poupanca) {
+            poupanca = dadosFirebase.poupanca;
+            localStorage.setItem('contas-firebase-poupanca', JSON.stringify(poupanca));
+            if (typeof renderizarPoupanca === 'function') {
+                renderizarPoupanca();
+            }
+        }
+        
+        // Re-renderizar tudo
+        if (typeof renderizarTudo === 'function') {
+            renderizarTudo();
+        }
+        
+        alert('✅ Resincronização completa realizada!\n\nTodos os dados foram recuperados e mesclados.');
+        console.log('✅ Resincronização completa finalizada!');
+        
+    } catch (error) {
+        console.error('❌ Erro na resincronização completa:', error);
+        alert('❌ Erro ao resincronizar: ' + error.message);
+    }
+}
+
 // ===== EXPORTAR FUNÇÕES =====
 window.firebaseSync = {
     sincronizarMesParaFirebase,
     sincronizarCategoriasParaFirebase,
     sincronizarPoupancaParaFirebase,
     atualizarListenerMes,
+    forcarResincronizacaoCompleta,
     isEnabled: () => isFirebaseEnabled,
     iniciarSincronizacao: () => {
         sincronizarDadosInicial();

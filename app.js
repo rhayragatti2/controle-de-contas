@@ -2128,10 +2128,14 @@ btnExportar.addEventListener('click', abrirModalExportar);
 // Listener do botão de sincronização de Gastos Avulsos
 if (btnSyncGastos) {
     btnSyncGastos.addEventListener('click', () => {
-        if (confirm('Deseja forçar a sincronização de todos os Gastos Avulsos com o Firebase?\n\nIsso enviará todos os gastos locais para a nuvem.')) {
-            // Remover flag de migração para forçar nova execução
-            localStorage.removeItem('contas-migracao-gastos-avulsos-v2');
-            migrarESincronizarGastosAvulsos();
+        if (confirm('🔄 RESINCRONIZAÇÃO COMPLETA\n\nEsta ação vai:\n• Buscar TODOS os dados do Firebase\n• Mesclar com seus dados locais\n• Recuperar dados perdidos\n• Sincronizar tudo\n\nDeseja continuar?')) {
+            mostrarToast('🔄 Iniciando resincronização...', 'info');
+            
+            if (window.firebaseSync && window.firebaseSync.isEnabled()) {
+                window.firebaseSync.forcarResincronizacaoCompleta();
+            } else {
+                mostrarToast('❌ Firebase não está habilitado', 'error');
+            }
         }
     });
 }
