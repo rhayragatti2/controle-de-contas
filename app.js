@@ -1853,6 +1853,17 @@ window.fecharModalExportar = (event = null) => {
     document.getElementById('modal-exportar').classList.add('hidden');
 };
 
+// ===== MODAL SOS RECUPERAÇÃO =====
+
+window.abrirModalSOS = () => {
+    document.getElementById('modal-sos-recuperacao').classList.remove('hidden');
+};
+
+window.fecharModalSOS = (event = null) => {
+    if (event && event.target.id !== 'modal-sos-recuperacao') return;
+    document.getElementById('modal-sos-recuperacao').classList.add('hidden');
+};
+
 // ===== BACKUP E RESTAURAÇÃO =====
 
 window.exportarBackup = () => {
@@ -3111,6 +3122,15 @@ const fecharMenuDrawer = () => {
 document.getElementById('btn-menu-hamburguer').addEventListener('click', abrirMenuDrawer);
 document.getElementById('btn-fechar-menu').addEventListener('click', fecharMenuDrawer);
 document.getElementById('menu-overlay').addEventListener('click', fecharMenuDrawer);
+
+// Event Listener para botão SOS Recuperação
+const btnSOSRecuperacao = document.getElementById('btn-sos-recuperacao');
+if (btnSOSRecuperacao) {
+    btnSOSRecuperacao.addEventListener('click', () => {
+        fecharMenuDrawer();
+        abrirModalSOS();
+    });
+}
 
 // Event Listeners para botões do menu (fechar ao clicar)
 const menuBtns = ['btn-calendario', 'btn-relatorio', 'btn-exportar', 'btn-contas-bancarias', 'btn-backup', 'btn-sync-gastos', 'btn-logout'];

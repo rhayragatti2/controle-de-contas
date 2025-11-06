@@ -256,6 +256,17 @@
                         </div>
                     </button>
                     
+                    <!-- Botão: SOS Recuperação -->
+                    <button id="btn-sos-recuperacao" class="w-full h-16 min-h-[64px] max-h-[64px] py-0 flex items-center gap-4 px-4 bg-orange-600 hover:bg-orange-700 text-white rounded-lg shadow-md transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div class="text-left flex-1 leading-tight">
+                            <div class="font-semibold text-sm">🆘 Recuperação</div>
+                            <div class="text-xs opacity-90">Dados Perdidos</div>
+                        </div>
+                    </button>
+                    
                     <!-- Botão: Resincronizar -->
                     <button id="btn-sync-gastos" class="w-full h-16 min-h-[64px] max-h-[64px] py-0 flex items-center gap-4 px-4 bg-purple-700 hover:bg-purple-800 text-white rounded-lg shadow-md transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -263,7 +274,7 @@
                         </svg>
                         <div class="text-left flex-1 leading-tight">
                             <div class="font-semibold text-sm">Resincronizar</div>
-                            <div class="text-xs opacity-90">Recuperar Dados</div>
+                            <div class="text-xs opacity-90">Merge Firebase</div>
                         </div>
                     </button>
                     
@@ -1141,6 +1152,82 @@
         </div>
     </div>
 
+    <!-- Modal de Recuperação SOS -->
+    <div id="modal-sos-recuperacao" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" onclick="fecharModalSOS(event)">
+        <div class="relative bg-white dark:bg-gray-800 max-w-3xl mx-auto my-12 p-8 rounded-xl shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="fecharModalSOS()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 text-2xl font-bold">&times;</button>
+            <h2 class="text-2xl font-bold text-orange-600 dark:text-orange-400 border-b pb-3 mb-6 flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                🆘 Recuperação de Dados
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 border-l-4 border-yellow-500 p-4 mb-6">
+                    <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                        <strong>⚠️ Use estas ferramentas se você perdeu dados ou se os dados estão dessincronizados.</strong>
+                    </p>
+                </div>
+                
+                <!-- Diagnóstico -->
+                <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-5 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
+                        <span>🔍</span> 1. Diagnóstico Completo
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">Verifica e mostra TODOS os dados disponíveis (localStorage + Firebase). Abre o Console do navegador (F12) para ver os resultados.</p>
+                    <button onclick="window.recuperacaoDados.diagnosticoCompleto(); mostrarToast('✅ Diagnóstico rodando! Abra o Console (F12)', 'info')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold">
+                        Executar Diagnóstico
+                    </button>
+                </div>
+                
+                <!-- Ver Firebase -->
+                <div class="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-20 p-5 rounded-lg border border-purple-200 dark:border-purple-700">
+                    <h3 class="text-lg font-semibold text-purple-800 dark:text-purple-300 mb-2 flex items-center gap-2">
+                        <span>☁️</span> 2. Ver Dados do Firebase
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">Mostra exatamente o que está salvo no Firebase (nuvem) agora.</p>
+                    <button onclick="window.recuperacaoDados.mostrarDadosFirebase()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold">
+                        Ver Firebase
+                    </button>
+                </div>
+                
+                <!-- Upload Forçado -->
+                <div class="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 p-5 rounded-lg border border-green-200 dark:border-green-700">
+                    <h3 class="text-lg font-semibold text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
+                        <span>📤</span> 3. Enviar Meus Dados Locais
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">Pega TODOS os seus dados locais e envia para o Firebase (mescla com o que já existe). Use se você tem dados aqui mas não estão no Firebase.</p>
+                    <button onclick="window.recuperacaoDados.forcarUploadLocal()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold">
+                        Enviar para Firebase
+                    </button>
+                </div>
+                
+                <!-- Limpar e Recarregar -->
+                <div class="bg-orange-50 dark:bg-orange-900 dark:bg-opacity-20 p-5 rounded-lg border border-orange-200 dark:border-orange-700">
+                    <h3 class="text-lg font-semibold text-orange-800 dark:text-orange-300 mb-2 flex items-center gap-2">
+                        <span>🔄</span> 4. Limpar e Recarregar do Firebase
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">LIMPA todo localStorage e recarrega TUDO do Firebase. Cria backup automático antes. Use se está tudo bagunçado.</p>
+                    <button onclick="window.recuperacaoDados.limparERecarregarFirebase()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold">
+                        Limpar e Recarregar
+                    </button>
+                </div>
+                
+                <!-- Backup Emergência -->
+                <div class="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 p-5 rounded-lg border border-red-200 dark:border-red-700">
+                    <h3 class="text-lg font-semibold text-red-800 dark:text-red-300 mb-2 flex items-center gap-2">
+                        <span>💾</span> 5. Backup de Emergência
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">Baixa um arquivo JSON com TODOS os seus dados locais atuais. Faça isso ANTES de qualquer operação de limpeza!</p>
+                    <button onclick="window.recuperacaoDados.criarBackupEmergencia()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold">
+                        Baixar Backup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Contas Bancárias -->
     <div id="modal-contas-bancarias" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50" onclick="fecharModalContasBancarias(event)">
         <div class="relative bg-white dark:bg-gray-800 max-w-4xl mx-auto my-12 p-8 rounded-xl shadow-2xl" onclick="event.stopPropagation()">
@@ -1276,6 +1363,7 @@
     </script>
     <script src="auth-simple.js"></script>
     <script src="firebase-sync.js"></script>
+    <script src="recuperacao-dados.js"></script>
     <script src="masks-validation.js"></script>
     <script src="app.js"></script>
 </body>
