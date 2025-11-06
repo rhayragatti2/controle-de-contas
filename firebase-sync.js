@@ -38,6 +38,7 @@ try {
 
 let listenersAtivos = {};
 let ignorarProximaAtualizacaoFirebase = false;
+let rafRenderId = null; // debounce de render
 
 // Constantes para prefixos de armazenamento
 const PREFIX_FIREBASE = 'contas-firebase-';
@@ -350,7 +351,17 @@ function iniciarListenersSincronizacao() {
         }
     });
 
-    // Listener para mudanças no mês atual compartilhado
+    // Utilitário: agendar render para o próximo frame (evita flicker)
+    const agendarRender = () => {
+        if (typeof renderizarTudo !== 'function') return;
+        if (rafRenderId) cancelAnimationFrame(rafRenderId);
+        rafRenderId = requestAnimationFrame(() => {
+            rafRenderId = null;
+            renderizarTudo();
+        });
+    };
+
+    // Listener para mudanças no mês atual compartilhado (merge, sem limpar em snapshot vazio)
     const refMesAtual = database.ref(`dados-compartilhados/meses/${mesAtual}`);
     listenersAtivos.mesAtual = refMesAtual.on('value', (snapshot) => {
         // Se estamos ignorando atualizações (acabamos de salvar localmente), pular
@@ -359,42 +370,34 @@ function iniciarListenersSincronizacao() {
             return;
         }
         
-        const dadosMesFirebase = snapshot.val();
-        if (dadosMesFirebase) {
-            const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
-            const dadosLocaisStr = localStorage.getItem(chaveMesFirebase);
-            const dadosFirebaseStr = JSON.stringify(dadosMesFirebase);
-            
-            if (dadosLocaisStr !== dadosFirebaseStr) {
-                console.log('☁️ Recebendo atualização do Firebase...');
-                entradas = dadosMesFirebase.entradas || [];
-                despesas = dadosMesFirebase.despesas || [];
-                
-                // Atualizar gastos avulsos do mês
-                if (dadosMesFirebase.gastosAvulsos && Array.isArray(dadosMesFirebase.gastosAvulsos)) {
-                    gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
-                    gastosAvulsos.push(...dadosMesFirebase.gastosAvulsos);
-                } else {
-                    gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
-                }
-                
-                localStorage.setItem(chaveMesFirebase, dadosFirebaseStr);
-                renderizarTudo();
-                console.log('☁️ Dados compartilhados do mês atual atualizados');
-            }
-        } else {
-            // Se não há dados no Firebase para este mês, mostrar vazio
-            entradas = [];
-            despesas = [];
-            gastosAvulsos = gastosAvulsos.filter(g => g.mes !== mesAtual);
-            const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
-            localStorage.setItem(chaveMesFirebase, JSON.stringify({ 
-                entradas: [], 
-                despesas: [],
-                gastosAvulsos: []
-            }));
-            renderizarTudo();
+        if (!snapshot.exists()) {
+            console.warn('📭 Snapshot vazio; mantendo estado atual (sem limpar)');
+            return;
         }
+
+        const dadosMesFirebase = snapshot.val() || { entradas: [], despesas: [], gastosAvulsos: [] };
+        console.log('☁️ Atualização do Firebase (merge em tempo real)...');
+
+        // Mesclar com estado atual (lado cliente)
+        entradas = mesclarTransacoes(entradas || [], dadosMesFirebase.entradas || []);
+        despesas = mesclarTransacoes(despesas || [], dadosMesFirebase.despesas || []);
+
+        // Atualizar gastos avulsos mantendo outros meses
+        const gastosMesNovos = garantirIdsUnicos(dadosMesFirebase.gastosAvulsos || []).map(g => ({ ...g, mes: mesAtual }));
+        gastosAvulsos = (gastosAvulsos || []).filter(g => g.mes !== mesAtual).concat(gastosMesNovos);
+
+        // Persistir localmente o estado MERGIDO do mês atual
+        const chaveMesFirebase = `${PREFIX_FIREBASE}${mesAtual}`;
+        const snapshotMes = {
+            entradas,
+            despesas,
+            gastosAvulsos: gastosAvulsos.filter(g => g.mes === mesAtual)
+        };
+        localStorage.setItem(chaveMesFirebase, JSON.stringify(snapshotMes));
+
+        // Agendar render (debounced)
+        agendarRender();
+        console.log('✅ Merge em tempo real aplicado (mês atual)');
     });
 }
 
@@ -429,7 +432,17 @@ function atualizarListenerMes(novoMes) {
         database.ref(`dados-compartilhados/meses/${mesAtual}`).off('value', listenersAtivos.mesAtual);
     }
 
-    // Iniciar novo listener
+    // Utilitário local de agendamento
+    const agendarRender = () => {
+        if (typeof renderizarTudo !== 'function') return;
+        if (rafRenderId) cancelAnimationFrame(rafRenderId);
+        rafRenderId = requestAnimationFrame(() => {
+            rafRenderId = null;
+            renderizarTudo();
+        });
+    };
+
+    // Iniciar novo listener (merge, sem limpar em snapshot vazio)
     const refNovoMes = database.ref(`dados-compartilhados/meses/${novoMes}`);
     listenersAtivos.mesAtual = refNovoMes.on('value', (snapshot) => {
         // Se estamos ignorando atualizações (acabamos de salvar localmente), pular
@@ -438,42 +451,34 @@ function atualizarListenerMes(novoMes) {
             return;
         }
         
-        const dadosMesFirebase = snapshot.val();
-        const chaveMesFirebase = `${PREFIX_FIREBASE}${novoMes}`;
-        
-        if (dadosMesFirebase) {
-            const dadosLocaisStr = localStorage.getItem(chaveMesFirebase);
-            const dadosFirebaseStr = JSON.stringify(dadosMesFirebase);
-            
-            if (dadosLocaisStr !== dadosFirebaseStr) {
-                console.log(`☁️ Recebendo atualização do Firebase para ${novoMes}...`);
-                entradas = dadosMesFirebase.entradas || [];
-                despesas = dadosMesFirebase.despesas || [];
-                
-                // Atualizar gastos avulsos do novo mês
-                if (dadosMesFirebase.gastosAvulsos && Array.isArray(dadosMesFirebase.gastosAvulsos)) {
-                    gastosAvulsos = gastosAvulsos.filter(g => g.mes !== novoMes);
-                    gastosAvulsos.push(...dadosMesFirebase.gastosAvulsos);
-                } else {
-                    gastosAvulsos = gastosAvulsos.filter(g => g.mes !== novoMes);
-                }
-                
-                localStorage.setItem(chaveMesFirebase, dadosFirebaseStr);
-                renderizarTudo();
-                console.log(`☁️ Dados compartilhados de ${novoMes} atualizados`);
-            }
-        } else {
-            // Se não há dados no Firebase para este mês, mostrar vazio
-            entradas = [];
-            despesas = [];
-            gastosAvulsos = gastosAvulsos.filter(g => g.mes !== novoMes);
-            localStorage.setItem(chaveMesFirebase, JSON.stringify({ 
-                entradas: [], 
-                despesas: [],
-                gastosAvulsos: []
-            }));
-            renderizarTudo();
+        if (!snapshot.exists()) {
+            console.warn(`📭 Snapshot vazio para ${novoMes}; mantendo estado atual`);
+            return;
         }
+
+        const dadosMesFirebase = snapshot.val() || { entradas: [], despesas: [], gastosAvulsos: [] };
+        console.log(`☁️ Atualização do Firebase (merge) para ${novoMes}...`);
+
+        // Mesclar com estado atual
+        entradas = mesclarTransacoes(entradas || [], dadosMesFirebase.entradas || []);
+        despesas = mesclarTransacoes(despesas || [], dadosMesFirebase.despesas || []);
+
+        // Atualizar gastos avulsos do novo mês
+        const gastosMesNovos = garantirIdsUnicos(dadosMesFirebase.gastosAvulsos || []).map(g => ({ ...g, mes: novoMes }));
+        gastosAvulsos = (gastosAvulsos || []).filter(g => g.mes !== novoMes).concat(gastosMesNovos);
+
+        // Persistir localmente o estado MERGIDO do mês
+        const chaveMesFirebase = `${PREFIX_FIREBASE}${novoMes}`;
+        const snapshotMes = {
+            entradas,
+            despesas,
+            gastosAvulsos: gastosAvulsos.filter(g => g.mes === novoMes)
+        };
+        localStorage.setItem(chaveMesFirebase, JSON.stringify(snapshotMes));
+
+        // Agendar render
+        agendarRender();
+        console.log(`✅ Merge em tempo real aplicado (${novoMes})`);
     });
 }
 
