@@ -236,11 +236,17 @@ async function sincronizarMesParaFirebase(mes, dados) {
             gastosAvulsos: dados.gastosAvulsos?.length || 0
         });
         
-        // 2. Mesclar dados (mantém existentes + adiciona novos)
+        // 2. Aplicar REMOÇÕES corretamente: o estado local é a fonte de verdade para este cliente
+        //    - Garantimos IDs nos dados locais
+        //    - Removemos do servidor o que não existe localmente (propaga exclusões)
+        const entradasLocais = garantirIdsUnicos(dados.entradas || []);
+        const despesasLocais = garantirIdsUnicos(dados.despesas || []);
+        const gastosLocais = garantirIdsUnicos(dados.gastosAvulsos || []);
+
         const dadosMesclados = {
-            entradas: mesclarTransacoes(dadosExistentes.entradas, dados.entradas),
-            despesas: mesclarTransacoes(dadosExistentes.despesas, dados.despesas),
-            gastosAvulsos: mesclarTransacoes(dadosExistentes.gastosAvulsos, dados.gastosAvulsos)
+            entradas: entradasLocais,
+            despesas: despesasLocais,
+            gastosAvulsos: gastosLocais
         };
         
         console.log('✅ Dados mesclados:', {
@@ -253,7 +259,7 @@ async function sincronizarMesParaFirebase(mes, dados) {
         await database.ref(`dados-compartilhados/meses/${mes}`).set(dadosMesclados);
         console.log(`✅ Mês ${mes} sincronizado com merge bem-sucedido!`);
         
-        // 4. Atualizar dados locais com os dados mesclados
+        // 4. Atualizar dados locais com os dados enviados (estado fonte)
         if (mes === mesAtual) {
             entradas = dadosMesclados.entradas;
             despesas = dadosMesclados.despesas;
@@ -378,9 +384,9 @@ function iniciarListenersSincronizacao() {
         const dadosMesFirebase = snapshot.val() || { entradas: [], despesas: [], gastosAvulsos: [] };
         console.log('☁️ Atualização do Firebase (merge em tempo real)...');
 
-        // Mesclar com estado atual (lado cliente)
-        entradas = mesclarTransacoes(entradas || [], dadosMesFirebase.entradas || []);
-        despesas = mesclarTransacoes(despesas || [], dadosMesFirebase.despesas || []);
+        // Substituir estado do mês pelo snapshot (necessário para refletir exclusões)
+        entradas = garantirIdsUnicos(dadosMesFirebase.entradas || []);
+        despesas = garantirIdsUnicos(dadosMesFirebase.despesas || []);
 
         // Atualizar gastos avulsos mantendo outros meses
         const gastosMesNovos = garantirIdsUnicos(dadosMesFirebase.gastosAvulsos || []).map(g => ({ ...g, mes: mesAtual }));
@@ -459,9 +465,9 @@ function atualizarListenerMes(novoMes) {
         const dadosMesFirebase = snapshot.val() || { entradas: [], despesas: [], gastosAvulsos: [] };
         console.log(`☁️ Atualização do Firebase (merge) para ${novoMes}...`);
 
-        // Mesclar com estado atual
-        entradas = mesclarTransacoes(entradas || [], dadosMesFirebase.entradas || []);
-        despesas = mesclarTransacoes(despesas || [], dadosMesFirebase.despesas || []);
+        // Substituir estado do mês pelo snapshot (necessário para refletir exclusões)
+        entradas = garantirIdsUnicos(dadosMesFirebase.entradas || []);
+        despesas = garantirIdsUnicos(dadosMesFirebase.despesas || []);
 
         // Atualizar gastos avulsos do novo mês
         const gastosMesNovos = garantirIdsUnicos(dadosMesFirebase.gastosAvulsos || []).map(g => ({ ...g, mes: novoMes }));
